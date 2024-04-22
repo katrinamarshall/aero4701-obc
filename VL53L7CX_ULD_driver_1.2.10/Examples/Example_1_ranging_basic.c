@@ -80,7 +80,7 @@
 #include <stdio.h>
 #include "vl53l7cx_api.h"
 
-int example1(void)
+int main(void)
 {
 
 	/*********************************/
