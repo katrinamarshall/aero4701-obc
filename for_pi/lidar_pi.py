@@ -17,7 +17,7 @@ def gen_test_data(_num_pixels, _debris_freq, current_time, test_vel=False, empty
         test_data = np.full((_num_pixels, _num_pixels), SENSOR_RANGE)
         if current_time < 1:
             cluster_size1 = np.random.randint(100)
-            clump1_center = np.random.randint(0, 1024 - cluster_size1, size=2)
+            clump1_center = np.random.randint(0, _num_pixels - cluster_size1, size=2)
             test_data[clump1_center[0]:clump1_center[0] + cluster_size1, clump1_center[1]:clump1_center[1] + cluster_size1] = 100
             # plt.imshow(test_data, cmap='viridis', interpolation= 'nearest')
             # plt.colorbar(label='Value')
