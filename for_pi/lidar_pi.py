@@ -2,7 +2,8 @@ import numpy as np
 # import matplotlib.pyplot as plt
 import datetime as dt
 
-from pysatsim.coordinates import rotation, _conversion
+from rotation import *
+from _conversion import *
 
 from lidar_contants import *
 
