@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import datetime as dt
 
 from pysatsim.coordinates import rotation, _conversion
@@ -294,7 +294,7 @@ def on_tick( timestamp,_all_readings_count, _lidar_message_received, _lidar_labe
 
                 plotted = False
                 if PLOT == True and plotted == False:
-                    plot_lidar_data(data,blob_positions)
+                    # plot_lidar_data(data,blob_positions)
                     plotted = True
                 # update debris count
                 # _debris_count += len(blob_avg_values)
@@ -385,15 +385,15 @@ def find_abs_vel( lidar_label, size, timestamp):
                 _prev_detections.remove(_prev_detections[prev_found_index])
     return vel
 
-def plot_lidar_data(test_data, blob_positions):
-    plt.figure()
-    plt.imshow(test_data, cmap='viridis', interpolation= 'nearest')
-    plt.colorbar(label='Value')
-    plt.scatter(blob_positions[:,1], blob_positions[:,0], marker='x', color = 'r')
-    plt.xlabel('Column')
-    plt.ylabel('Row')
-    plt.title('2D Plot of test_data')
-    plt.savefig("lidar")
+# def plot_lidar_data(test_data, blob_positions):
+#     plt.figure()
+#     plt.imshow(test_data, cmap='viridis', interpolation= 'nearest')
+#     plt.colorbar(label='Value')
+#     plt.scatter(blob_positions[:,1], blob_positions[:,0], marker='x', color = 'r')
+#     plt.xlabel('Column')
+#     plt.ylabel('Row')
+#     plt.title('2D Plot of test_data')
+#     plt.savefig("lidar")
 
 
 st = time.process_time()
