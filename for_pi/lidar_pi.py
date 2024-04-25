@@ -66,15 +66,15 @@ current_time = 0
 _num_pixels = 1024
 _debris_freq = 1/15
 test_data = gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)
-_raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
-                       gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
-_lidar_labels = [0,1,2,3,0,1,2,3]
+_raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
+                    #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
+_lidar_labels = [0]#,1,2,3,0,1,2,3]
 
 # Callback variables
 _lidar_message_received = True
