@@ -314,14 +314,14 @@ def on_tick( timestamp,_all_readings_count, _lidar_message_received, _lidar_labe
                     # identify which lidar this came from
                     lidar_label = _lidar_labels_prev_detections[n]
                     # convert to xyz coordinates
-                    debris_pos_cart = _conversion.polar_to_cartesian(x_polar)
+                    debris_pos_cart = polar_to_cartesian(x_polar)
             
                     # convert these to body fixed based on lidar positioning
                     # in body-fixed frame y points straight down
-                    debris_pos_body_fixed = rotation.rot3_y(lidar_label*np.pi/2)@debris_pos_cart
+                    debris_pos_body_fixed = rot3_y(lidar_label*np.pi/2)@debris_pos_cart
 
                     # convert body fixed coordinates to ECI
-                    debris_pos_eci_rel = _conversion.bodyfixed_to_ECI(debris_pos_body_fixed,r_sat,v_sat,attitude,rotation_only=True)
+                    debris_pos_eci_rel = bodyfixed_to_ECI(debris_pos_body_fixed,r_sat,v_sat,attitude,rotation_only=True)
                     debris_pos_eci = debris_pos_eci_rel + r_sat
 
                     # print timestep and eci data
