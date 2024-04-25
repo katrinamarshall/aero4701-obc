@@ -31,14 +31,14 @@ def gen_test_data(_num_pixels, _debris_freq, current_time, test_vel=False, empty
             test_data = np.full((_num_pixels, _num_pixels), SENSOR_RANGE)
         elif _num_pixels == 8: 
             # 8 x 8 input data
-                test_data = np.array([[1, 2, 4000, 4000, 1, 2, 4000, 4000], 
-                                [1, 1, 8, 4000, 4000, 4000, 4000, 4000],
-                                [1, 8, 8, 4000, 4000, 4000, 4000, 4000],
-                                [1, 8, 8, 12, 4000, 4000, 4000, 4000],
-                                [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
-                                [4000, 4000, 4000, 4000, 4000, 80, 80, 80], 
-                                [4000, 50, 4000, 4000, 4000, 4000, 4000, 4000], 
-                                [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]])  
+            test_data = np.array([[1, 2, 4000, 4000, 1, 2, 4000, 4000], 
+                            [1, 1, 8, 4000, 4000, 4000, 4000, 4000],
+                            [1, 8, 8, 4000, 4000, 4000, 4000, 4000],
+                            [1, 8, 8, 12, 4000, 4000, 4000, 4000],
+                            [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
+                            [4000, 4000, 4000, 4000, 4000, 80, 80, 80], 
+                            [4000, 50, 4000, 4000, 4000, 4000, 4000, 4000], 
+                            [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]])  
                                                                                                                             
         else:
             # test_data = np.random.uniform(0.1, 4000, size=(64, 64))
@@ -66,6 +66,7 @@ current_time = 0
 _num_pixels = 8
 _debris_freq = 1/15
 test_data = gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)
+# print(test_data)
 _raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
