@@ -66,6 +66,7 @@ current_time = 0
 _num_pixels = 8
 _debris_freq = 1/15
 test_data = gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)
+ 
 # print(test_data)
 _raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
@@ -76,7 +77,14 @@ _raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, te
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
 _lidar_labels = [0]#,1,2,3,0,1,2,3]
-
+_raw_lidar = np.array([[[1, 2, 4000, 4000, 1, 2, 4000, 4000], 
+                            [1, 1, 8, 4000, 4000, 4000, 4000, 4000],
+                            [1, 8, 8, 4000, 4000, 4000, 4000, 4000],
+                            [1, 8, 8, 12, 4000, 4000, 4000, 4000],
+                            [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
+                            [4000, 4000, 4000, 4000, 4000, 80, 80, 80], 
+                            [4000, 50, 4000, 4000, 4000, 4000, 4000, 4000], 
+                            [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]]]) 
 # Callback variables
 _lidar_message_received = True
 _all_readings_count = 0
