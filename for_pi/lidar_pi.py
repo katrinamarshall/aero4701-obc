@@ -68,7 +68,7 @@ _debris_freq = 1/15
 test_data = gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)
  
 # print(test_data)
-_raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True, empty=True)])
+_raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= False, empty=True)])
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
                     #    gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True),
