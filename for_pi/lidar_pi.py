@@ -63,7 +63,7 @@ def gen_test_data(_num_pixels, _debris_freq, current_time, test_vel=False, empty
 # Logging fields
 timestamp = dt.datetime(2024,4,25,17,27,2,881934)
 current_time = 0
-_num_pixels = 1024
+_num_pixels = 8
 _debris_freq = 1/15
 test_data = gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)
 _raw_lidar = np.array([gen_test_data(_num_pixels, _debris_freq, current_time, test_vel= True)])
