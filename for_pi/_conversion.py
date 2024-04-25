@@ -29,9 +29,9 @@ Contains:
 import numpy as np
 import math
 import datetime as dt
-from .. import constants as const
-from .. import time
-from . import rotation as rot
+import constants as const
+import time
+import rotation as rot
 
 
 def elements_to_perifocal(
