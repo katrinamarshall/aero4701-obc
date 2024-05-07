@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+
+import time
+import rospy
+import numpy
+import vl53l5cx_ctypes as vl53l5cx
+from vl53l5cx_ctypes import STATUS_RANGE_VALID, STATUS_RANGE_VALID_LARGE_PULSE
+
+from std_msgs.msg import String
+from rospy.numpy_msg import numpy_msg
+from rospy_tutorials.msg import Floats
+
+# class Talker:
+#     def __init__(self):
+#         self.pub = rospy.Publisher('/chatter', String, queue_size=10)
+
+#     def print_time(self, event=None):
+#         hello_str = "hello world %s" % rospy.get_time()
+#         rospy.loginfo(hello_str)
+#         self.pub.publish(hello_str)
+
+class Payload:
+    def __init__(self):
+        print("Uploading firmware, please wait...")
+        self.vl53 = vl53l5cx.VL53L5CX()
+        print("Done!")
+        self.vl53.set_resolution(8 * 8)
+        self.vl53.enable_motion_indicator(8 * 8)
+        self.vl53.set_motion_distance(400, 1400)
+
+        self.pub = rospy.Publisher('/raw_lidar_data', numpy_msg(Floats), queue_size=10)
+
+    def pub_raw_data(self):
+        if self.vl53.data_ready():
+            data = self.vl53.get_data()
+            # 2d array of motion data (always 4x4?)
+            motion = numpy.flipud(numpy.array(data.motion_indicator.motion[0:16]).reshape((4, 4)))
+            # 2d array of distance
+            distance = numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+            # 2d array of reflectance
+            reflectance = numpy.flipud(numpy.array(data.reflectance).reshape((8, 8)))
+            # 2d array of good ranging data
+            status = numpy.isin(numpy.flipud(numpy.array(data.target_status).reshape((8, 8))), (STATUS_RANGE_VALID, STATUS_RANGE_VALID_LARGE_PULSE))
+            print(motion, distance, reflectance, status)
+
+            self.pub.publish(distance)
+
+if __name__ == '__main__':
+    # rospy.init_node("talker")
+    # talker_obj = Talker()
+    # rospy.Timer(rospy.Duration(1.0/10.0), talker_obj.print_time)
+
+    rospy.init_node("payload")
+    payload_obj = Payload()
+    rospy.Timer(rospy.Duration(1.0/10.0), payload_obj.pub_raw_data)
+
+    rospy.spin()
+
+
+# vl53.start_ranging()
+
+# while True:
+#     if vl53.data_ready():
+#         data = vl53.get_data()
+#         # 2d array of motion data (always 4x4?)
+#         motion = numpy.flipud(numpy.array(data.motion_indicator.motion[0:16]).reshape((4, 4)))
+#         # 2d array of distance
+#         distance = numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+#         # 2d array of reflectance
+#         reflectance = numpy.flipud(numpy.array(data.reflectance).reshape((8, 8)))
+#         # 2d array of good ranging data
+#         status = numpy.isin(numpy.flipud(numpy.array(data.target_status).reshape((8, 8))), (STATUS_RANGE_VALID, STATUS_RANGE_VALID_LARGE_PULSE))
+#         print(motion, distance, reflectance, status)
+#     time.sleep(0.1)
+
+# import rospy
+# from std_msgs.msg import Float64
+# class TemperatureSensor:
+#     def read_temperature_sensor_data(self, event=None):
+#         # Here you read the data from your sensor
+#         # And you return the real value
+#         self.temperature = 30.0
+#     def __init__(self):
+#         # Create a ROS publisher
+#         self.temperature_publisher = rospy.Publisher("/temperature", Float64, queue_size=1)
+#         # Initialize temperature data
+#         self.temperature = 0
+#     def publish_temperature(self, event=None):
+#         msg = Float64()
+#         msg.data = self.temperature
+#         self.temperature_publisher.publish(msg)
+# if __name__ == '__main__':
+#     rospy.init_node("your_sensor_node")
+#     # Create an instance of Temperature sensor
+#     ts = TemperatureSensor()
+#     # Create a ROS Timer for reading data
+#     rospy.Timer(rospy.Duration(1.0/10.0), ts.read_temperature_sensor_data)
+#     # Create another ROS Timer for publishing data
+#     rospy.Timer(rospy.Duration(1.0/10.0), ts.publish_temperature)
+#     # Don't forget this or else the program will exit
+#     rospy.spin()
