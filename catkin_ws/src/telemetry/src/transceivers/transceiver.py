@@ -23,14 +23,20 @@ class Transceiver(sx126x):
         # File path of received commands for visualization
         self.json_file_path = 'received_commands.json'
     
-    def send_deal(self):
-        """ Send data after taking input from the user. """
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.old_settings)
-        print("\nPlease input your commands in the format <component>,<component_id>,<command>: ", end='')
-        message = input()
+    def send_deal(
+            self, 
+            message: str
+        ) -> None:
+        """Sends a message after encoding
+
+        Args:
+            message (str): _description_
+
+        Returns:
+            _type_: _description_
+        """
         DEFAULT_ADDRESS = 0
-        FREQ_433 = 433
-        offset_frequency = FREQ_433 - (850 if FREQ_433 > 850 else 410)
+        offset_frequency = self.freq - (850 if self.freq > 850 else 410)
         data = (bytes([DEFAULT_ADDRESS >> 8]) + 
                 bytes([DEFAULT_ADDRESS & 0xff]) +
                 bytes([offset_frequency]) + 
@@ -40,7 +46,6 @@ class Transceiver(sx126x):
                 message.encode())
         self.send(data)
         print("Message sent!")
-        self.setcbreak(sys.stdin.fileno())
         return None
 
     def receive_data(self):

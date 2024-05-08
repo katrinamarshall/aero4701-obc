@@ -9,6 +9,11 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 
+# Callback to receive downlink data instructions
+def downlink_data_callback(data: String, transceiver: Transceiver):
+    transceiver.send_deal(data)
+    
+
 # Function to receive data and publish to the topic
 def main():
     # Initialize the ROS node
@@ -21,6 +26,9 @@ def main():
 
     # Publisher for uplink commands
     uplink_publisher = rospy.Publisher('/uplink_commands', command_msg, queue_size=10)
+
+    # Subscriber for downlink commands
+    downlink_subscriber = rospy.Subscriber('/downlink_data', String, downlink_data_callback)
 
     # Spin node
     while not rospy.is_shutdown():
