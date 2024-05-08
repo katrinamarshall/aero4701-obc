@@ -1,4 +1,3 @@
-# File: telemetry/src/transceiver/transceiver.py
 import json
 import sys
 import termios

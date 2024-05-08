@@ -1,10 +1,9 @@
-# File: telemetry/scripts/telemetry_node.py
 #!/usr/bin/env python
 
 import rospy
 from std_msgs.msg import String
 from telemetry.msg import command_msg
-from telemetry.src.transceiver.transceiver import Transceiver
+from transceiver import Transceiver
 
 # Initialize the ROS node
 rospy.init_node('telemetry_node')
