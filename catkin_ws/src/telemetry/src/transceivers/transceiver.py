@@ -57,7 +57,7 @@ class Transceiver(sx126x):
                 # For uplink commands
                 if len(message) == 3:
                     component, component_id, command = message
-                    uplink_command = command_msg
+                    uplink_command = command_msg()
                     uplink_command.component = component
                     uplink_command.component_id = int(component_id)
                     uplink_command.command = command
