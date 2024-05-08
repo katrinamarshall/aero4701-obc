@@ -5,9 +5,8 @@ import datetime as dt
 from rotation import *
 from _conversion import *
 
-from lidar_contants import *
+from lidar_constants import *
 
-import cProfile
 import time
 
 def gen_test_data(_num_pixels, _debris_freq, current_time, test_vel=False, empty = False):
