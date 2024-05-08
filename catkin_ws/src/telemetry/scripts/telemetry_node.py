@@ -11,7 +11,7 @@ from transceivers import Transceiver
 
 # Callback to receive downlink data instructions
 def downlink_data_callback(data: String, transceiver: Transceiver):
-    transceiver.send_deal(data)
+    transceiver.send_deal(data.data)
     
 
 # Function to receive data and publish to the topic
