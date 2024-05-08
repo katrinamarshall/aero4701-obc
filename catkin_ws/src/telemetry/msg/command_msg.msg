@@ -1,3 +1,3 @@
-char component
+uint8 component
 int32 component_id
 string command
