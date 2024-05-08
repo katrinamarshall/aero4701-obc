@@ -1,7 +1,7 @@
 import json
 import sys
 import termios
-from catkin_ws.src.telemetry.src.transceivers._sx126x import sx126x
+from _sx126x import sx126x
 from telemetry.msg import command_msg
 
 class Transceiver(sx126x):
