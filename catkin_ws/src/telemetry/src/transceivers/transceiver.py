@@ -50,6 +50,8 @@ class Transceiver(sx126x):
         if data:
             try:
                 # Split data to determine message type
+                if isinstance(data, bytes):
+                    data = data.decode('utf-8')
                 message = data.split(",")
 
                 # For uplink commands
