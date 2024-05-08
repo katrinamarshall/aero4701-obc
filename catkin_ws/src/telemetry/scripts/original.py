@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-from catkin_ws.src.telemetry.src.transceiver import _sx126x as _sx126x
+from catkin_ws.src.telemetry.src.transceivers import _sx126x as _sx126x
 import select
 import termios
 import tty
