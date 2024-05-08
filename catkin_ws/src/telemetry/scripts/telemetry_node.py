@@ -28,7 +28,7 @@ def main():
     uplink_publisher = rospy.Publisher('/uplink_commands', command_msg, queue_size=10)
 
     # Subscriber for downlink commands
-    downlink_subscriber = rospy.Subscriber('/downlink_data', String, downlink_data_callback)
+    downlink_subscriber = rospy.Subscriber('/downlink_data', String, lambda data: downlink_data_callback(data, transceiver))
 
     # Spin node
     while not rospy.is_shutdown():
