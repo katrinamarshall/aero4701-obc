@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 
-# import sys
-# import os
-# sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 import rospy
 from std_msgs.msg import String
 from telemetry.msg import command_msg
-from .transceivers import Transceiver
-# from telemetry.src.transceivers.transceiver import Transceiver
+from transceivers import Transceiver
 
 # Function to receive data and publish to the topic
 def main():
     # Initialize the ROS node
     rospy.init_node('telemetry_node')
-    rospy.log_info("Starting telemetry node")
+    rospy.loginfo("Starting telemetry node")
     rate = rospy.Rate(1)
 
     # Initialize the transceiver object
