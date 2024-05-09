@@ -51,6 +51,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   command_msg.msg
+  payload_data.msg
+  satelltie_pose.msg
 )
 
 ## Generate services in the 'srv' folder
