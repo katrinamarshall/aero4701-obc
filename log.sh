@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "Running autostart.py..."
 
-cd $home
+#cd $home
 
 #source /opt/ros/noetic/setup.bash 
 
