@@ -7,6 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+# Ensure Python setup happens after messages
+catkin_python_setup()
+
 # Add message files
 add_message_files(
   FILES
@@ -29,8 +32,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# Ensure Python setup happens after messages
-catkin_python_setup()
 
 # Mark executable scripts (Python etc.) for installation
 catkin_install_python(PROGRAMS
