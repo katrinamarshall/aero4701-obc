@@ -1,0 +1,17 @@
+# Satellite Pose Service
+# request message
+string request
+
+# response message
+---
+int32 time
+float32 position_x 
+float32 position_y
+float32 position_z
+float32 velocity_x 
+float32 velocity_y
+float32 velocity_z
+float32 quat_w
+float32 quat_x
+float32 quat_y
+float32 quat_z
