@@ -1,0 +1,14 @@
+#:kivy 1.2.0
+#:import CustomIndicator seawolf.utils.customWidgets
+#:import BrushState seawolf.widgets.BrushState
+
+<BrushStatePilotView>:
+    BoxLayout:
+        orientation: "vertical"
+        BrushState:
+            size_hint: (1, 0.8)
+        CustomIndicator:
+            id: dc_overlay
+            size_hint: (1, 0.2)
+            font_size: self.height * 0.75
+            text: root.duty_cycle

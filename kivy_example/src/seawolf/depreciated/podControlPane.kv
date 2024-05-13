@@ -1,0 +1,106 @@
+#:kivy 1.2.0
+
+<PodControlPane>
+    motor_switch: motor_switch
+    pod_power_switch: pod_power_switch
+    pod_command_drop_down: pod_command_drop_down
+    tether_speed_slider: tether_speed_slider
+    tether_speed_text_input: tether_speed_text_input
+    spring_calibration_button: spring_calibration_button
+    orientation: "vertical"
+
+    BoxLayout:
+        orientation:"vertical"
+
+        Label:
+            size_hint_y: 0.2
+            canvas.before:
+                Color:
+                    rgba: [0.17, 0.3, 1, 0.5]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            text: "POD CONTROL"
+            bold: "True"
+
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.2
+
+            Label:
+                text: "Motors"
+
+            Switch:
+                id: motor_switch
+                active: False
+                on_active: root.motor_switch_callback(self.active)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.2
+
+            Label:
+                text: "Pod Power"
+
+            Switch:
+                id: pod_power_switch
+                active: False
+                on_active: root.pod_power_switch_callback(self.active)
+
+        Label:
+            size_hint_y: 0.1
+            canvas.before:
+                Color:
+                    rgba: [1, 0.84, 0, 0.5]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            text: "FEATHER CONTROL"
+            bold: "True"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.2
+
+            PodCommandDropDown:
+                orientation:"vertical"
+                id: pod_command_drop_down
+
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.35
+
+            Button:
+                text:"Calibrate Spring"
+                id: spring_calibration_button
+                size_hint: (0.8, 0.8)
+                pos_hint: {"top": 1}
+                on_release: root.calibrate_spring()
+                disabled: True
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.3
+
+            Label:
+                size_hint: (0.2, 1)
+                text: "Tether\nSpeed"
+                pos_hint: {"top": 1}
+            Slider:
+                size_hint: (0.6, 1)
+                id: tether_speed_slider
+                pos_hint: {"top": 1}
+                step: 0.05
+                on_touch_up: root.tether_slider_callback(self.value)
+                disabled: True
+
+            TextInput:
+                size_hint: (0.2, 1)
+                pos_hint: {"top": 1}
+                id: tether_speed_text_input
+                text: str(round(tether_speed_slider.value,2))
+                multiline: False
+                on_text_validate: root.tether_slider_callback(self.text)
+                disabled: True

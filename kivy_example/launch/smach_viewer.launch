@@ -1,0 +1,3 @@
+<launch>
+    <node name="smach_viewer" pkg="smach_viewer" type="smach_viewer.py" required="true"/>
+</launch>

@@ -1,0 +1,16 @@
+#:kivy 1.2.0
+#:import CustomButton seawolf.utils.customWidgets
+#:import CustomButtonModern seawolf.utils.customWidgets
+#:import CustomTextIndicator seawolf.utils.customWidgets
+#:import AmputateControl seawolf.widgets.AmputateControl
+
+<AmputateControl>:
+    orientation: 'vertical'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        CustomTextIndicator:
+            text: "Amputate Motor"
+        CustomButton:
+            id: tc_selector
+            text: "None"

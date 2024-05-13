@@ -1,0 +1,68 @@
+#:kivy 1.2.0
+#:import CustomButton seawolf.utils.customWidgets
+#:import CustomButtonModern seawolf.utils.customWidgets
+#:import CustomTextIndicator seawolf.utils.customWidgets
+#:import TrajectoryControl seawolf.widgets.TrajectoryControl
+
+<TrajectoryControl>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomTextIndicator:
+                text: "Path"
+            CustomButton:
+                id: path_selector
+                text: "-"
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomTextIndicator:
+                text: "Speed"
+            CustomButton:
+                id: speed_selector
+                text: "-"
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomTextIndicator:
+                text: "Fixed Orientation"
+            CustomButton:
+                id: orientation_selector
+                text: "-"
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomTextIndicator:
+                text: "Interpolation"
+            CustomButton:
+                id: interpolation_selector
+                text: "-"
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomTextIndicator:
+                text: "Alignment"
+            CustomButton:
+                id: alignment_selector
+                text: "-"
+
+        BoxLayout:
+            orientation: 'horizontal'
+            CustomButton:
+                id: update_trajectory
+                text: "Update"
+                on_release: root.update_mission_trajectory_parameters()
+
+
+        BoxLayout:
+            size_hint_y: 0.1
+
+        BoxLayout:
+            orientation: 'horizontal'
+
+            CustomButton:
+                id: enter_exit_trajectory_freeswim
+                text: "Enter Trajectory Freeswim"
+                on_release: root.enter_exit_trajectory_freeswim()

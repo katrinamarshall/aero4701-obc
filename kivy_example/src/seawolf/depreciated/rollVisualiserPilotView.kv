@@ -1,0 +1,12 @@
+#:kivy 1.2.0
+#:import RollVisualiser seawolf.widgets.ImuVisualiserPane
+
+
+<RollVisualiserPilotView>:
+    size_hint: 1, 1
+    roll_widget: roll_visualiser
+    orientation: "horizontal"
+
+    RollVisualiser:
+        pos_hint: {"center_x":0.25, "center_y":0.55}
+        id: roll_visualiser

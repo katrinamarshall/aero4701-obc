@@ -1,0 +1,37 @@
+#:kivy 1.2.0
+
+<NodeStatusPane>
+    orientation: 'vertical'
+    size_hint: 1, 1
+    BoxLayout:
+        id: indicator_display
+
+<NodeIndicator>
+    BoxLayout:
+        id: dropdown_menu
+
+        canvas.before:
+            Color:
+                rgba: root.statusColour
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+<CustomDropDown>
+    Button:
+        text: "Start"
+        size_hint_y: None
+        height: 40
+        on_release: root.start()
+
+    Button:
+        text: "Stop"
+        size_hint_y: None
+        height: 40
+        on_release: root.stop()
+
+    Button:
+        text: "Restart"
+        size_hint_y: None
+        height: 40
+        on_release: root.restart()

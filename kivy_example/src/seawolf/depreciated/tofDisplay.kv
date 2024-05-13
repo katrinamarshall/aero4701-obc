@@ -1,0 +1,187 @@
+#:kivy 1.2.0
+<TofDisplay>:
+
+    orientation: "vertical"
+    BoxLayout:
+        size_hint: (1, 0.1)
+        Button:
+            text: "Mode"
+            on_release: root.tof_mode_button_release()
+            size_hint: (0.3, 1)
+        Label:
+            text: "Front TOFs"
+            size_hint: (0.7, 1)
+    BoxLayout:
+        size_hint: (1, 0.25)
+        orientation: 'horizontal'
+        TofsScale:
+            size_hint: (0.25, 1)
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.1, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.front_port
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.1, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.front_star
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.05, 1)
+    BoxLayout:
+        size_hint: (1, 0.1)
+        Label:
+            text: ""
+            size_hint: (0.25, 1)
+        Label:
+            text: "Top TOFs"
+            size_hint: (0.75, 1)
+    BoxLayout:
+        size_hint: (1, 0.25)
+        orientation: 'horizontal'
+        TofsScale:
+            size_hint: (0.25, 1)
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.1, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.top_front_port
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.1, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.top_front_star
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.05, 1)
+    BoxLayout:
+        size_hint: (1, 0.05)
+    BoxLayout:
+        size_hint: (1, 0.25)
+        orientation: 'horizontal'
+        TofsScale:
+            size_hint: (0.25, 1)
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.15, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.top_back_port
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.15, 1)
+        TofsBar:
+            size_hint: (0.25, 1)
+            value: root.top_back_star
+            tof_mode: root.tof_mode
+        BoxLayout:
+            size_hint: (0.05, 1)
+    BoxLayout:
+        size_hint: (1, 0.05)
+
+<TofsScale>:
+    LabelTicks:
+        # id:
+        size_hint: 0.95, 1
+        tof_mode: root.tof_mode
+    BoxLayout:
+        size_hint: 0.05, 1  # white line (axis)
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1  #white
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+
+<LabelTicks>:
+    rows: 8
+    cols: 2
+
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    TickTop:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+    Label:
+        halign: 'center'
+        valign: 'bottom'
+    Tick:
+
+
+<Tick>:
+    orientation: "vertical"
+    BoxLayout:
+        size_hint: (1, 0.9)
+    BoxLayout:
+        size_hint: (1, 0.1)
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1  #white
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+<TickTop>:
+    orientation: "vertical"
+    BoxLayout:
+        size_hint: (1, 0.1)
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1  #white
+            Rectangle:
+                size: self.size
+                pos: self.pos
+    BoxLayout:
+        size_hint: (1, 0.8)
+    BoxLayout:
+        size_hint: (1, 0.1)
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1  #white
+            Rectangle:
+                size: self.size
+                pos: self.pos
+
+<TOFErrorPopup>:
+    title: 'Tof Mode Change Error'
+
+    size_hint: None, None
+    size: 600, 200
+
+    label_text: label_text
+    error_text: error_text
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: label_text
+        Label:
+            id: error_text

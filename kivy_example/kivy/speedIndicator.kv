@@ -1,0 +1,94 @@
+<SpeedIndicator>:
+
+    orientation: "horizontal"
+
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: (0.3, 1)
+
+        BoxLayout:
+            size_hint: (1, 0.03)
+
+        Label:
+            text: "0.3"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0.2"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0.1"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0.1"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0.2"
+            size_hint: 1, 0.13
+
+        Label:
+            text: "0.3"
+            size_hint: 1, 0.13
+
+        BoxLayout:
+            size_hint: (1, 0.03)
+
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: (0.15, 1)
+
+        canvas:
+
+            Color:
+                rgba: 1, 1, 1, 1  # White color (R, G, B, A)
+            Line:
+                points: self.x, self.y + self.height * 0.1, self.x + self.width, self.y + self.height * 0.1
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.2333, self.x + self.width, self.y + self.height * 0.2333
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.3666, self.x + self.width, self.y + self.height * 0.3666
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.5, self.x + self.width, self.y + self.height * 0.5
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.6333, self.x + self.width, self.y + self.height * 0.6333
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.7666, self.x + self.width, self.y + self.height * 0.7666
+                width: 1.2
+            Line:
+                points: self.x, self.y + self.height * 0.9, self.x + self.width, self.y + self.height * 0.9
+                width: 1.2
+
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: (0.35, 1)
+
+        canvas:
+
+            Color:
+                rgba: 1, 1, 1, 1  # White color (R, G, B, A)
+            Rectangle:
+                pos: self.center_x - 12.5, self.y + self.height * 0.5 - 1.25
+                size: 25, 2.5
+            Rectangle:
+                pos: self.center_x - 12.5, self.y + self.height * 0.5
+                size: 25, self.height * root.speed_line
+
+    BoxLayout:
+        orientation: "horizontal"
+        size_hint: (0.2, 1)
+
+        Label:
+            font_name: "formular"
+            text: str(root.speed_number)

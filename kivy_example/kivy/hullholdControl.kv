@@ -1,0 +1,29 @@
+#:kivy 1.2.0
+#:import CustomButton seawolf.utils.customWidgets
+#:import CustomButtonModern seawolf.utils.customWidgets
+#:import CustomTextIndicator seawolf.utils.customWidgets
+#:import HullholdControl seawolf.widgets.HullholdControl
+
+<HullholdControl>:
+    orientation: 'vertical'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        CustomTextIndicator:
+            size_hint_x: 0.5
+            text: 'Hull Hold'
+        CustomButton:
+            size_hint_x: 0.15
+            id: light_button
+            text: 'Light'
+            on_release: root.update_steady_state_thrust_based_on_level(light_button.text)
+        CustomButton:
+            size_hint_x: 0.2
+            id: medium_button
+            text: 'Medium'
+            on_release: root.update_steady_state_thrust_based_on_level(medium_button.text)
+        CustomButton:
+            size_hint_x: 0.15
+            id: heavy_button
+            text: 'Heavy'
+            on_release: root.update_steady_state_thrust_based_on_level(heavy_button.text)

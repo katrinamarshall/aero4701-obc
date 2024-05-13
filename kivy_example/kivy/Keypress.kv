@@ -1,0 +1,62 @@
+#:kivy 1.2.0
+<KeyboardHelp>:
+    auto_dismiss: True
+    title: 'Keyboard Mappings'
+    size_hint_x: 0.6
+    size_hint_y: 0.8
+
+    command_list: command_list
+    scroll_content: scroll_content
+    keyboard_enable_switch: keyboard_enable_switch
+
+    ScrollView:
+        do_scroll_y: True
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            id: scroll_content
+            height: 0
+
+            BoxLayout:
+                size_hint_y: 0.05
+
+            GridLayout:
+                id: keyboard_enable
+                cols: 2
+                size_hint_y: 0.05
+
+                Label:
+                    text: 'Enable Keyboard Control'
+                    bold: True
+
+                Switch:
+                    id: keyboard_enable_switch
+                    active: False
+
+            Label:
+                text: 'Keyboard Control - Requires shift to be held'
+                size_hint: 1, 0.05
+
+            BoxLayout:
+                size_hint_y: 0.05
+
+            Image:
+
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                source: root.bot_graphic_path
+
+            BoxLayout:
+                size_hint_y: 0.05
+
+            Label:
+                id: key_map
+                text: 'Keyboard commands mapping'
+                size_hint_y: 0.05
+
+            GridLayout:
+                id: command_list
+                cols: 2
+                size_hint_y: None
+                row_force_default: True
+                row_default_height: 40

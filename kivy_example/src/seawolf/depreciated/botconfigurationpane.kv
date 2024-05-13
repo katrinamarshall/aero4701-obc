@@ -1,0 +1,20 @@
+#:kivy 1.2.0
+
+<BotConfigurationPane>:
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        Button:
+            text:"Configuration"
+            id: configuration_button
+            size_hint: (1, 0.4)
+            disabled: True
+
+        Button:
+            id: configuration_selector
+            text: "Unknown"
+            text_size: self.width, None
+            size_hint: (1, 0.6)
+            halign: 'center'
+            height: self.texture_size[1] * 1.1

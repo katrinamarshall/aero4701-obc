@@ -1,0 +1,19 @@
+#:kivy 1.2.0
+
+<RosbagOptionsPopup>:
+    # Popup properties
+    auto_dismiss: True
+    title: 'What would you like to do?'
+    size_hint_x: 0.4
+    size_hint_y: 0.2
+
+    BoxLayout:
+        orientation: 'horizontal'
+
+        Button:
+            text: 'Stop Recording'
+            on_release: root.stop_recording_button()
+
+        Button:
+            text: 'Start New Recording'
+            on_release: root.start_new_recording_button()

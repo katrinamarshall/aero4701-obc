@@ -1,0 +1,11 @@
+#:kivy 1.2.0
+<VideoDisplayer>:
+    size_hint: (1, 1)
+    orientation: "vertical"
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.rotation
+            origin: self.center
+    canvas.after:
+        PopMatrix

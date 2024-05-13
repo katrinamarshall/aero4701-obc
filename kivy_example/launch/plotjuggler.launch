@@ -1,0 +1,4 @@
+<launch>
+    <node name="plotjuggler_bot" pkg="plotjuggler" type="plotjuggler"
+    args="--layout $(find seawolf)/config/h6_plotjuggler.xml"/>
+</launch>

@@ -1,0 +1,108 @@
+#:kivy 1.2.0
+<ProgressPopup>:
+  auto_dismiss: False
+  size_hint: (0.3, 0.3)
+  title: 'System Test in progress'
+
+  progress_bar: progress_bar
+  progress_text: progress_text
+
+  BoxLayout:
+    orientation: 'vertical'
+
+    ProgressBar:
+      max: 1
+      id: progress_bar
+
+    Label:
+      text: '0%'
+      size_hint_y: 0.1
+      id: progress_text
+
+    Button:
+      text: 'Cancel'
+      size_hint_x: 0.3
+      pos_hint: {"center_x":0.85, "center_y":0.5}
+      on_release: root.cancel()
+
+<StatusLabel>
+  text_size: self.width, None
+  orientation: 'horizontal'
+  name_label: name_label
+  messages_box: messages_box
+  cols: 2
+  size_hint_y: None
+  #minimum_height: 40
+  #row_default_height: 30
+  #row_force_default: True
+
+  canvas.before:
+    Color:
+      rgba: root.color
+    Rectangle:
+      pos: self.pos
+      size: self.size
+    # Black border
+    Color:
+      rgba: 0, 0, 0, 1
+    Line:
+      width: 1
+      rectangle: self.x, self.y, self.width, self.height
+
+  Label:
+    id: name_label
+    size_hint_x: 0.3
+    size_hint_y: 1
+    text_size: self.size
+    halign: 'left'
+    valign: 'center'
+
+  BoxLayout:
+    id: messages_box
+    orientation: 'vertical'
+
+<ResultsPopup>
+  auto_dismiss: True
+  size_hint: (0.5, 0.6)
+  title: 'System Test Result'
+
+  scroll_content: scroll_content
+
+  ScrollView:
+    #do_scroll_y: True
+    size_hint_y: 1
+
+    BoxLayout:
+      orientation: 'vertical'
+      size_hint_y: None # Needs to be None for scrolling to work properly
+      #minimum_height: 30
+      id: scroll_content
+
+<ConfirmationPopup>:
+  auto_dismiss: False
+  size_hint: (0.3, 0.3)
+  title: 'System Test Request'
+
+  BoxLayout:
+    orientation: 'vertical'
+
+    Label:
+      text: 'Is it safe to conduct a system test?'
+      text_size: self.size
+      size_hint_y: 0.8
+      halign: 'center'
+      valign: 'center'
+
+    BoxLayout:
+      orientation: 'horizontal'
+      Button:
+        text: 'No'
+        on_release: root.dismiss()
+        size_hint_x: 0.2
+        size_hint_y: 0.2
+
+      Button:
+        text: 'Yes'
+        on_release: root.on_confirm()
+        size_hint_x: 0.2
+        size_hint_y: 0.2

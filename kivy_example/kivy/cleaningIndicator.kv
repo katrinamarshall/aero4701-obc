@@ -1,0 +1,65 @@
+#:import CustomSliderIndicator seawolf.utils.customWidgets
+#:import VisionIndicator seawolf.widgets.VisionIndicator
+
+<CleaningIndicator>:
+    size_hint: 1, 1
+
+    ## Cleaning core position on widget
+    #
+    #          2     1
+    #
+    #          4     3
+    #
+
+    canvas:
+        Color:
+            rgba: root.cc_1_color
+        Rectangle:
+            pos: self.width/2, 0.7*self.height
+            size: self.width/6, 0.1*self.height
+        Color:
+            rgba: root.cc_2_color
+        Rectangle:
+            pos: self.width/3, 0.7*self.height
+            size: self.width/6, 0.1*self.height
+        Color:
+            rgba: root.cc_3_color
+        Rectangle:
+            pos: self.width/2, 0.2*self.height
+            size: self.width/6, 0.1*self.height
+        Color:
+            rgba: root.cc_4_color
+        Rectangle:
+            pos: self.width/3, 0.2*self.height
+            size: self.width/6, 0.1*self.height
+
+    Label:
+        pos_hint: {'center_x': 0.5, 'center_y': 0.85}
+        font_name: "formular"
+        text: root.desired_rpm_text
+
+    VisionIndicator:
+        size_hint: (0.15, 0.15)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    Image:
+        size_hint: (0.6, 0.6)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        source: root.bot_graphic_path
+
+    Label:
+        pos_hint: {'center_x': 0.59, 'center_y': 0.75}
+        font_name: "formular"
+        text: root.cc_1_text
+    Label:
+        pos_hint: {'center_x': 0.41, 'center_y': 0.75}
+        font_name: "formular"
+        text: root.cc_2_text
+    Label:
+        pos_hint: {'center_x': 0.59, 'center_y': 0.25}
+        font_name: "formular"
+        text: root.cc_3_text
+    Label:
+        pos_hint: {'center_x': 0.41, 'center_y': 0.25}
+        font_name: "formular"
+        text: root.cc_4_text

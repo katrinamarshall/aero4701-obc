@@ -1,0 +1,84 @@
+#:kivy 1.2.0
+<MotorTesterPane>:
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint: 1,1
+        id: test_panel
+
+<MotorSelectorPane>:
+    GridLayout:
+        id: motor_grid
+        cols: 4
+        rows: 6
+
+<SystemTestPane>:
+    orientation: 'vertical'
+    size_hint: 1, 1
+    BoxLayout:
+        id: indicator_display
+
+<RunSystemsTest>:
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            id: run_test_button
+            text: root.label
+
+<BuoyancyTestPane>:
+    orientation: 'vertical'
+    size_hint: 1, 1
+    BoxLayout:
+        id: indicator_display
+
+<RunBuoyancyTest>:
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            id: run_buoyancy_test_button
+            text: root.label
+
+<RunMotorTest>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 1
+            Button:
+                id: runTC_btn
+                text: 'Test All TCs'
+            Button:
+                id: runTCR_btn
+                text: 'Rinse All TCs'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 1
+            Button:
+                id: runCC_btn
+                text: 'Test All CCs'
+            Button:
+                id: detectTC_btn
+                text: 'Calibrate TCs'
+
+<LabelSwitch>:
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1,1
+        Label:
+            text: root.name
+        Switch:
+            id: switch
+            active: False
+
+<LabelSliderLabel>:
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: 1,1
+        Label:
+            size_hint: 0.2,1
+            text: root.name
+        Slider:
+            size_hint: 0.6,1
+            id: slider
+        Label:
+            size_hint: 0.2,1
+            text: str(round(slider.value,2))

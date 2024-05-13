@@ -1,0 +1,19 @@
+#:kivy 1.2.0
+
+<NoRoscorePopup>:
+    # Popup properties
+    auto_dismiss: False
+    title: 'Error: No roscore detected.'
+    # size_hint_x: 0.8
+    # size_hint_y: 0.6
+
+    error_label: error_label
+
+    BoxLayout:
+        id: content_layout
+        # size_hint_y: 0.2
+        orientation: 'vertical'
+        cols: 1
+        Label:
+            id: error_label
+            text: ''

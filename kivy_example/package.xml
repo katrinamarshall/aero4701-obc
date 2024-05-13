@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>seawolf</name>
+  <version>0.0.0</version>
+  <description>The seawolf package</description>
+
+  <author email="hao.nguyen@hullbot.com">Hao Nguyen</author>
+  <author email="jesse.morris@hullbot.com">Jesse Morris</author>
+
+  <maintainer email="hao.nguyen@hullbot.com">Hao Nguyen</maintainer>
+  <maintainer email="jesse.morris@hullbot.com">Jesse Morris</maintainer>
+
+  <license>LGPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>hullbot_msgs</depend>
+  <depend>hb_drivers_msgs</depend>
+  <depend>hb_control_msgs</depend>
+  <depend>hb_common_msgs</depend>
+  <depend>hb_localisation_msgs</depend>
+  <depend>docker_deps</depend>
+  <depend>supervisor_deps</depend>
+  <depend>diagnostics_tools</depend>
+  <depend>mavros_msgs</depend>
+  <depend>h6_bringup</depend>
+  <depend>smach_msgs</depend>
+  <depend>smach_viewer</depend>
+  <depend>actionlib</depend>
+
+  <depend>rqt_gui</depend>
+  <!-- <depend>rqt_guicpp</depend>
+  <depend>rqt-gui-py</depend> -->
+  <depend>rviz_imu_plugin</depend>
+  <depend>ros_numpy</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>plotjuggler</depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

@@ -1,0 +1,189 @@
+
+#:kivy 1.2.0
+#:import SnapSplitter seawolf.utils.snapsplitter
+#:import CustomButton seawolf.utils.customWidgets
+#:import CustomButtonModern seawolf.utils.customWidgets
+
+<DemoView>:
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: (1, 1)
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.7)
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.2, 1)
+                BoxLayout:
+                    size_hint: (1, 0.15)
+                BoxLayout:
+                    size_hint: (1, 0.7)
+                    id: left_side_video
+                    canvas.before:
+                        PushMatrix
+                        Rotate:
+                            angle: 90
+                            origin: self.center
+                        Scale:
+                            x: 1.6
+                            y: 1.6
+                            origin: self.center
+                    canvas.after:
+                        PopMatrix
+                BoxLayout:
+                    size_hint: (1, 0.15)
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.3, 1)
+                spacing: -25
+                BoxLayout:
+                    orientation: "vertical"
+                    id: left_front_video
+                BoxLayout:
+                    orientation: "vertical"
+                    id: left_top_video
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.3, 1)
+                spacing: -25
+                BoxLayout:
+                    orientation: "vertical"
+                    id: right_front_video
+                BoxLayout:
+                    orientation: "vertical"
+                    id: right_top_video
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.2, 1)
+                BoxLayout:
+                    size_hint: (1, 0.15)
+                BoxLayout:
+                    size_hint: (1, 0.7)
+                    id: right_side_video
+                    canvas.before:
+                        PushMatrix
+                        Rotate:
+                            angle: 270
+                            origin: self.center
+                        Scale:
+                            x: 1.6
+                            y: 1.6
+                            origin: self.center
+                    canvas.after:
+                        PopMatrix
+                BoxLayout:
+                    size_hint: (1, 0.15)
+
+<PilotView>:
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: (1, 1)
+
+        BoxLayout:
+        # AnchorLayout:
+            anchor_x: "center"
+            anchor_y: "top"
+            # orientation: "vertical"
+            size_hint: (1, 0.08)
+            id: node_indicator_bar
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.92)
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.3, 1)
+                spacing: -25
+                BoxLayout:
+                    orientation: "vertical"
+                    id: left_video
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: (0.3, 1)
+                spacing: -25
+                BoxLayout:
+                    orientation: "vertical"
+                    id: right_video
+
+
+<FullScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        size_hint: (1, 1)
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.7)
+            id: view_type
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.3)
+
+
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint: (0.3, 1)
+
+                BoxLayout:
+                    id: speed_container
+                    size_hint: (0.3, 1)
+
+                BoxLayout:
+                    id: tof_container
+                    size_hint: (0.7, 1)
+
+
+            BoxLayout:
+                orientation:'vertical'
+                size_hint: (0.4, 1)
+                BoxLayout:
+                    orientation:'horizontal'
+                    size_hint: (1, 0.2)
+                    BoxLayout:
+                        id: armed_container
+                        size_hint: (0.4, 1)
+                    BoxLayout:
+                        id: mode_container
+                        size_hint: (0.4, 1)
+
+                BoxLayout:
+                    id: roll_container
+                    size_hint: (1, 0.6)
+                BoxLayout:
+                    id: power_container
+                    size_hint: (1, 0.2)
+
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint: (0.3, 1)
+
+                BoxLayout:
+                    id: cleaning_container
+                    size_hint: (0.5, 1)
+                BoxLayout:
+                    id: depth_container
+                    size_hint: (0.5, 1)
+
+    SnapSplitter:
+        sizable_from: "left"
+        ScrollView:
+            do_scroll_x: True
+            do_scroll_y: True
+            pos: self.parent.pos
+            size: self.parent.size
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'vertical'
+                    pos: self.parent.pos
+                    size: self.parent.size
+                    id: right_container
+
+
+<SeawolfWindow>:
+    BoxLayout:
+        orientation: "vertical"
+        id: everything

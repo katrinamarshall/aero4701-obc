@@ -1,0 +1,113 @@
+#:import CustomSliderIndicator seawolf.utils.customWidgets
+
+<TofIndicator>:
+    size_hint: 1.1, 1.1
+
+    canvas:
+        #:set sz 14 # divisor for size of circle elements
+        #:set sc 13 # divisor for spacing of corner circle elements
+        #:set off 5 # offset for space between circles
+        #:set loff 18 # large offset for line components
+        #:set lsz 6.5 # divisor for max size of horizontal line indicators
+        #:set lszd 9 # divisor for max size of diagonal line indicators
+
+        ## TOF Layout
+        #
+        #  a       b
+        #     e f
+        #     g h
+        #  c       d
+
+        Color:
+            rgba: root.tof_a_color
+        Ellipse:
+            pos: self.width/2 - 2*self.width/sc - off, self.height/2 + self.width/sc + off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_b_color
+        Ellipse:
+            pos: self.width/2 + self.width/sc + off, self.height/2 + self.width/sc + off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_c_color
+        Ellipse:
+            pos: self.width/2 - 2*self.width/sc - off, self.height/2 - 2*self.width/sc - off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_d_color
+        Ellipse:
+            pos: self.width/2 + self.width/sc + off, self.height/2 - 2*self.width/sc - off
+            size: self.width/sz, self.width/sz
+
+        Color:
+            rgba: root.tof_e_color
+        Ellipse:
+            pos: self.width/2 - self.width/sz - off, self.height/2 + off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_f_color
+        Ellipse:
+            pos: self.width/2 + off, self.height/2 + off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_g_color
+        Ellipse:
+            pos: self.width/2 - self.width/sz - off, self.height/2 - self.width/sz - off
+            size: self.width/sz, self.width/sz
+        Color:
+            rgba: root.tof_h_color
+        Ellipse:
+            pos: self.width/2 + off, self.height/2 - self.width/sz - off
+            size: self.width/sz, self.width/sz
+
+
+        Color:
+            rgba: 1, 1, 1, 1
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 - 2*self.width/sc - off,
+                self.height/2 + 2*self.width/sc + off,
+                self.width/2 - 2*self.width/sc - off - (self.width/lszd * root.tof_a_val),
+                self.height/2 + 2*self.width/sc + off + (self.width/lszd * root.tof_a_val))
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 + 2*self.width/sc + off,
+                self.height/2 + 2*self.width/sc + off,
+                self.width/2 + 2*self.width/sc + off + (self.width/lszd * root.tof_b_val),
+                self.height/2 + 2*self.width/sc + off + (self.width/lszd * root.tof_b_val))
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 - 2*self.width/sc - off,
+                self.height/2 - 2*self.width/sc - off,
+                self.width/2 - 2*self.width/sc - off - (self.width/lszd * root.tof_c_val),
+                self.height/2 - 2*self.width/sc - off - (self.width/lszd * root.tof_c_val))
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 + 2*self.width/sc + off,
+                self.height/2 - 2*self.width/sc - off,
+                self.width/2 + 2*self.width/sc + off + (self.width/lszd * root.tof_d_val),
+                self.height/2 - 2*self.width/sc - off - (self.width/lszd * root.tof_d_val))
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 - self.width/sz - loff, self.height/2 + self.width/sz/2 + off,
+                self.width/2 - self.width/sz - loff - (self.width/lsz * root.tof_e_val), self.height/2 + self.width/sz/2 + off)
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 + self.width/sz + loff, self.height/2 + self.width/sz/2 + off,
+                self.width/2 + self.width/sz + loff + (self.width/lsz * root.tof_f_val), self.height/2 + self.width/sz/2 + off)
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 - self.width/sz - loff, self.height/2 - self.width/sz/2 - off,
+                self.width/2 - self.width/sz - loff - (self.width/lsz * root.tof_g_val), self.height/2 - self.width/sz/2 - off)
+        Line:
+            width: 1.2
+            points:
+                (self.width/2 + self.width/sz + loff, self.height/2 - self.width/sz/2 - off,
+                self.width/2 + self.width/sz + loff + (self.width/lsz * root.tof_h_val), self.height/2 - self.width/sz/2 - off)

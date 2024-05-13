@@ -1,0 +1,129 @@
+#:kivy 1.2.0
+
+<MissionNamePopUp>:
+    # Popup properties
+    auto_dismiss: False
+    title: 'Choose mission robot, location, and description'
+    size_hint_x: 0.6
+    size_hint_y: 0.5
+
+    # Exposing widgets to Python
+    # To choose a bot, should be chosen in order to start a mission
+    bot_dropdown_button: bot_dropdown_button
+    # To attach the dropdown locations
+    location_dropdown_button: location_dropdown_button
+    boat_dropdown_button: boat_dropdown_button
+
+    description_text_input: description_text_input
+    location_text: location_text
+    confirmation_input: confirmation_input
+    boat_name_text_input: boat_name_text_input
+    # To enable the button once the text_input has had a modification
+    confirm_button: confirm_button
+    GridLayout:
+        id: root_layout
+        orientation: 'horizontal'
+        cols: 1
+        GridLayout:
+            id: bot_dropdown_layout
+            size_hint_y: 0.2
+            orientation: 'horizontal'
+            cols: 2
+            Label:
+                id: robot_label
+                text: 'Use robot:'
+            Button:
+                id: bot_dropdown_button
+                text: ''
+                # Make it red until a bot is chosen
+                background_color: 1, 0, 0, 1
+                on_release: root.dropdown_bot.open(bot_dropdown_button)
+        GridLayout:
+            id: location_dropdown_layout
+            size_hint_y: 0.2
+            orientation: 'horizontal'
+            cols: 2
+            Label:
+                id: location_label
+                text: 'Choose location:'
+            GridLayout:
+                id: location_text_and_dropdown_layout
+                size_hint_y: 0.2
+                orientation: 'horizontal'
+                cols: 2
+                TextInput:
+                    write_tab: False
+                    id: location_text
+                    on_text: root.location_on_text(location_text.text)
+                Button:
+                    id: location_dropdown_button
+                    text: ''
+                    background_color: 1, 1, 1, 1
+                    on_release: root.dropdown_loc.open(location_dropdown_button)
+                    disabled: False
+        GridLayout:
+            id: boat_name_layout
+            size_hint_y: 0.2
+            orientation: 'horizontal'
+            cols: 2
+            Label:
+                id: boat_name_label
+                text: 'Boat name:\n(will be appended to rosbag name)'
+            GridLayout:
+                id: boat_text_and_dropdown_layout
+                size_hint_y: 0.2
+                orientation: 'horizontal'
+                cols: 2
+                TextInput:
+                    write_tab: False
+                    id: boat_name_text_input
+                    on_text: root.boat_name_on_text(boat_name_text_input.text)
+                Button:
+                    id: boat_dropdown_button
+                    text: ''
+                    background_color: 1, 1, 1, 1
+                    on_release: root.dropdown_boat.open(boat_dropdown_button)
+                    disabled: False
+
+        GridLayout:
+            id: text_description_layout
+            size_hint_y: 0.2
+            orientation: 'horizontal'
+            cols: 2
+            Label:
+                id: description_label
+                text: 'Mission Description:\n(will be appended to rosbag name)'
+            TextInput:
+                write_tab: False
+                id: description_text_input
+                on_text: root.description_on_text(description_text_input.text)
+        GridLayout:
+            id: edit_final_rosbag_layout
+            size_hint_y: 0.2
+            orientation: 'horizontal'
+            cols: 2
+            Label:
+                id: confirmation_label
+                text: 'Edit final rosbag folder name:'
+            TextInput:
+                write_tab: False
+                id: confirmation_input
+                on_text: root.confirmation_on_text(confirmation_input.text)
+        GridLayout:
+            id: confirmation_layout
+            size_hint_y: 0.2
+            orientation: 'vertical'
+            rows: 2
+            Button:
+                id: confirm_button
+                # Text gets updated to show whether we are recording locally or remotely
+                text: ''
+                background_color: 1, 0, 0, 1
+                disabled: True
+                on_release: root.confirm_mission_naming(confirmation_input.text)
+            # The button below can be uncommented to allow a developer to skip creating
+            # a rosbag if Seawolf is just being tested. Otherwise, we want to force the user
+            # to record a bag.
+            # Button:
+            #     text: 'DEBUG: NO ROSBAG WILL BE RECORDED!'
+            #     on_release: root.bypass_rosbag_record()

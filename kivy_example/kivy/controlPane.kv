@@ -1,0 +1,498 @@
+#:kivy 1.2.0
+#:import CustomButton seawolf.utils.customWidgets
+#:import CustomButtonModern seawolf.utils.customWidgets
+#:import CustomLabel seawolf.utils.customWidgets
+#:import CustomIndicator seawolf.utils.customWidgets
+#:import CustomSlider seawolf.utils.customWidgets
+
+<ControlPane>:
+
+    do_default_tab: False
+    canvas.before:
+        Color:
+            rgba: [0, 0, 0, 1]
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+
+    TabbedPanelItem:
+        text: "STARTUP"
+        font_name: "formular"
+        size_hint: 1, 1
+        orientation: 'vertical'
+        pos_hint: {"center_x":0.5, "center_y":0.5}
+
+        # Black background for panel label
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        background_color: 0, 0, 0, 1
+
+        BoxLayout:
+            canvas:
+                Color:
+                    rgba: [0, 0, 0, 1]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            orientation: 'vertical'
+            spacing: 10
+            id: startup_stack
+
+            # # Once H6 is stable, switch back to simplified launch/kill buttons
+            # CustomButtonModern:
+            #     id: startup_button
+            #     text: "STARTUP"
+            #     font_size: self.parent.width/16
+            #     on_press: self.on_press_cb()
+            #     on_release: root.on_startup()
+
+            # CustomButtonModern:
+            #     id: shutdown_button
+            #     text: "SHUTDOWN"
+            #     font_size: self.parent.width/16
+            #     on_press: self.on_press_cb()
+            #     on_release: root.on_shutdown()
+
+            CustomButtonModern:
+                id: launch_topside_button
+                text: "Launch Topside"
+                color: [0, 1, 0, 1]
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.launch_topside()
+
+            CustomButtonModern:
+                id: launch_botside_button
+                text: "Launch Botside"
+                color: [0, 1, 0, 1]
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.launch_botside()
+
+            CustomButtonModern:
+                id: kill_topside_button
+                text: "Kill Topside"
+                color: [1, 0, 0, 1]
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.kill_topside()
+
+            CustomButtonModern:
+                id: kill_botside_button
+                text: "Kill Botside"
+                color: [1, 0, 0, 1]
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.kill_botside()
+
+            CustomButtonModern:
+                id: rviz_button
+                text: "RVIZ"
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.on_launch_rviz()
+
+            CustomButtonModern:
+                id: robot_monitor_button
+                text: "Robot Monitor"
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.on_launch_robot_monitor()
+
+            CustomButtonModern:
+                id: plotjuggler_button
+                text: "PlotJuggler"
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.on_launch_plotjuggler()
+
+            CustomButtonModern:
+                id: smach_viewer_button
+                text: "Smach Viewer"
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.on_launch_smach_viewer()
+
+            CustomButtonModern:
+                id: rosbag_options_button
+                text: "Rosbag Options"
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.on_rosbag_options()
+
+            CustomButtonModern:
+                id: system_test_button
+                text: "Run System Test"
+                font_size: self.parent.width/16
+                on_release: root.system_test.prompt_system_test()
+
+            BoxLayout
+
+    TabbedPanelItem:
+        text: "FUNCTION"
+        font_name: "formular"
+        size_hint: 1, 1
+        orientation: 'vertical'
+        pos_hint: {"center_x":0.5, "center_y":0.5}
+
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        background_color: 0, 0, 0, 1
+
+        BoxLayout:
+            canvas:
+                Color:
+                    rgba: [0, 0, 0, 1]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            orientation: 'vertical'
+            spacing: 10
+            id: function_stack
+
+            CustomButtonModern:
+                id: lights
+                text: "Lights"
+                font_size: self.parent.width/16
+                size_hint: 1.0, 0.1
+
+            BoxLayout:
+                size_hint_y: 0.5
+                orientation: 'vertical'
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.15
+
+                    # CustomTextIndicator:
+                    #     size_hint: (0.2, 1)
+
+                    CustomButton:
+                        size_hint: (0.2, 1)
+                        id: selected_light_groups_button
+                        text: ""
+                        font_name: "formular"
+                        on_release: root.toggle_selected_light_type()
+
+                    CustomButton:
+                        size_hint: (0.26, 1)
+                        id: dim_button
+                        text: "DIM"
+                        font_name: "formular"
+                        on_release: root.set_light_preset_to_dim()
+
+                    CustomButton:
+                        size_hint: (0.26, 1)
+                        id: on_button
+                        text: "ON"
+                        font_name: "formular"
+                        on_release: root.set_light_preset_to_on()
+
+                    CustomButton:
+                        size_hint: (0.26, 1)
+                        id: off_button
+                        text: "OFF"
+                        font_name: "formular"
+                        on_release: root.set_light_preset_to_off()
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.22
+
+                    CustomButton:
+                        size_hint: (0.2, 1)
+                        id: top_lights_button
+                        text: "Top"
+                        font_name: "formular"
+                        on_release: root.toggle_light_group_state(top_lights_button.text)
+
+                    CustomSlider:
+                        size_hint_x: 0.7
+                        id: top_lights_intensity_slider
+                        min: 0
+                        max: 100
+                        step: 1
+                        orientation: 'horizontal'
+                        on_touch_up: root.set_light_group_brightness(top_lights_button.text, top_lights_intensity_slider.value)
+
+                    Label:
+                        size_hint_x: 0.1
+                        text: str(int(top_lights_intensity_slider.value))
+                        font_name: "formular"
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.22
+
+                    CustomButton:
+                        size_hint: (0.2, 1)
+                        id: glow_lights_button
+                        text: "Glow"
+                        font_name: "formular"
+                        on_release: root.toggle_light_group_state(glow_lights_button.text)
+
+                    CustomSlider:
+                        size_hint_x: 0.7
+                        id: glow_lights_intensity_slider
+                        min: 0
+                        max: 100
+                        step: 1
+                        orientation: 'horizontal'
+                        on_touch_up: root.set_light_group_brightness(glow_lights_button.text, glow_lights_intensity_slider.value)
+
+                    Label:
+                        size_hint_x: 0.1
+                        text: str(int(glow_lights_intensity_slider.value))
+                        font_name: "formular"
+
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.22
+
+                    CustomButton:
+                        size_hint: (0.2, 1)
+                        id: front_lights_button
+                        text: "Front"
+                        font_name: "formular"
+                        on_release: root.toggle_light_group_state(front_lights_button.text)
+
+                    CustomSlider:
+                        size_hint_x: 0.7
+                        id: front_lights_intensity_slider
+                        min: 0
+                        max: 100
+                        step: 1
+                        orientation: 'horizontal'
+                        on_touch_up: root.set_light_group_brightness(front_lights_button.text, front_lights_intensity_slider.value)
+
+                    Label:
+                        size_hint_x: 0.1
+                        text: str(int(front_lights_intensity_slider.value))
+                        font_name: "formular"
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.22
+
+                    CustomButton:
+                        size_hint: (0.2, 1)
+                        id: side_lights_button
+                        text: "Side"
+                        font_name: "formular"
+                        on_release: root.toggle_light_group_state(side_lights_button.text)
+
+                    CustomSlider:
+                        size_hint_x: 0.7
+                        id: side_lights_intensity_slider
+                        min: 0
+                        max: 100
+                        step: 1
+                        orientation: 'horizontal'
+                        on_touch_up: root.set_light_group_brightness(side_lights_button.text, side_lights_intensity_slider.value)
+
+                    Label:
+                        size_hint_x: 0.1
+                        text: str(int(side_lights_intensity_slider.value))
+                        font_name: "formular"
+
+            CustomButtonModern:
+                id: Inspection
+                text: "Inspection Cam"
+                font_size: self.parent.width/16
+                size_hint: 1.0, 0.1
+
+            BoxLayout:
+                size_hint_y: 0.1
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_y: 0.15
+                    CustomButton:
+                        id: start_inspection_button
+                        text: 'Start'
+                        on_release: root.start_inspection_camera()
+                    CustomButton:
+                        id: stop_inspection_button
+                        text: 'Stop'
+                        on_release: root.stop_inspection_camera()
+
+            CustomButtonModern:
+                id: turbo_mode
+                text: "Turbo Mode"
+                font_size: self.parent.width/16
+                size_hint: 1.0, 0.1
+
+            BoxLayout:
+                size_hint_y: 0.1
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_y: 0.15
+                    CustomButton:
+                        id: enable_turbo_mode_button
+                        text: 'Enable'
+                        on_release: root.enable_turbo_mode()
+                    CustomButton:
+                        id: disable_turbo_mode_button
+                        text: 'Disable'
+                        on_release: root.disable_turbo_mode()
+
+            CustomButtonModern:
+                id: Cleaning
+                text: "Cleaning"
+                font_size: self.parent.width/16
+                size_hint: 1.0, 0.1
+
+            BoxLayout:
+                size_hint_y: 0.25
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_y: 0.43
+                    CustomTextIndicator:
+                        size_hint_x: 0.5
+                        text: "Joust"
+                    CustomButton:
+                        size_hint_x: 0.25
+                        id: enable_joust_button
+                        text: 'Enable'
+                        on_release: root.enable_joust()
+                    CustomButton:
+                        size_hint_x: 0.25
+                        id: disable_joust_button
+                        text: 'Disable'
+                        on_release: root.disable_joust()
+
+                BoxLayout:
+                    size_hint_y: 0.04
+
+                BoxLayout:
+                    size_hint_y: 0.43
+                    orientation: "vertical"
+                    id: hullhold_control
+
+            BoxLayout:
+                size_hint_y: 0.1
+                orientation: "horizontal"
+
+                CustomButtonModern:
+                    size_hint_x: 0.5
+                    text: "Depth Lock"
+                    font_size: self.parent.width/16
+
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint_x: 0.5
+
+                    PositiveTextInput:
+                        id: depth_lock_setter
+                        on_text_validate: root.depth_lock_control.on_enter(depth_lock_setter.text)
+                        disabled: True
+                        multiline: False
+                        input_filter: 'float'
+
+                    BoxLayout:
+                        size_hint_x: 0.2
+                        orientation: "vertical"
+
+                        CustomButton:
+                            size_hint_y: 0.5
+                            text: "+"
+                            font_name: "formular"
+                            on_release: root.depth_lock_control.setpoint_increment()
+
+                        CustomButton:
+                            size_hint_y: 0.5
+                            text: "-"
+                            font_name: "formular"
+                            on_release: root.depth_lock_control.setpoint_decrement()
+
+            CustomButtonModern:
+                id: Trajectory
+                text: "Trajectory"
+                font_size: self.parent.width/16
+                size_hint: 1.0, 0.1
+
+            BoxLayout:
+                size_hint_y: 0.7
+                orientation: "vertical"
+                id: trajectory_control
+
+    TabbedPanelItem:
+        text: "DEBUG"
+        font_name: "formular"
+        size_hint: 1, 1
+        orientation: 'vertical'
+        pos_hint: {"center_x":0.5, "center_y":0.5}
+
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        background_color: 0, 0, 0, 1
+
+        BoxLayout:
+            canvas:
+                Color:
+                    rgba: [0, 0, 0, 1]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            orientation: 'vertical'
+            spacing: 10
+            id: debug_stack
+
+            CustomButtonModern:
+                id: fix_socketcan_crash_button
+                text: "Fix SocketCAN Crash"
+                color: [1, 1, 0, 1]
+
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.fix_socketcan_crash()
+
+            CustomButtonModern:
+                id: reset_motors_button
+                text: 'Reset Motors'
+                color: [1, 1, 0, 1]
+
+                font_size: self.parent.width/16
+                on_release: root.reset_tmescs()
+
+            CustomButtonModern:
+                id: fix_network_dropout_button
+                text: "Fix Network Dropout"
+                color: [1, 1, 0, 1]
+
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.fix_network_dropout()
+
+            CustomButtonModern:
+                id: fix_imu_dropout_button
+                text: "Fix IMU Dropout"
+                color: [1, 1, 0, 1]
+
+                font_size: self.parent.width/16
+                on_press: self.on_press_cb()
+                on_release: root.fix_imu_dropout()
+
+            BoxLayout:
+                size_hint_y: 0.01
+                orientation: 'vertical'
+
+                BoxLayout:
+                    orientation: "vertical"
+                    id: amputate_control
+
+            BoxLayout
+                size_hint_y: 0.1

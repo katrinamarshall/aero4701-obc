@@ -1,0 +1,16 @@
+#:import CustomSliderIndicator seawolf.utils.customWidgets
+#:import CustomTextIndicator seawolf.utils.customWidgets
+<BatteryIndicator>:
+    orientation: "horizontal"
+    size_hint: (1, 1)
+
+    CustomSliderIndicator:
+        size_hint: (0.95, 1)
+        max: 1
+        min: 0
+        value: root.display_percentage
+
+    CustomTextIndicator:
+        size_hint: (0.4, 1)
+        id: voltage_text
+        text: root.display_voltage_text

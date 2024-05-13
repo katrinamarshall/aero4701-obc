@@ -1,0 +1,29 @@
+#:import CustomSliderIndicator seawolf.utils.customWidgets
+
+<DepthIndicator>:
+    orientation: "horizontal"
+    size_hint: (1, 1)
+
+    BoxLayout:
+        Label:
+            font_name: "formular"
+            text: str(root.depth)
+
+    BoxLayout:
+        orientation: "vertical"
+
+        Label:
+            size_hint: (1, 0.1)
+            font_name: "formular"
+            text: str(root.min_depth) + " M"
+        CustomSliderIndicator:
+            orientation: "vertical"
+            size_hint: (1, 0.7)
+            max: root.min_depth
+            min: root.max_depth
+            value: root.depth
+            size_hint: (1, 1)
+        Label:
+            size_hint: (1, 0.1)
+            font_name: "formular"
+            text: str(root.max_depth)  + " M"

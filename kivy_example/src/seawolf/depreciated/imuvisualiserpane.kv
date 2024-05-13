@@ -1,0 +1,37 @@
+#:kivy 1.2.0
+
+<ImuVisualiserPane>:
+    size_hint: 1, 1
+    roll_widget: roll_visualiser
+    pitch_widget: pitch_visualiser
+    orientation: "horizontal"
+
+    AnchorLayout:
+        size_hint: 0.5, 0.95
+        anchor_x: "right"
+        pos: -20, 10
+        PitchVisualiser:
+            pos_hint: {"center_x":0.25, "center_y":0.55}
+            id: pitch_visualiser
+    AnchorLayout:
+        size_hint: 0.5, 0.95
+        pos: self.width+20, 10
+        anchor_x: "left"
+        RollVisualiser:
+            pos_hint: {"center_x":0.75, "center_y":0.55}
+            id: roll_visualiser
+
+<PitchRollVisualiser>:
+    size_hint: None, None
+    height: self.parent.height * 0.75
+    width: self.height
+
+    Label:
+        font_size: '20sp'
+        text: root.label
+        center: [self.parent.center_x, self.parent.height*0.1]
+    Label:
+        font_size: self.parent.height * 12/100
+        text: '{: >6}°'.format(str(round(-root.angle, 1)))
+        center: [self.parent.x + self.parent.width/2.0, self.parent.height*0.31]
+        color: [1,1,1,1]

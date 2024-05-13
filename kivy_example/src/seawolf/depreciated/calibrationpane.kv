@@ -1,0 +1,39 @@
+#:kivy 1.2.0
+
+<CalibrationPane>:
+    size_hint: 1,1
+    canvas:
+        Color:
+            rgba: [0,0,0,1]
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Label:
+        text:  root.currentInstruction
+        font_size: self.parent.width / 30
+        halign: 'center'
+    Button:
+        id: acc_button
+        text: 'Accelerometer'
+        size_hint: None, None
+        size: 150, 30
+        # As the button is removed from the widget tree we must test to see if the button has a parent before setting relative  to the parent
+        center: self.parent is not None and self.parent.center_x - self.width/2, self.parent is not None and self.parent.height*0.2
+        on_press: root.start_accel()
+    Button:
+        id: pres_button
+        text: 'Pressure'
+        size_hint: None, None
+        size: 150, 30
+        # As the button is removed from the widget tree we must test to see if the button has a parent before setting relative  to the parent
+        center: self.parent is not None and self.parent.center_x + self.width/2, self.parent is not None and self.parent.height*0.2
+        on_press: root.start_baro()
+
+<NextButton>:
+    id: next_button
+    text: 'Next'
+    size_hint: None, None
+    size: 150, 30
+    # As the button is removed from the widget tree we must test to see if the button has a parent before setting relative  to the parent
+    center: self.parent is not None and self.parent.center_x, self.parent is not None and self.parent.height*0.2
+    on_press: self.parent is not None and self.parent.handle_next()

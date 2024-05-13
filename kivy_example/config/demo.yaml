@@ -1,0 +1,13 @@
+video_feeds:
+  "Top Right Cam": "/camera_0/image_raw_relay/compressed"
+  "Side Right Cam": "/camera_1/image_raw_relay/compressed"
+  "Front Left Cam": "/camera_2/image_raw_relay/compressed"
+  "Front Right Cam": "/camera_3/image_raw_relay/compressed"
+  "Top Left Cam": "/camera_4/image_raw_relay/compressed"
+  "Side Left Cam": "/camera_5/image_raw_relay/compressed"
+  "Inspection Cam": "/inspection_cam/image_raw_relay/compressed"
+# debug images
+  "Top Right Debug": "/localisation/fg_odom/frontend_viz/camera_0/debug_image_relay/compressed"
+  "Top Left Debug": "/localisation/fg_odom/frontend_viz/camera_4/debug_image_relay/compressed"
+  "Front Left Debug": "/localisation/fg_odom/frontend_viz/camera_2/debug_image_relay/compressed"
+  "Front Right Debug": "/localisation/fg_odom/frontend_viz/camera_3/debug_image_relay/compressed"

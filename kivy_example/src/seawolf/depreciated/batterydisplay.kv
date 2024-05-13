@@ -1,0 +1,57 @@
+#:kivy 1.2.0
+<BatteryDisplay>:
+    battery_bar: battery_bar
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (1, 0.4)
+            Label: # Battery percent
+                text: root.batt_percent_str
+                size_hint: (1, 0.4)
+                font_size: 20
+                bold: True
+            BoxLayout:
+                size_hint: (1, 0.1)
+            Label: # Battery time remaining
+                text: root.batt_time
+                size_hint: (1, 0.4)
+                font_size: 18
+                bold: True
+        BoxLayout:
+            size_hint: (1, 0.6)
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint: (1, 0.2)
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint: (1, 0.6)
+                BoxLayout:
+                    size_hint: (0.2, 1)
+                BatteryBar:
+                    size_hint: (0.5, 1)
+                    id: battery_bar
+                BoxLayout:
+                    size_hint: (0.2, 1)
+            BoxLayout:
+                size_hint: (1, 0.2)
+
+
+<BatteryBar>:
+    canvas.after:
+        Color:
+            rgba: (255, 255, 255, 1)
+        Rectangle: # Battery outline from png
+            id: batt_rectangle
+            size: self.size
+            pos: self.pos[0], self.pos[1]
+            source: root.battery_path
+
+<BatteryVoltageWarningPopup>:
+    auto_dismiss: True
+    size_hint: (0.6, 0.3)
+    title: 'Very Low Battery'
+    Label:
+        text: "Battery average is below its safe level of {}V!\nStop cleaning or high power movements and return to boat\nIf strong current disarm robot!".format(root.warn_voltage)
+        font_size: 25
+        bold: True

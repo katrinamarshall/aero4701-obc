@@ -1,0 +1,242 @@
+#:kivy 1.2.0
+#:import RedGreenLedLabel seawolf.utils.led
+#:import RedWarnLedLabel seawolf.utils.led
+#:import BlueWhiteLedLabel seawolf.utils.led
+
+<TopicViewPane>:
+
+    arm_status_led_label : arm_status_led_label
+    conn_status_led_label : conn_status_led_label
+    voltage_led_label : voltage_led_label
+    rovio_happiness_number_text: rovio_happiness_number_text
+    slam_atlas_map_count_text: slam_atlas_map_count_text
+    slam_state_text: slam_state_text
+    rovio_memory_usage_text: rovio_memory_usage_text
+    underwater_state_label: underwater_state_label
+    cpu_load_num: cpu_load_num
+    current_led_label : current_led_label
+    ping_number_label: ping_number_label
+    tc_boost_led_label: tc_boost_led_label
+
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            size_hint: 0.5, 1
+            orientation: 'vertical'
+            GridLayout:
+                rows: 14
+                cols: 3
+                Label:
+                    text: "TCs"
+                Label:
+                    text: "Thrust %"
+                Label:
+                    text: "Currents"
+                Label:
+                    text: '1'
+                Label:
+                    text: root.tc_pwm_1
+                Label:
+                    text: root.tc_curr_1
+                Label:
+                    text: '2'
+                Label:
+                    text: root.tc_pwm_2
+                Label:
+                    text: root.tc_curr_2
+                Label:
+                    text: '3'
+                Label:
+                    text: root.tc_pwm_3
+                Label:
+                    text: root.tc_curr_3
+                Label:
+                    text: '4'
+                Label:
+                    text: root.tc_pwm_4
+                Label:
+                    text: root.tc_curr_4
+                Label:
+                    text: '5'
+                Label:
+                    text: root.tc_pwm_5
+                Label:
+                    text: root.tc_curr_5
+                Label:
+                    text: '6'
+                Label:
+                    text: root.tc_pwm_6
+                Label:
+                    text: root.tc_curr_6
+                Label:
+                    text: '7'
+                Label:
+                    text: root.tc_pwm_7
+                Label:
+                    text: root.tc_curr_7
+                Label:
+                    text: '8'
+                Label:
+                    text: root.tc_pwm_8
+                Label:
+                    text: root.tc_curr_8
+                Label:
+                    text: 'CCs'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        text: 'Duty %'
+                    Label:
+                        text: 'eRPM'
+                Label:
+                    text: ''
+                Label:
+                    text: 'FR'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        text: root.cleaning_star_1_duty
+                    Label:
+                        text: root.cleaning_star_1_rpm
+                Label:
+                    text: root.cc_curr_1
+                Label:
+                    text: 'BR'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        text: root.cleaning_star_3_duty
+                    Label:
+                        text: root.cleaning_star_3_rpm
+                Label:
+                    text: root.cc_curr_3
+                Label:
+                    text: 'FL'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        text: root.cleaning_port_2_duty
+                    Label:
+                        text: root.cleaning_port_2_rpm
+                Label:
+                    text: root.cc_curr_2
+                Label:
+                    text: 'BL'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    Label:
+                        text: root.cleaning_port_4_duty
+                    Label:
+                        text: root.cleaning_port_4_rpm
+                Label:
+                    text: root.cc_curr_4
+
+        BoxLayout:
+            size_hint: 0.5, 1
+            orientation: 'vertical'
+            BoxLayout:
+                Label:
+                    text: "Armed"
+                RedGreenLedLabel:
+                    text: root.armed
+                    id: arm_status_led_label
+                    color: self.color
+            BoxLayout:
+                Label:
+                    text: "Mode"
+                Label:
+                    text: root.mode
+            BoxLayout:
+                Label:
+                    text: "Bot State"
+                Label:
+                    text: root.bot_state
+            BoxLayout:
+                Label:
+                    text: "Control Mode"
+                Label:
+                    text: root.control_mode
+            BoxLayout:
+                Label:
+                    text: "TC Boost Mode"
+                BlueWhiteLedLabel:
+                    text: root.tc_boost
+                    id: tc_boost_led_label
+                    color: self.color
+            BoxLayout:
+                Label:
+                    text: "Connected"
+                RedGreenLedLabel:
+                    text: root.connected
+                    id: conn_status_led_label
+                    status: root.connected
+            BoxLayout:
+                Label:
+                    text: "Voltage"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    RedWarnLedLabel:
+                        text: root.bat_voltage
+                        id: voltage_led_label
+                        color: self.color
+            BoxLayout:
+                Label:
+                    text: "Current"
+                RedWarnLedLabel:
+                    text: root.bat_current
+                    id: current_led_label
+                    color: self.color
+            BoxLayout:
+                Label:
+                    text: "Depth"
+                Label:
+                    text: root.depth
+            BoxLayout:
+                Label:
+                    text: "Ping (ms)"
+                Label:
+                    text: root.ping
+                    id: ping_number_label
+            BoxLayout:
+                Label:
+                    text: "CPU Load"
+                Label:
+                    text: root.cpu_load_str
+                    id: cpu_load_num
+            BoxLayout:
+                Label:
+                    text: "Rovio Happiness"
+                Label:
+                    id: rovio_happiness_number_text
+                    text: root.rovio_happiness
+            BoxLayout:
+                Label:
+                    text: "SLAM Atlas Map Number"
+                Label:
+                    id: slam_atlas_map_count_text
+                    text: root.slam_atlas_map_count
+            BoxLayout:
+                Label:
+                    text: "SLAM State"
+                Label:
+                    id: slam_state_text
+                    text: root.slam_state
+            BoxLayout:
+                Label:
+                    text: "Rovio Mem Usage (%)"
+                Label:
+                    id: rovio_memory_usage_text
+                    text: root.rovio_memory_usage
+            BoxLayout:
+                Label:
+                    text: "Underwater state:"
+                Label:
+                    id: underwater_state_label
+                    text: root.is_underwater
+
+                    canvas.before:
+                        Color:
+                            rgba: root.underwater_box_col
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos

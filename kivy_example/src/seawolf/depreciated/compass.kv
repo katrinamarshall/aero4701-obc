@@ -1,0 +1,27 @@
+#:kivy 1.2.0
+
+<Compass>:
+    rose_img: rose_img
+    compass_layout: compass_layout
+
+    BoxLayout:
+        RelativeLayout:
+            id: compass_layout
+            canvas.after:
+            # Display a tick on the perimiter of the compass to show where RTH is set to
+                Color:
+                    rgba: 0.8, 0.8, 1, 1
+                PushMatrix
+                Rotate:
+                    angle: root.rth_needle_angle
+                    axis: 0, 0, 1
+                    origin: self.center
+                Rectangle:
+                    size: 4, 10
+                    # The 0.48 is a scaling factor for the distance of the tick from the center of the compass
+                    pos: self.center[0], self.center[1]+self.size[1]*0.48
+                PopMatrix
+
+            Image:
+                source: root.compass_rose_path
+                id: rose_img

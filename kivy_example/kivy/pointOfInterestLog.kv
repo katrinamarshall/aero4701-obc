@@ -1,0 +1,22 @@
+#:kivy 1.2.0
+
+<PointOfInterestLog>:
+    title: 'Enter issue or note'
+
+    text_input: text_input
+    pos_hint: {'x':0, 'y':0}
+    size_hint: (0.70, 0.40)
+
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: 'Save'
+                on_release: root.on_save_button()
+
+        BoxLayout:
+            TextInput:
+                id: text_input
+                text: ''

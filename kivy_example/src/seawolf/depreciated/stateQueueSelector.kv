@@ -1,0 +1,200 @@
+#:kivy 1.2.0
+
+<AutoModeIndicator>
+    canvas.before:
+        Color:
+            rgba: root.statusColour
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    text: "Auto mode"
+
+<TofHoldIndicator>
+    canvas.before:
+        Color:
+            rgba: root.statusColour
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    text: "Tof hold"
+
+<HorizonHoldIndicator>
+    canvas.before:
+        Color:
+            rgba: root.statusColour
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    text: "Horizon hold"
+
+<StateQueueSelector>:
+    moon_land_button: moon_land_button
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            TofHoldIndicator:
+                id: tof_hold_indicator
+                font_size: self.parent.width/20
+            Button:
+                text: 'ON'
+                id: tof_hold_on
+                on_release: root.enable_tof_hold()
+            Button:
+                text: 'OFF'
+                id: tof_hold_off
+                on_release: root.disable_tof_hold()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            HorizonHoldIndicator:
+                id: horizon_hold_indicator
+                font_size: self.parent.width/20
+            Button:
+                text: 'ON'
+                id: horizon_hold_on
+                on_release: root.enable_horizon_hold()
+            Button:
+                text: 'OFF'
+                id: horizon_hold_off
+                on_release: root.disable_horizon_hold()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                id: moon_land_button
+                text: 'Moon land'
+                on_release: root.moon_land()
+            Button:
+                text: 'Start Rovio'
+                on_release: root.start_rovio()
+
+        Label:
+            size_hint_y: 0.05
+            text: 'Auto clean'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                text: 'Reset octomap'
+                on_release: root.reset_octomap()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                id: dirty_region_button
+                text: 'Find Dirty Regions'
+                on_release: root.find_dirty_regions()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Spinner:
+                id: region_selector_spinner
+                text: 'Select Region'
+                values: root.region_values
+                on_release: root.region_selector_pressed()
+            Button:
+                text: 'Clean Region'
+                on_release: root.clean_region()
+
+        Label:
+            size_hint_y: 0.05
+            text: 'Auto buttons'
+
+        Button:
+            text: 'Load New StateQueue'
+            size_hint_y: 0.1
+            on_release: root.show_load()
+        Button:
+            text: 'Load ' + root.loaded_auto_script
+            size_hint_y: 0.1
+            on_release: root.load_states_to_queue([root.loaded_auto_script_abs])
+        Button:
+            text: 'Clear State Queue'
+            size_hint_y: 0.1
+            on_release: root.clear_state_queue()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                id: auto_mode_button
+                text: "Auto Mode On/Off"
+                on_release: root.toggle_auto_mode()
+            AutoModeIndicator:
+                id: auto_mode_indicator
+                font_size: self.parent.width/20
+        GridLayout:
+            id: state_grid
+            cols: 3
+            row_default_height: 100
+            row_force_default: True
+            Label:
+                markup: True
+                text: '[b]State[/b]'
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+            Label:
+                markup: True
+                text: '[b]Run Params[/b]'
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+            Label:
+                markup: True
+                text: '[b]Value[/b]'
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+            Label:
+                markup: True
+                text: '[b]' + root.current_state_name + '[/b]'
+                color: 0,1,0.1,0.8
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+            Label:
+                markup: True
+                text: '[b]' + root.current_state_name + '[/b]'
+                color: 0,1,0.1,0.8
+                text: root.current_state_params
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+            Label:
+                markup: True
+                text: '[b]' + root.current_state_name + '[/b]'
+                color: 0,1,0.1,0.8
+                text: root.current_state_param_vals
+                text_size: self.size
+                halign: 'center'
+                valign: 'center'
+
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            rootpath: root.auto_scripts_path
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.selection)

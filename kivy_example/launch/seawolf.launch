@@ -1,0 +1,54 @@
+<launch>
+    <node name="seawolf" pkg="seawolf" type="TopsideApp.py" output="screen">
+        <remap from="~video_stream_0" to="/camera_0/image_raw_relay/compressed"/>
+        <remap from="~video_stream_1" to="/camera_1/image_raw_relay/compressed"/>
+        <remap from="~video_stream_2" to="/camera_2/image_raw_relay/compressed"/>
+        <remap from="~video_stream_3" to="/camera_3/image_raw_relay/compressed"/>
+        <remap from="~video_stream_4" to="/camera_4/image_raw_relay/compressed"/>
+        <remap from="~video_stream_5" to="/camera_5/image_raw_relay/compressed"/>
+        <remap from="~odometry" to="/odometry"/>
+        <remap from="~battery_current" to="/battery_power/data"/>
+        <remap from="~arm" to="/thruster_cores/arm_status"/>
+        <remap from="~frontend_feedback" to="/localisation/fg_odom/frontend_viz/frontend_feedback"/>
+        <remap from="~state" to="/mission/current_state"/>
+        <remap from="~tofs_port" to="/tofs_port"/>
+        <remap from="~tofs_stbd" to="/tofs_stbd"/>
+        <remap from="~tofs" to="/tofs"/>
+
+        <remap from="~cleaning_joust" to="/cleaning/enable_joust"/>
+        <remap from="~cleaning_desired_rpm" to="/cleaning_cores/desired_rpm"/>
+        <remap from="~cleaning_feedback" to="/cleaning_cores/feedback"/>
+
+        <remap from="~battery_monitor" to="/battery"/>
+        <remap from="~thruster_feedback" to="/thruster_cores/feedback"/>
+        
+        <remap from="~rosbag_start" to="/rosbag/mission/manager/start"/>
+        <remap from="~rosbag_stop" to="/rosbag/mission/manager/stop"/>
+        <remap from="~diagnostics" to="/diagnostics"/>
+        <remap from="~lights_brightness" to="/lights/brightness"/>
+
+        <remap from="~mission_trajectory_path" to="/mission/mission_manager/trajectory_path"/>
+        <remap from="~mission_trajectory_speed" to="/mission/mission_manager/trajectory_speed"/>
+        <remap from="~mission_trajectory_orientation" to="/mission/mission_manager/trajectory_fixed_orientation"/>
+        <remap from="~mission_trajectory_alignment" to="/mission/mission_manager/trajectory_alignment"/>
+        <remap from="~mission_trajectory_interpolation" to="/mission/mission_manager/trajectory_interpolation"/>
+
+        <remap from="~system_test" to="/mission/mission_manager/system_test"/>
+        <remap from="~systest_needed" to="/mission/mission_manager/systest_needed"/>
+
+        <remap from="~thruster_enable_mask" to="/motion/wrench/thruster_enable_mask"/>
+        <remap from="~hullhold_steady_state_thrust" to="/motion/hull_hold/hull_hold_params/steady_state_thrust"/>
+        <remap from="~mission_steady_state_thrust" to="/mission/mission_manager/hullhold_steady_state_thrust"/>
+        <remap from="~turbo_mode" to="/joystick_translator/enable_turbo_mode"/>
+        <remap from="~state_transitions" to="/mission/mission_manager/state_transitions"/>
+
+        <remap from="~station_keeping_setpoint" to="/motion/station_keeping/setpoint"/>
+        <remap from="~station_keeping_current_setpoint" to="/motion/station_keeping/current_setpoint"/>
+        <remap from="~station_keeping_control_modes" to="/motion/station_keeping/control_modes"/>
+
+    </node>
+
+    <group ns="seawolf">
+        <rosparam command="load" file="$(find seawolf)/config/demo.yaml"/>
+    </group>
+</launch>

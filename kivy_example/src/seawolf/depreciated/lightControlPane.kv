@@ -1,0 +1,32 @@
+<LightControlPane>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint: (1, 0.15)
+            text: 'Light\nBrightness'
+        Label:
+            size_hint: (1, 0.05)
+            text: str(int(slider.value))
+        Slider:
+            size_hint: (1, 0.4)
+            id: slider
+            min: 0
+            max: 100
+            step: 1
+            orientation: 'vertical'
+            on_touch_up: root.set_all_light_brightnesses(slider.value)
+        BoxLayout:
+            size_hint: (1, 0.05)
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (1, 0.3)
+            ToggleButton:
+                id: lights_front
+                text: 'Front'
+                on_press: root.toggle_light_group("front")
+            ToggleButton:
+                id: lights_top
+                text: 'Top'
+                on_press: root.toggle_light_group("top")
+        BoxLayout:
+            size_hint: (1, 0.05)

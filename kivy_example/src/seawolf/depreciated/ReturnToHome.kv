@@ -1,0 +1,55 @@
+#:kivy 1.2.0
+
+<ReturnToHome>:
+
+    heading_button: heading_button
+    depth_button: depth_button
+    rth_button: rth_button
+
+    BoxLayout:
+        orientation: 'vertical'
+        pos: self.pos
+        Button:
+            text: "Set\nHome\nHeading"
+            size_hint: 0.9, 0.3
+            on_release: root.set_home_heading_on_release()
+            background_color: 1, 0.5, 0.5, 1
+            id: heading_button
+            halign: 'center'
+        Button:
+            text: "Home Depth:\n" + str(root.home_depth)
+            size_hint: 0.9, 0.3
+            on_release: root.set_home_depth_on_release()
+            background_color: 1, 0.5, 0.5, 1
+            id: depth_button
+            halign: 'center'
+            # Disabled while the depth functionality does not work
+            disabled: True
+        Button:
+            text: "Rotate\nto home"
+            size_hint: 0.9, 0.3
+            on_release: root.rotateToHome()
+            id: rth_button
+            halign: 'center'
+        Label: # padding
+            size_hint: 1, 0.1
+
+<DepthSetPopup>:
+
+    title: 'Set RTH Depth'
+    size_hint_x: 0.6
+    size_hint_y: 0.3
+
+    depth_text_input: depth_text_input
+    error_label: error_label
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            id: error_label
+            color: 1, 0.2, 0.2, 1
+        TextInput:
+            id: depth_text_input
+            on_text: root.on_depth_text_input()
+        Button:
+            text: "Set Depth"
+            on_release: root.set_depth_on_release()

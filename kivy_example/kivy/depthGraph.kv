@@ -1,0 +1,19 @@
+#:import CustomSliderIndicator seawolf.utils.customWidgets
+
+<DepthGraph>:
+    orientation: "vertical"
+    size_hint: (1, 1)
+
+    BoxLayout:
+        size_hint: (1, 0.01)
+
+        Label:
+            font_name: "formular"
+            text: str(root.depth)  + " M"
+
+    BoxLayout:
+        size_hint: (1, 0.95)
+        id: graph
+
+    BoxLayout:
+        size_hint: (1, 0.04)

@@ -1,0 +1,67 @@
+#: kivy 1.2.0
+#:import CustomTextIndicator seawolf.utils.customWidgets
+#:import CustomTextIndicator2 seawolf.utils.customWidgets
+
+<TofDisplayPilotView>:
+    orientation: "vertical"
+    BoxLayout:
+        size_hint: (1, 0.05)
+        CustomTextIndicator:
+            text: "Hullbot :)"
+            font_size: 50
+    BoxLayout:
+        size_hint: (1, 0.25)
+        orientation: 'horizontal'
+
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.front_port
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.top_front_port
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.top_front_star
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.front_port
+
+    BoxLayout:
+        size_hint: (1, 0.05)
+
+    BoxLayout:
+        size_hint: (1, 0.05)
+        Label:
+            text: "hullbot"
+    BoxLayout:
+        size_hint: (1, 0.25)
+        orientation: 'horizontal'
+
+
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.back_port
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.top_back_port
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.top_back_star
+        BoxLayout:
+            size_hint: (0.05, 1)
+        TofsBar:
+            size_hint: (0.2, 1)
+            value: root.back_port
+
+    BoxLayout:
+        size_hint: (1, 0.05)

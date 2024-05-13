@@ -1,0 +1,19 @@
+#:kivy 1.2.0
+#import CustomButton seawolf.utils.customWidgets
+
+<NodeIndicatorsPilotView>:
+    CustomButton:
+        id: node_indicator_button
+        text: root.system_status
+        on_release: root.on_indicator()
+
+
+<NodeIndicatorsPopup>:
+    size_hint: (0.1, 0.6)
+    #size_hint: (None, None)
+    title: "Node statuses"
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 5
+        id: indicator_container

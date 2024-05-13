@@ -1,0 +1,58 @@
+#:kivy 1.2.0
+
+<Terminal>:
+    size_hint: 1, 1
+    BoxLayout:
+        orientation: 'vertical'
+        pos: self.parent.pos
+        size: self.parent.size
+        Filter:
+            id: filter
+        ScrollView:
+            id: scrollview
+            do_scroll_x: True
+            do_scroll_y: True
+            pos: self.parent.pos
+            size: self.parent.size
+            BoxLayout:
+                orientation: 'vertical'
+                pos: self.parent.pos
+                size_hint_y: None
+                id: message_container
+                Message:
+                    text: "Waiting for /rosout messages"
+                    level: 2
+
+
+<Message>:
+    size_hint_y: None
+    text_size: self.width, None
+    height: self.texture_size[1]
+    halign: 'left'
+    pos: self.parent.pos if self.parent else (0,0)
+
+<Filter>:
+    size_hint: None, None
+    size: self.parent.width, 30
+    orientation: 'horizontal'
+    canvas:
+        Color:
+            rgba: [0.1,0.1,0.15,1]
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Label:
+        text: "FILTER"
+    Button:
+        text: "Node"
+        id: node_button
+    Button:
+        text: "Level"
+        id: level_button
+    BoxLayout:
+        orientation: "horizontal"
+        Label:
+            text: "Auto Scroll"
+        CheckBox:
+            id: autoscroll
+            active: True

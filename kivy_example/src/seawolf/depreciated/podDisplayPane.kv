@@ -1,0 +1,212 @@
+#:kivy 1.2.0
+
+<PodDisplayPane>
+    orientation: "vertical"
+
+    BoxLayout:
+
+        orientation: "vertical"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+
+            Label:
+                text: "Attached Pod"
+                bold: "True"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.attached_pod
+                bold: "True"
+
+        Label:
+            size_hint_y: 0.3
+            canvas.before:
+                Color:
+                    rgba: [0.17, 0.3, 1, 0.5]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            text: "TETHER CONTROL STATUS"
+            bold: "True"
+
+        # Spring and internal length
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+
+            Label:
+                text: "Torsion Spring Angle"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.torsion_spring_angle
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Internal Tether Length"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.internal_tether_length
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Reel Diameter"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.reel_diameter
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Reel Speed"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.reel_speed
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Reel Torque"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.reel_torque
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Winch Speed"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+
+                text: root.winch_speed
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.3
+            Label:
+                text: "Winch Torque"
+
+            Label:
+                canvas.before:
+                    Color:
+                        rgba: [0, 0, 0, 1]
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
+                text: root.winch_torque
+
+        Button:
+            size_hint_y: 0.3
+            text: "FEATHER STATUS: STALE"
+            bold: "True"
+            disabled: "True"
+            background_disabled_normal: ""
+            background_color: root.grey
+            id: feather_node_status
+
+        Label:
+            size_hint_y: 0.2
+            text: "Pin Configurations"
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: 0.25
+            id: feather_pins_status
+
+        Label:
+            size_hint_y: 0.2
+            text: "Connections"
+
+        BoxLayout:
+
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint_y: 0.1
+
+                Label:
+                    text: "MQTT "
+                    bold: "True"
+
+                Label:
+                    canvas.before:
+                        Color:
+                            rgba: [0, 0, 0, 1]
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    text: root.mqtt_connected
+
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint_y: 0.1
+
+                Label:
+                    text: "SERIAL"
+                    bold: "True"
+
+                Label:
+                    canvas.before:
+                        Color:
+                            rgba: [0, 0, 0, 1]
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
+
+                    text: root.serial_connected

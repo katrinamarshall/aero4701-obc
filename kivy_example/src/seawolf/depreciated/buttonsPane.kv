@@ -1,0 +1,75 @@
+#:kivy 1.2.0
+
+<SupervisorIndicator>
+    canvas.before:
+        Color:
+            rgba: root.statusColour
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    text: "Topside Supervisor"
+
+<ButtonsPane>:
+    size_hint: 1, 1
+    orientation: 'vertical'
+    pos_hint: {"center_x":0.5, "center_y":0.5}
+
+    BoxLayout:
+        BoxLayout:
+            orientation: 'vertical'
+            SupervisorIndicator:
+                id: supervisor_indicator
+                size_hint: 1,0.5
+                font_size: self.parent.width/20
+            # Hijacking the space of this button that is currently unused
+            # Button:
+            #     text: "Launch Topside Remote"
+            #     font_size: self.parent.width/12
+            #     on_release: root.launch_topside_remote()
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: "Rviz"
+                    font_size: self.parent.width/12
+                    on_release: root.launch_rviz()
+                Button:
+                    text: "Rqt"
+                    font_size: self.parent.width/12
+                    on_release: root.launch_rqt()
+            BoxLayout:
+                Button:
+                    text: "PlotJuggler"
+                    font_size: self.parent.width/12
+                    on_release: root.launch_plotjuggler()
+            Button:
+                text: root.launch_topside_button_str
+                font_size: self.parent.width/12
+                on_release: root.launch_topside()
+            Button:
+                text: "Launch Botside"
+                font_size: self.parent.width/12
+                on_release: root.launch_tx2_core()
+            Button:
+                text:"Kill Topside"
+                font_size: self.parent.width/12
+                on_release: root.kill_topside()
+            Button:
+                text:"Kill Botside"
+                font_size: self.parent.width/12
+                on_release: root.kill_botside()
+            # Button:
+            #     text:"Reboot Pixhawk"
+            #     font_size: self.parent.width/12
+            #     on_release: root.rebootPixhawk()
+            Button:
+                text:"ROSbag Options"
+                font_size: self.parent.width/12
+                on_release: root.open_rosbag_popup()
+            Button:
+                text:"Log POI"
+                font_size: self.parent.width/12
+                on_release: root.log_point_of_interest()
+            Button:
+                text:"Retrieve Remote Logs"
+                font_size: self.parent.width/12
+                on_release: root.retrieve_remote_logs()

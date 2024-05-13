@@ -1,0 +1,8 @@
+#:kivy 1.2.0
+
+<PointofInterestPilotView>:
+    size_hint: (1,1)
+    Button:
+        id: POI_button
+        background_normal: root.POI_file
+        on_release: root.on_log_POI()

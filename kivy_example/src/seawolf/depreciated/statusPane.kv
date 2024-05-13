@@ -1,0 +1,64 @@
+#:kivy 1.2.0
+#:import CustomIndicator seawolf.utils.customWidgets
+#:import CustomLabelledIndicator seawolf.utils.customWidgets
+
+<InfoPanePilotView>:
+    orientation: 'vertical'
+    spacing: 5
+
+    BoxLayout:
+        id: node_indicator_container
+
+    CustomIndicator:
+        label: root.system_armed
+        font_size: self.height * 0.22 + self.width / 20
+        id: bot_armed_indicator
+
+    CustomIndicator:
+        label: root.bot_state
+        font_size: self.height * 0.22 + self.width / 20
+        id: bot_state_indicator
+
+    CustomIndicator:
+        label: root.control_mode
+        font_size: self.height * 0.22 + self.width / 20
+        id: control_mode_indicator
+
+    CustomIndicator:
+        label: root.tc_boost
+        font_size: self.height * 0.22 + self.width / 20
+        id: tc_boost_indicator
+
+    CustomLabelledIndicator:
+        title: "Depth"
+        label: root.depth
+        font_size: self.height * 0.4
+        id: depth_indicator
+
+    BoxLayout:
+        size_hint_min_y: 100
+        orientation: 'horizontal'
+        BoxLayout:
+            size_hint_x: 0.4
+            orientation: 'vertical'
+            CustomIndicator:
+                id: voltage_indicator
+                label: root.bat_voltage + " V"
+                font_size: self.height * 0.11 + self.width / 8
+            CustomIndicator:
+                id: current_indicator
+                label: root.bat_current + " A"
+                font_size: self.height * 0.11 + self.width / 8
+        BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: (0.5,0.5,0.5,1)
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            orientation: 'vertical'
+            size_hint_x: 0.6
+            BoxLayout:
+                size_hint_y: 0.08
+            BatteryDisplay:
+                size_hint_y: 0.92

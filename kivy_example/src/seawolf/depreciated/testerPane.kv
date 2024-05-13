@@ -1,0 +1,39 @@
+#:kivy 1.2.0
+
+<TesterPane>
+    do_default_tab: False
+
+    TabbedPanelItem:
+        text: "Robot"
+
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout:
+                orientation: "horizontal"
+                id: bot_configuration_container
+                size_hint: (1, 0.06)
+            BoxLayout:
+                orientation: "horizontal"
+                id: calibration_container
+                size_hint: (1, 0.2)
+                height: 300
+            BoxLayout:
+                orientation: "horizontal"
+                id: motor_tester_container
+                size_hint: (1, 0.75)
+
+    TabbedPanelItem:
+        text: "Pod"
+
+        BoxLayout:
+            orientation: "vertical"
+
+            BoxLayout:
+                orientation: "vertical"
+                id: pod_display_container
+                size_hint: (1, 0.65)
+
+            BoxLayout:
+                orientation:"vertical"
+                id: pod_control_container
+                size_hint: (1, 0.35)
