@@ -3,6 +3,7 @@ import rospy
 from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
+from trancsivers import AX25UIFrame
 
 # Callback to receive downlink data instructions
 def downlink_data_callback(data: String, transceiver: Transceiver):
