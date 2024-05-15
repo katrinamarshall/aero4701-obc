@@ -7,8 +7,8 @@ from AX25UI import AX25UIFrame
 
 # Callback to receive downlink data instructions
 def downlink_data_callback(data: String, transceiver: Transceiver):
-    info = data.data  # Information field to be filled by the user
-    ssid_type = int(data[:4]).to_bytes()
+    info = data.data  
+    ssid_type = int(info[:4]).to_bytes()
     print(f"SSID type: {ssid_type}")
     # ssid_type = 0  # Science Data
 
