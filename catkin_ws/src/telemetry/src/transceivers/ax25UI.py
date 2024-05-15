@@ -31,7 +31,9 @@ class AX25UIFrame:
             _type_: _description_
         """
         # Address needs 6 bytes so must be padded
+        print(f"Callsign before: {callsign}")
         callsign = callsign.ljust(6)
+        print(f"Callsign after: {callsign}")
         encoded = bytearray()
 
         # Each character of the callsign must be bit shifted with a 0 at the end
