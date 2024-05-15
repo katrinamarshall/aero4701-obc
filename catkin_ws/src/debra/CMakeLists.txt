@@ -53,6 +53,8 @@ add_message_files(
   command_msg.msg
   payload_data.msg
   satellite_pose.msg
+  WOD_data.msg
+  WOD.msg
 )
 
 ## Generate services in the 'srv' folder
