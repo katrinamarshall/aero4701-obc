@@ -2,6 +2,9 @@
   <!-- Launch the telemetry node -->
   <node pkg="telemetry" type="telemetry_node.py" name="telemetry_node" output="screen"/>
 
+  <!-- Launch the thermistor node -->
+  <node pkg="temperature_monitor" type="temp_monitor.py" name="temp_monitor_node" output="screen"/>
+
   <!-- Launch the debra node -->
   <node pkg="debra" type="debra_node.py" name="debra_node" output="screen"/>
 </launch>
