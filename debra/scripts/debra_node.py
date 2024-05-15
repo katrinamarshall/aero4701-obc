@@ -79,7 +79,7 @@ class Debra:
             pi_cpu_temp = float(temperatures[5])  # Convert the Pi CPU temperature
 
             # Check temperatures for going out of the nominal range
-            if any(t < -20 or t > 27 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 70°C as the critical temperature for Pi CPU
+            if any(t < -20 or t > 50 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 70°C as the critical temperature for Pi CPU
                 if self.state != 6:
                     self.state = 6  # Safe state
                     rospy.loginfo("Temperature out of range. Switched to SAFE state.")
