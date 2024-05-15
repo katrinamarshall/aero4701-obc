@@ -9,7 +9,7 @@ from payload.msg import lidar_raw_data
 #from lidar_listener import listener_func
 import vl53l5cx_ctypes as vl53l5cx
 
-class Payload:
+class Lidar:
     def __init__(self):
         print("Uploading firmware, please wait...")
         self.vl53 = vl53l5cx.VL53L5CX()
@@ -46,6 +46,6 @@ class Payload:
 
 if __name__ == '__main__':
     rospy.init_node("payload")
-    myPayload = Payload()
-    rospy.Timer(rospy.Duration(1.0/2.0), myPayload.get_lidar_data)
+    myLidar = Lidar()
+    rospy.Timer(rospy.Duration(1.0/2.0), myLidar.get_lidar_data)
     rospy.spin()
