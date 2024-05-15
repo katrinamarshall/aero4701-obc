@@ -36,7 +36,7 @@ class Telemetry:
 
     def payload_data_callback(self, data):
         # Pack the data into a binary format
-        info = struct.pack('<fff fff f i h',
+        info = struct.pack('<fff fff f i i',
             data.debris_position_x,
             data.debris_position_y,
             data.debris_position_z,
