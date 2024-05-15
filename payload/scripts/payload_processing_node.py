@@ -45,8 +45,8 @@ class PayloadProcessing():
     """ gets test data and does all the processing"""
     def __init__(self) -> None:
 
-        # Publishers
-        # self.pub_payload_data = rospy.Publisher('/debris_packet', payload_data, queue_size=10)
+        # Publishers TODO WRITE THIS - make custom message for debris packet
+        self.pub_payload_data = rospy.Publisher('/debris_packet', payload_data_downlink, queue_size=10)
         # publish to different topic for debugging - showing polar coords
         # self.pub_payload_debugging_f = rospy.Publisher('/debugging_f', polar_data, queue_size=10) #TODO need to define
 
@@ -60,7 +60,7 @@ class PayloadProcessing():
 
         
 
-        # would subscribe to a reset messages which would clear all arrays  (need to sub to debra)
+        # would subscribe to a reset messages which would clear all arrays  (need to sub to debra) ??
 
      
         
@@ -128,12 +128,15 @@ class PayloadProcessing():
 
 
 # this should just be publisher?!
-    def _log_for_transmit(self, timestamp, x_eci, debris_size, debris_vel, sat_vel) -> None:
-        self._debris_eci_pos.append(x_eci)
-        self._debris_sizes.append(debris_size)
-        self._detection_times.append(timestamp)
-        self._debris_velocities.append(debris_vel)
-        self._debris_rel_velocities.append(debris_vel - sat_vel)
+    def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, debris_vel, sat_vel):
+        self.pub.publish(timestamp, debris_count, x_eci, debris_size, debris_vel, debris_vel - sat_vel)
+
+        # self._debris_eci_pos.append(x_eci)
+        # self._debris_sizes.append(debris_size)
+        # self._detection_times.append(timestamp)
+        # self._debris_velocities.append(debris_vel)
+        # self._debris_rel_velocities.append(debris_vel - sat_vel)
+        return
 
 
 
@@ -617,6 +620,7 @@ class PayloadProcessing():
 
                         print("-----------------------------------------------------------------------------------------------")
                         print("\n")
+                        self.payload_data_downlink(self.sat_time, self.debris_count, debris_pos_eci, debris_sizes[s], self._debris_velocities[-1], self._debris_rel_velocities[-1])
 
         return
     
