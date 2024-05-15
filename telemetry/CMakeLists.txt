@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  debra
 )
 
 # Ensure Python setup happens after messages
@@ -24,7 +25,7 @@ generate_messages(
 
 # Add catkin package information
 catkin_package(
-  CATKIN_DEPENDS rospy std_msgs message_runtime
+  CATKIN_DEPENDS rospy std_msgs message_runtime debra
 )
 
 # Include directories

@@ -3,10 +3,19 @@ import rospy
 from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
+from AX25UI import AX25UIFrame
 
 # Callback to receive downlink data instructions
 def downlink_data_callback(data: String, transceiver: Transceiver):
-    transceiver.send_deal(data.data)
+    info = data.data  # Information field to be filled by the user
+    ssid_type = 0b1111  # Science Data
+
+    ax25_frame = AX25UIFrame(info, ssid_type)
+    frame = ax25_frame.create_frame()
+
+    transceiver.send_deal(frame)
+
+    # transceiver.send_deal(data.data)
     
 
 # Function to receive data and publish to the topic
