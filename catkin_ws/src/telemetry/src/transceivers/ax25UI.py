@@ -31,9 +31,7 @@ class AX25UIFrame:
             _type_: _description_
         """
         # Address needs 6 bytes so must be padded
-        print(f"Callsign before: {callsign}.")
         callsign = callsign.ljust(6)
-        print(f"Callsign after: {callsign}.")
         encoded = bytearray()
 
         # Each character of the callsign must be bit shifted with a 0 at the end
@@ -42,7 +40,6 @@ class AX25UIFrame:
         
         # The final bit of the address should be a 1
         ssid_byte = 0b01100000 | (ssid << 1) | 1  
-        print(f"SSID byte: {ssid_byte}")
         encoded.append(ssid_byte)
         return encoded
 
@@ -74,8 +71,6 @@ class AX25UIFrame:
 
         # Ending flag
         frame.append(self.FLAG)
-
-        print(f"Frame: {frame}")
 
         return frame
 
@@ -117,11 +112,3 @@ class AX25UIFrame:
     def to_hex(self, frame):
         """Converts bytes to hexadecimal"""
         return ' '.join(format(x, '02x') for x in frame)
-
-# # Example usage
-# info = "Test Data"  # Information field to be filled by the user
-# ssid_type = 0b1111  # Science Data
-
-# ax25_frame = AX25UIFrame(info, ssid_type)
-# frame = ax25_frame.create_frame()
-# print(ax25_frame.to_hex(frame))
