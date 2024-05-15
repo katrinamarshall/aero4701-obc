@@ -40,6 +40,7 @@ class AX25UIFrame:
         
         # The final bit of the address should be a 1
         ssid_byte = 0b01100000 | (ssid << 1) | 1  
+        print(f"SSID byte: {ssid_byte}")
         encoded.append(ssid_byte)
         return encoded
 
@@ -71,6 +72,8 @@ class AX25UIFrame:
 
         # Ending flag
         frame.append(self.FLAG)
+
+        print(f"Frame: {frame}")
 
         return frame
 
