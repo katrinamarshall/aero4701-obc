@@ -13,8 +13,8 @@ class AX25UIFrame:
     FCS_POLY = 0x8408
 
     def __init__(self, info, ssid_type):
-        self.source = "DEBRA  "  # Padded to 6 characters
-        self.destination = "GROUND "  # Padded to 6 characters
+        self.source = "DEBRA "  # Padded to 6 characters
+        self.destination = "GROUND"
         self.ssid_type = ssid_type # Im thinking 0b1110 for WOD, 0b1111 for science, 0b1101 for satellite pose 0b1011 for payload data and 0b0111 for misc
         self.info = info
 
