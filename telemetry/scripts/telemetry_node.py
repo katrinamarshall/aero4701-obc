@@ -51,7 +51,7 @@ class Telemetry:
         ssid_type = 0b1111
 
         # Create an ax.25 UI frame
-        ax25_frame = AX25UIFrame(info.hex(), ssid_type)
+        ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
 
         # Send data
