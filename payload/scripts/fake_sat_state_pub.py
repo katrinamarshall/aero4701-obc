@@ -3,46 +3,29 @@ import time
 import rospy
 import numpy as np
 
-from std_msgs.msg import String
-from payload.msg import lidar_raw_data
-from """ import message"""
 
+from payload.msg import sat_info
 
-
-#from lidar_listener import listener_func
 
 class FakeSat:
     def __init__(self):
         # print("Sending lidar data...")
-        
-       
 
-        self.pub = rospy.Publisher('/sat_info', satmessage?!?, queue_size=10)
+        self.pub = rospy.Publisher('/sat_info',sat_info, queue_size=10)
         self.ready = True
         # print("Done!")
 
 
-    def get_lidar_data(self, event=None):
-        if True:
-            data  = np.array([[40, 30, 50, 4000, 100, 140, 4000, 4000], 
-                                    [10, 10, 1000, 4000, 4000, 4000, 4000, 4000],
-                                    [10, 4000, 1000, 1000, 1000, 4000, 4000, 4000],
-                                    [1000, 1040, 1000, 4000, 4000, 4000, 4000, 4000],
-                                    [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
-                                    [4000, 4000, 4000, 4000, 4000, 1500, 1540, 1580], 
-                                    [4000, 2000, 4000, 4000, 4000, 4000, 4000, 4000], 
-                                    [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]])  
-            # 2d array of motion data (always 4x4?)
-            #motion = numpy.flipud(numpy.array(data.motion_indicator.motion[0:16]).reshape((4, 4)))
-            # 2d array of distance
-            distance = data.flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
-            #print(f"Distance: {distance} \n")
-            self.pub.publish(distance)
-            # 2d array of reflectance
-            # reflectance = numpy.flipud(numpy.array(data.reflectance).reshape((8, 8)))
-            # 2d array of good ranging data
-            #status = numpy.isin(numpy.flipud(numpy.array(data.target_status).reshape((8, 8))), (STATUS_RANGE_VALID, STATUS_RANGE_VALID_LARGE_PULSE))
-            #print(f"Motion: {motion}, \n Distance: {distance}, \n Reflectance: {reflectance}, \n Status: {status}\n\n")
+    def get_sat_data(self, event=None):
+        while not rospy.is_shutdown():
+            position = np.array([-9006.10175046, -6926679.95121315, 9565.3464146])# ECI pos
+            velocity = np.array([4559.07205974, 12.98671741, 6062.13485532])#ECI vel
+            attitude = np.array([1,0,0,0])#quaternion
+            timestamp = 0 # ms
+
+
+            self.pub.publish(position, velocity, attitude, timestamp)
+
         time.sleep(0.1)
 
         #rospy.loginfo(hello_str)
@@ -52,7 +35,7 @@ class FakeSat:
 
 
 if __name__ == '__main__':
-    rospy.init_node("fake_lidar")
-    myFakeLidar = FakeLidar()
-    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar.get_lidar_data)
+    rospy.init_node("fake_sat_state")
+    myFakeSat = FakeSat()
+    rospy.Timer(rospy.Duration(1.0/2.0), myFakeSat.get_sat_data())
     rospy.spin()

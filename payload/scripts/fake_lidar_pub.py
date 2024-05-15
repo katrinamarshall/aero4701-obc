@@ -9,8 +9,9 @@ from payload.msg import lidar_raw_data
 #from lidar_listener import listener_func
 
 class FakeLidar:
-    def __init__(self):
+    def __init__(self, label):
         # print("Sending lidar data...")
+        self.label = label
         
        
 
@@ -34,7 +35,7 @@ class FakeLidar:
             # 2d array of distance
             distance = data.flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
             #print(f"Distance: {distance} \n")
-            self.pub.publish(distance)
+            self.pub.publish(self.label, distance)
             # 2d array of reflectance
             # reflectance = numpy.flipud(numpy.array(data.reflectance).reshape((8, 8)))
             # 2d array of good ranging data
@@ -50,6 +51,14 @@ class FakeLidar:
 
 if __name__ == '__main__':
     rospy.init_node("fake_lidar")
-    myFakeLidar = FakeLidar()
-    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar.get_lidar_data)
+    myFakeLidar1 = FakeLidar(1)
+    myFakeLidar2 = FakeLidar(2)
+    myFakeLidar3 = FakeLidar(3)
+    myFakeLidar4 = FakeLidar(4)
+
+    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar1.get_lidar_data)
+    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar2.get_lidar_data)
+    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar3.get_lidar_data)
+    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar4.get_lidar_data)
+
     rospy.spin()

@@ -74,7 +74,7 @@ def perifocal_to_ECI_matrix(
     i: float,
     rt_asc: float,
     arg_p: float
-) -> np.ndarray:
+)  :
     """Creates a matrix to convert a vector in the perifocal 
     frame to the ECI frame.
 
@@ -112,7 +112,7 @@ def perifocal_to_ECI(
     i: float,
     rt_asc: float,
     arg_p: float
-) -> np.ndarray:
+)  :
     """Converts a vector in the perifocal frame to the ECI frame.
 
     Args:
@@ -157,7 +157,7 @@ def elements_to_ECI(
     
     return r_ECI, v_ECI
 
-def ECI_to_elements(r: np.ndarray, v: np.ndarray, mu: float) -> np.ndarray:
+def ECI_to_elements(r: np.ndarray, v: np.ndarray, mu: float)  :
     """Finds the orbital elements of an orbit given the position and velocity
     vectors in the ECI frame.
     
@@ -211,7 +211,7 @@ def ECI_to_elements(r: np.ndarray, v: np.ndarray, mu: float) -> np.ndarray:
     ])
     
     
-def ECI_to_ECEF(x_eci: np.ndarray, utc: dt.datetime) -> np.ndarray:
+def ECI_to_ECEF(x_eci: np.ndarray, utc: dt.datetime)  :
     """Converts a vector in the ECI frame to the ECEF frame.
 
     Args:
@@ -226,7 +226,7 @@ def ECI_to_ECEF(x_eci: np.ndarray, utc: dt.datetime) -> np.ndarray:
     return rot_mat @ x_eci
 
 
-def ECI_to_LLH(eci: np.ndarray, utc: dt.datetime) -> np.ndarray:
+def ECI_to_LLH(eci: np.ndarray, utc: dt.datetime)  :
     """Converts a vector in the ECI frame to the geodetic LLH frame.
 
     Args:
@@ -240,7 +240,7 @@ def ECI_to_LLH(eci: np.ndarray, utc: dt.datetime) -> np.ndarray:
     return ECEF_to_LLH(ecef)
 
 
-def LLH_to_ECI(llh: np.ndarray, utc: dt.datetime) -> np.ndarray:
+def LLH_to_ECI(llh: np.ndarray, utc: dt.datetime)  :
     """Converts a vector in the geodetic LLH frame to the ECI frame.
 
     Args:
@@ -254,7 +254,7 @@ def LLH_to_ECI(llh: np.ndarray, utc: dt.datetime) -> np.ndarray:
     return ECEF_to_ECI(ecef, utc)
 
 
-def ECEF_to_ECI(ecef: np.ndarray, utc: dt.datetime) -> np.ndarray:
+def ECEF_to_ECI(ecef: np.ndarray, utc: dt.datetime)  :
     """Converts a vector in the ECEF frame to the ECI frame.
 
     Args:
@@ -269,7 +269,7 @@ def ECEF_to_ECI(ecef: np.ndarray, utc: dt.datetime) -> np.ndarray:
     return rot_mat @ ecef
 
 
-def ECEF_to_LLH(ecef: np.ndarray) -> np.ndarray:
+def ECEF_to_LLH(ecef: np.ndarray)  :
     """Applies Ferrari's solution to convert a coordinate in the ECEF frame to the
     geodetic LLH frame.
     
@@ -308,7 +308,7 @@ def ECEF_to_LLH(ecef: np.ndarray) -> np.ndarray:
     return np.array([latitude, longitude, h], dtype=np.float64)
 
 
-def LLH_to_ECEF(llh: np.ndarray) -> np.ndarray:
+def LLH_to_ECEF(llh: np.ndarray)  :
     """Converts a vector in the geodedic LLH frame to the ECEF frame.
     
     Args:
@@ -348,7 +348,7 @@ def geodetic_radius(lat_geodetic: float) -> float:
 def geo_ecliptic_to_ECI(
     x_geo_ecliptic: np.ndarray,
     utc: dt.datetime
-) -> np.ndarray:
+)  :
     """Transforms a vector in Geocentric Ecliptic coordinates
     to ECI coordinates.
 
@@ -372,7 +372,7 @@ def ECI_to_LVLH(
     v_sat: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+)  :
     """Converts a vector in ECI coordinates to Local Vertical
     Local Horizontal coordinates.
     
@@ -413,7 +413,7 @@ def LVLH_to_ECI(
     v_sat: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+)  :
     """Converts a vector in Local Vertical Local Horizontal
     coordinates to ECI coordinates.
 
@@ -448,7 +448,7 @@ def LVLH_to_ECI(
 def LVLH_to_bodyfixed(
     x_lvlh: np.ndarray,
     attitude: np.ndarray
-) -> np.ndarray:
+)  :
     """Converts a vector in the LVLH frame into the body fixed frame
 
     Args:
@@ -460,7 +460,7 @@ def LVLH_to_bodyfixed(
 def bodyfixed_to_LVLH(
     x_bf: np.ndarray,
     attitude: np.ndarray
-) -> np.ndarray:
+):
     """Converts a vector in the bodyfixed frame into
     the LVLH frame
 
@@ -485,7 +485,7 @@ def ECI_to_bodyfixed(
     attitude: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+):
     """Converts a vector in the ECI frame to the body fixed frame
 
     Args:
@@ -507,7 +507,7 @@ def bodyfixed_to_ECI(
     attitude: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+) :
     """Converts a vector in the body fixed frame to the ECI frame
 
     Args:
@@ -530,7 +530,7 @@ def NED_to_ECEF(
     r_ecef: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+) :
     """Converts a vector in the North East Down frame to the ECEF frame
 
     Args:
@@ -562,7 +562,7 @@ def ECEF_to_NED(
     r_ecef: np.ndarray,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+) :
     """Converts a vector in the ECEF frame to the NED frame
 
     Args:
@@ -596,7 +596,7 @@ def NED_to_ECI(
     utc: dt.datetime,
     *,
     rotation_only: bool = False
-) -> np.ndarray:
+) :
     """Converts a vector in the North East Down frame to the ECI frame
 
     Args:
@@ -618,7 +618,7 @@ def NED_to_LVLH(
     r_sat: np.ndarray,
     v_sat: np.ndarray,
     utc: dt.datetime,
-) -> np.ndarray:
+)  :
     """Converts a vector in the North East Down frame to the LVLH frame
 
     Args:
@@ -635,7 +635,7 @@ def NED_to_LVLH(
     x_lvlh = ECI_to_LVLH(x_eci, r_sat, v_sat, rotation_only=True)
     return x_lvlh
     
-def polar_to_cartesian(polar: np.ndarray) -> np.ndarray:
+def polar_to_cartesian(polar: np.ndarray):
     """Converts a vector in the polar coordinate system to the cartesian coordinate system.
     
     The unit of the calculated cartesian vector is the same as the unit of the range.
@@ -657,7 +657,7 @@ def polar_to_cartesian(polar: np.ndarray) -> np.ndarray:
     return cart
 
 
-def cartesian_to_polar(cart: np.ndarray) -> np.ndarray:
+def cartesian_to_polar(cart: np.ndarray):
     """Converts a vector in the cartesian coordinate system to the polar coordinate system.
     
     The unit of range is the same as the unit of the cartesian vector.

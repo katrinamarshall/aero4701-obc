@@ -5,9 +5,10 @@ from payload.msg import lidar_raw_data
 from std_msgs.msg import String
 import numpy as np
 
-def callback(distance):
+def callback(raw_data):
     #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-    print(f"Raw LiDAR Distances:\n{np.array(distance.distances).reshape(8,8)} \n")
+    print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances).reshape(8,8)} \n")
+    print(f"LiDAR Label: {raw_data.label}\n")
 
 def listener_func():
 

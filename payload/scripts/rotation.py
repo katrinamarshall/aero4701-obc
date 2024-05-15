@@ -43,7 +43,7 @@ def rot3_x(theta: float, degrees: bool = False) -> np.ndarray:
     ])
 
 
-def rot3_y(theta: float, degrees: bool = False) -> np.ndarray:
+def rot3_y(theta: float, degrees: bool = False):
     """Returns a 3x3 rotation matrix about the y-axis.
 
     Args:
