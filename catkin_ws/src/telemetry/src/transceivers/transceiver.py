@@ -43,7 +43,7 @@ class Transceiver(sx126x):
                 bytes([self.addr >> 8]) + 
                 bytes([self.addr & 0xff]) + 
                 bytes([self.offset_freq]) + 
-                message.encode())
+                message)
         self.send(data)
         print("Message sent!")
         return None
