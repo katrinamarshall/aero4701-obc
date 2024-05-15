@@ -4,13 +4,12 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
+from debra.msg import payload_data
 
 # Callback to receive downlink data instructions
 def downlink_data_callback(data: String, transceiver: Transceiver):
     info = data.data  
-    ssid_type = int(info[:4], 2)
-    print(f"SSID type: {ssid_type}")
-    # ssid_type = 0  # Science Data
+    ssid_type = 0b1110 
 
     ax25_frame = AX25UIFrame(info, ssid_type)
     frame = ax25_frame.create_frame()
@@ -18,7 +17,21 @@ def downlink_data_callback(data: String, transceiver: Transceiver):
     transceiver.send_deal(frame)
 
     # transceiver.send_deal(data.data)
+
+def payload_data_callback(data: payload_data, transceiver: Transceiver):
+    # Initialise data and science ssid
+    info = (
+        f"{data.debris_position_x}{data.debris_position_y}{data.debris_position_z}{data.debris_velocity_x}{data.debris_velocity_y}{data.debris_velocity_z}{data.debris_diameter}{data.time_of_detection}{data.object_count}"
+    )
+    print(f"Science data: {info}")
+    ssid_type = 0b1111
     
+    # Create an ax.25 UI frame
+    ax25_frame = AX25UIFrame(info, ssid_type)
+    frame = ax25_frame.create_frame()
+
+    # Send data
+    transceiver.send_deal(frame)
 
 # Function to receive data and publish to the topic
 def main():
@@ -35,6 +48,8 @@ def main():
 
     # Subscriber for downlink commands
     downlink_subscriber = rospy.Subscriber('/downlink_data', String, lambda data: downlink_data_callback(data, transceiver))
+
+    payload_subscriber = rospy.Subscriber('/payload_data', payload_data, lambda data: downlink_data_callback(data, transceiver))
 
     # Spin node
     while not rospy.is_shutdown():
