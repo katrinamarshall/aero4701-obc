@@ -1,0 +1,4 @@
+<!-- temp_monitor.launch -->
+<launch>
+    <node name="temp_monitor_node" pkg="temperature_monitor" type="temp_monitor.py" output="screen" />
+</launch>
