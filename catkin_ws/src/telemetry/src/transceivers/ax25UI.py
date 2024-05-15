@@ -13,7 +13,7 @@ class AX25UIFrame:
     FCS_POLY = 0x8408
 
     def __init__(self, info, ssid_type):
-        self.source = "DEBRA "  # Padded to 6 characters
+        self.source = "DEBRA"
         self.destination = "GROUND"
         self.ssid_type = ssid_type # Im thinking 0b1110 for WOD, 0b1111 for science, 0b1101 for satellite pose 0b1011 for payload data and 0b0111 for misc
         self.info = info
@@ -31,9 +31,9 @@ class AX25UIFrame:
             _type_: _description_
         """
         # Address needs 6 bytes so must be padded
-        print(f"Callsign before: {callsign}")
+        print(f"Callsign before: {callsign}.")
         callsign = callsign.ljust(6)
-        print(f"Callsign after: {callsign}")
+        print(f"Callsign after: {callsign}.")
         encoded = bytearray()
 
         # Each character of the callsign must be bit shifted with a 0 at the end
