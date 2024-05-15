@@ -15,7 +15,7 @@ class AX25UIFrame:
     def __init__(self, info, ssid_type):
         self.source = "DEBRA"
         self.destination = "GROUND"
-        self.ssid_type = ssid_type # Im thinking 0b1110 for WOD, 0b1111 for science, 0b1101 for satellite pose 0b1011 for payload data and 0b0111 for misc
+        self.ssid_type = ssid_type # Im thinking 0b1110 for WOD, 0b1111 for science, 0b1101 for satellite pose 0b1011 for payload data and 0b0111 for commands, maybe 0b1100 for misc
         self.info = info
 
     def encode_address(self, callsign, ssid):
@@ -38,8 +38,11 @@ class AX25UIFrame:
         for char in callsign:
             encoded.append(ord(char) << 1)
         
-        # The final bit of the address should be a 1
-        ssid_byte = 0b01100000 | (ssid << 1) | 1  
+        # The final bit of the address should be a 1 if it is the last callsign in the address field
+        if(ssid != 0b0000):
+            ssid_byte = 0b01100000 | (ssid << 1) | 1  
+        else:
+            ssid_byte = 0b01100000 | (ssid << 1)
         encoded.append(ssid_byte)
         return encoded
 

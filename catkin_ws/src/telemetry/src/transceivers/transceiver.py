@@ -3,6 +3,7 @@ import sys
 import termios
 from ._sx126x import sx126x
 from telemetry.msg import command_msg
+from AX25UI import AX25UIFrameDecoder
 
 class Transceiver(sx126x):
     def __init__(
@@ -56,8 +57,10 @@ class Transceiver(sx126x):
             try:
                 # Split data to determine message type
                 if isinstance(data, bytes):
-                    data = data.decode('utf-8')
-                message = data.split(",")
+                    # data = data.decode('utf-8')
+                    decoder = AX25UIFrameDecoder()
+                    decoded_frame = decoder.decode_ax25_frame(data)
+                    message = decoded_frame["info"].split(",")
 
                 # For uplink commands
                 if len(message) == 3:
