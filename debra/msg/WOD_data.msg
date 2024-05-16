@@ -1,8 +1,8 @@
 bool satellite_mode
-uint8 battery_voltage
-uint8 battery_current
-uint8 regulated_bus_current_3v3
-uint8 regulated_bus_current_5v
-uint8 temperature_comm
-uint8 temperature_eps
-uint8 temperature_battery
+float32 battery_voltage
+float32 battery_current
+float32 regulated_bus_current_3v3
+float32 regulated_bus_current_5v
+float32 temperature_comm
+float32 temperature_eps
+float32 temperature_battery

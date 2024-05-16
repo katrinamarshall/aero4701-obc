@@ -6,36 +6,36 @@ from debra.msg import WOD, WOD_data
 def publish_wod():
     pub = rospy.Publisher('/wod_data', WOD, queue_size=10)
     rospy.init_node('fake_wod_node', anonymous=True)
-    rate = rospy.Rate(0.2) # 1 Hz
+    rate = rospy.Rate(0.2)  # 0.2 Hz
 
-    # Define the datasets
+    # Define the datasets with float values
     dataset1 = WOD_data(
         satellite_mode=True,
-        battery_voltage=128,
-        battery_current=64,
-        regulated_bus_current_3v3=32,
-        regulated_bus_current_5v=16,
-        temperature_comm=8,
-        temperature_eps=4,
-        temperature_battery=2
+        battery_voltage=6.5,  # Example voltage in volts
+        battery_current=0.5,  # Example current in amps
+        regulated_bus_current_3v3=0.1,  # Example bus current in amps
+        regulated_bus_current_5v=0.2,  # Example bus current in amps
+        temperature_comm=25.0,  # Example temperature in Celsius
+        temperature_eps=20.0,  # Example temperature in Celsius
+        temperature_battery=15.0  # Example temperature in Celsius
     )
     
     dataset2 = WOD_data(
         satellite_mode=False,
-        battery_voltage=129,
-        battery_current=65,
-        regulated_bus_current_3v3=33,
-        regulated_bus_current_5v=17,
-        temperature_comm=9,
-        temperature_eps=5,
-        temperature_battery=3
+        battery_voltage=7.0,  # Example voltage in volts
+        battery_current=0.6,  # Example current in amps
+        regulated_bus_current_3v3=0.2,  # Example bus current in amps
+        regulated_bus_current_5v=0.3,  # Example bus current in amps
+        temperature_comm=26.0,  # Example temperature in Celsius
+        temperature_eps=21.0,  # Example temperature in Celsius
+        temperature_battery=16.0  # Example temperature in Celsius
     )
 
     # Create the WOD message
     wod_msg = WOD(
         satellite_id="DEBRA",
         packet_time_size=1234567890,
-        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(2)] 
+        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(30)] 
     )
 
     while not rospy.is_shutdown():

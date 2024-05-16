@@ -6,6 +6,7 @@ from transceivers import Transceiver
 from AX25UI import AX25UIFrame
 from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
 import struct
+import math
 
 class Telemetry:
     def __init__(self):
@@ -90,44 +91,6 @@ class Telemetry:
         self.transceiver.send_deal(frame)
 
 
-    # def wod_data_callback(self, data):
-    #     """Packs and sends WOD data"""
-    #     # Pack "DEBRA" satellite id
-    #     id_field = struct.pack('ccccc', data.satellite_id)
-
-    #     # Pack the time field in little endian
-    #     time_field = struct.pack('<I', data.packet_time_size)
-
-    #     # Pack each data set
-    #     if len(data.datasets) <= 32:
-    #         datasets = b''.join(pack_wod_dataset(dataset) for dataset in data.datasets)
-        
-    #     # For when there is more than 32 datasets, just take the first 32
-    #     else:
-    #         datasets_to_pack = data.datasets[:32]
-    #         datasets = b''.join(pack_wod_dataset(dataset) for dataset in datasets_to_pack)
-
-    #     print(f"Number of datasets: {len(datasets)}")
-    #     # # Pad if missing datasets
-    #     # if len(data.datasets) <= 32:
-    #     #     packets_padding = len(data.datasets) % 8 
-    #     expected_length = 32 * 57 // 8
-    #     if len(datasets) < expected_length:
-    #         datasets = datasets.ljust(expected_length, b'\x00') # Pads with zeroes
-
-    #     # Combine time field and datasets
-    #     info = id_field + time_field + datasets
-
-    #     print(f"Packed WOD Data: {info.hex()} (Length: {len(info)} bytes)")
-    #     ssid_type = 0b1110  # WOD data type
-
-    #     # Create an ax.25 UI frame
-    #     ax25_frame = AX25UIFrame(info, ssid_type)
-    #     frame = ax25_frame.create_frame()
-
-    #     # Send data
-    #     self.transceiver.send_deal(frame)
-
 
     def wod_data_callback(self, data):
         """Packs and sends WOD data"""
@@ -188,18 +151,63 @@ class Telemetry:
 
 
 # Helper functions ----------------------------------------------------------------
+# def pack_wod_dataset(dataset):
+#     """Pack a single WOD data set into binary format."""
+#     return struct.pack('B'*8, 
+#         dataset.satellite_mode,
+#         dataset.battery_voltage,
+#         dataset.battery_current,
+#         dataset.regulated_bus_current_3v3,
+#         dataset.regulated_bus_current_5v,
+#         dataset.temperature_comm,
+#         dataset.temperature_eps,
+#         dataset.temperature_battery
+#     )
+
+def convert_voltage(voltage):
+    return max(0, min(255, math.floor((20 * voltage) - 60)))
+
+def convert_current(current):
+    return max(0, min(255, math.floor(127 * current) + 127))
+
+def convert_bus_current(current):
+    return max(0, min(255, math.floor(40 * current)))
+
+def convert_temperature(temp):
+    return max(0, min(255, math.floor((4 * temp) + 60)))
+
 def pack_wod_dataset(dataset):
     """Pack a single WOD data set into binary format."""
-    return struct.pack('B'*8, 
-        dataset.satellite_mode,
-        dataset.battery_voltage,
-        dataset.battery_current,
-        dataset.regulated_bus_current_3v3,
-        dataset.regulated_bus_current_5v,
-        dataset.temperature_comm,
-        dataset.temperature_eps,
-        dataset.temperature_battery
+    # Convert all floats to unsigned 8bit integers as per WOD format
+    # Mode
+    satellite_mode = 1 if dataset.satellite_mode else 0
+
+    # Battery voltage
+    battery_voltage = convert_voltage(dataset.battery_voltage)
+
+    # Battery current
+    battery_current = convert_current(dataset.battery_current)
+
+    # Bus currents
+    regulated_bus_current_3v3 = convert_bus_current(dataset.regulated_bus_current_3v3)
+    regulated_bus_current_5v = convert_bus_current(dataset.regulated_bus_current_5v)
+
+    # Temperatures
+    temperature_comm = convert_temperature(dataset.temperature_comm)
+    temperature_eps = convert_temperature(dataset.temperature_eps)
+    temperature_battery = convert_temperature(dataset.temperature_battery)
+
+    return struct.pack('B'*8,
+        satellite_mode,
+        battery_voltage,
+        battery_current,
+        regulated_bus_current_3v3,
+        regulated_bus_current_5v,
+        temperature_comm,
+        temperature_eps,
+        temperature_battery
     )
+
 
 
 if __name__ == '__main__':
