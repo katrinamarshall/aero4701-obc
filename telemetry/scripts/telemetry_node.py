@@ -132,7 +132,7 @@ class Telemetry:
     def wod_data_callback(self, data):
         """Packs and sends WOD data"""
         # Pack "DEBRA" satellite id
-        id_field = struct.pack('s', data.satellite_id.encode('ascii'))
+        id_field = struct.pack('5s', data.satellite_id.encode('ascii'))
 
         # Pack the time field in little endian
         time_field = struct.pack('<I', data.packet_time_size)
@@ -197,7 +197,7 @@ def pack_wod_dataset(dataset):
         dataset.regulated_bus_current_3v3,
         dataset.regulated_bus_current_5v,
         dataset.temperature_comm,
-        dataset.temperature_eps,
+        dataset.temperature_eps,x
         dataset.temperature_battery
     )
 
