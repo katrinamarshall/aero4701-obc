@@ -179,6 +179,9 @@ def convert_temperature(temp):
 def pack_wod_dataset(dataset):
     """Pack a single WOD data set into binary format."""
     # Convert all floats to unsigned 8bit integers as per WOD format
+    # Mode
+    satellite_mode = 1 if dataset.satellite_mode else 0
+
     # Battery voltage
     battery_voltage = convert_voltage(dataset.battery_voltage)
 
@@ -195,7 +198,7 @@ def pack_wod_dataset(dataset):
     temperature_battery = convert_temperature(dataset.temperature_battery)
 
     return struct.pack('B'*8,
-        dataset.satellite_mode,
+        satellite_mode,
         battery_voltage,
         battery_current,
         regulated_bus_current_3v3,
