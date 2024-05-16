@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
-from debra.msg import WOD, WOD_dataset
+from debra.msg import WOD, WOD_data
 
 def publish_wod():
     pub = rospy.Publisher('/wod_data', WOD, queue_size=10)
@@ -9,7 +9,7 @@ def publish_wod():
     rate = rospy.Rate(1) # 1 Hz
 
     # Define the datasets
-    dataset1 = WOD_dataset(
+    dataset1 = WOD_data(
         satellite_mode=1,
         battery_voltage=128,
         battery_current=64,
@@ -20,7 +20,7 @@ def publish_wod():
         temperature_battery=2
     )
     
-    dataset2 = WOD_dataset(
+    dataset2 = WOD_data(
         satellite_mode=2,
         battery_voltage=129,
         battery_current=65,
@@ -35,7 +35,7 @@ def publish_wod():
     wod_msg = WOD(
         satellite_id="DEBRA",
         packet_time_size=1234567890,
-        datasets=[dataset1, dataset2] + [WOD_dataset() for _ in range(30)] # Pad with 30 empty datasets
+        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(30)] # Pad with 30 empty datasets
     )
 
     while not rospy.is_shutdown():
