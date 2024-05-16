@@ -1,7 +1,0 @@
-<launch>
-  <!-- Launch the telemetry node -->
-  <node pkg="telemetry" type="telemetry_node.py" name="telemetry_node" output="screen"/>
-
-  <!-- Launch the debra node -->
-  <node pkg="debra" type="debra_node.py" name="debra_node" output="screen"/>
-</launch>
