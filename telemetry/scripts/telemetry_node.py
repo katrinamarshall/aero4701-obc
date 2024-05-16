@@ -136,7 +136,6 @@ class Telemetry:
         self.transceiver.send_deal(second_frame)
 
 
-
     def run(self):
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
