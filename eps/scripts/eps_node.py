@@ -25,6 +25,10 @@ class EPS:
     def get_curr_volt(self, event=None):
         msg = current_voltage()
 
+        self.curr_volt_sensor_40.wake()
+        self.curr_volt_sensor_41.wake()
+        self.curr_volt_sensor_44.wake()
+
         msg.voltage_40 = self.curr_volt_sensor_40.voltage()
         msg.current_40 = self.curr_volt_sensor_40.current()
 
@@ -33,6 +37,10 @@ class EPS:
 
         msg.voltage_44 = self.curr_volt_sensor_44.voltage()
         msg.current_44 = self.curr_volt_sensor_44.current()
+
+        self.curr_volt_sensor_40.sleep()
+        self.curr_volt_sensor_41.sleep()
+        self.curr_volt_sensor_44.sleep()
 
         self.pub.publish(msg)
 
