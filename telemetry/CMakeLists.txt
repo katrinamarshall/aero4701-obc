@@ -37,5 +37,6 @@ include_directories(
 # Mark executable scripts (Python etc.) for installation
 catkin_install_python(PROGRAMS
   scripts/telemetry_node.py
+  scripts/fake_wod_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
