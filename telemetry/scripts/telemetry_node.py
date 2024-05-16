@@ -129,50 +129,50 @@ class Telemetry:
     #     self.transceiver.send_deal(frame)
 
 
-def wod_data_callback(self, data):
-    """Packs and sends WOD data"""
-    # Pack "DEBRA" satellite id
-    id_field = struct.pack('ccccc', data.satellite_id)
+    def wod_data_callback(self, data):
+        """Packs and sends WOD data"""
+        # Pack "DEBRA" satellite id
+        id_field = struct.pack('ccccc', data.satellite_id)
 
-    # Pack the time field in little endian
-    time_field = struct.pack('<I', data.packet_time_size)
+        # Pack the time field in little endian
+        time_field = struct.pack('<I', data.packet_time_size)
 
-    # Split datasets into two parts
-    first_16_datasets = data.datasets[:16]
-    second_16_datasets = data.datasets[16:32]
-    first_wod = struct.pack('B', 1)
-    second_wod = struct.pack('B', 2)
+        # Split datasets into two parts
+        first_16_datasets = data.datasets[:16]
+        second_16_datasets = data.datasets[16:32]
+        first_wod = struct.pack('B', 1)
+        second_wod = struct.pack('B', 2)
 
-    # Pack the first 16 datasets
-    first_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in first_16_datasets)
-    expected_length = 16 * 57 // 8  
-    if len(first_16_datasets_packed) < expected_length:
-        first_16_datasets_packed = first_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes
+        # Pack the first 16 datasets
+        first_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in first_16_datasets)
+        expected_length = 16 * 57 // 8  
+        if len(first_16_datasets_packed) < expected_length:
+            first_16_datasets_packed = first_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes
 
-    # Combine id_field, time_field, and the first 16 datasets
-    first_frame_info = first_wod + id_field + time_field + first_16_datasets_packed
-    print(f"Packed WOD Data (first frame): {first_frame_info.hex()} (Length: {len(first_frame_info)} bytes)")
+        # Combine id_field, time_field, and the first 16 datasets
+        first_frame_info = first_wod + id_field + time_field + first_16_datasets_packed
+        print(f"Packed WOD Data (first frame): {first_frame_info.hex()} (Length: {len(first_frame_info)} bytes)")
 
-    # Create and send the first ax.25 UI frame
-    ssid_type = 0b1110  # WOD data type
-    first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
-    first_frame = first_ax25_frame.create_frame()
-    self.transceiver.send_deal(first_frame)
+        # Create and send the first ax.25 UI frame
+        ssid_type = 0b1110  # WOD data type
+        first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
+        first_frame = first_ax25_frame.create_frame()
+        self.transceiver.send_deal(first_frame)
 
-    # Pack the second 16 datasets
-    second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
-    expected_length = 16 * 57 // 8  # 16 datasets, each 57 bits, converted to bytes
-    if len(second_16_datasets_packed) < expected_length:
-        second_16_datasets_packed = second_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes if needed
+        # Pack the second 16 datasets
+        second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
+        expected_length = 16 * 57 // 8  # 16 datasets, each 57 bits, converted to bytes
+        if len(second_16_datasets_packed) < expected_length:
+            second_16_datasets_packed = second_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes if needed
 
-    # Combine only the second 16 datasets
-    second_frame_info = second_wod + second_16_datasets_packed
-    print(f"Packed WOD Data (second frame): {second_frame_info.hex()} (Length: {len(second_frame_info)} bytes)")
+        # Combine only the second 16 datasets
+        second_frame_info = second_wod + second_16_datasets_packed
+        print(f"Packed WOD Data (second frame): {second_frame_info.hex()} (Length: {len(second_frame_info)} bytes)")
 
-    # Create and send the second ax.25 UI frame
-    second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
-    second_frame = second_ax25_frame.create_frame()
-    self.transceiver.send_deal(second_frame)
+        # Create and send the second ax.25 UI frame
+        second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
+        second_frame = second_ax25_frame.create_frame()
+        self.transceiver.send_deal(second_frame)
 
 
 
