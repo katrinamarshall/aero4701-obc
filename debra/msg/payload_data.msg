@@ -11,4 +11,4 @@ float32 debris_velocity_z
 # Debris Information
 float32 debris_diameter
 int32 time_of_detection
-int16 object_count
+int32 object_count

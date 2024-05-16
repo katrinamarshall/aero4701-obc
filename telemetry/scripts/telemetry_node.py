@@ -4,7 +4,7 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
-from debra.msg import payload_data
+from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
 import struct
 
 class Telemetry:
@@ -25,7 +25,11 @@ class Telemetry:
         # Subscriber for payload data
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
 
+        # Subscriber for statellite pose data
+        rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
+
     def downlink_data_callback(self, data):
+        """Sends a miscellaneous message to be sent by the transceiver"""
         info = data.data  
         ssid_type = 0b1110
 
@@ -35,7 +39,7 @@ class Telemetry:
         self.transceiver.send_deal(frame)
 
     def payload_data_callback(self, data):
-        # Pack the data into a binary format
+        """Packs and sends payload (science) data"""
         info = struct.pack('<fff fff f i i',
             data.debris_position_x,
             data.debris_position_y,
@@ -49,6 +53,31 @@ class Telemetry:
         )
         print(f"Science data: {info.hex()}")
         ssid_type = 0b1111
+
+        # Create an ax.25 UI frame
+        ax25_frame = AX25UIFrame(info, ssid_type)
+        frame = ax25_frame.create_frame()
+
+        # Send data
+        self.transceiver.send_deal(frame)
+
+
+    def satellite_pose_data_callback(self, data):
+        """Packs and sends payload (science) data"""
+        info = struct.pack('<fff ffff fff',
+            data.position_x,
+            data.position_y,
+            data.position_z,
+            data.orientation_x,
+            data.orientation_y,
+            data.orientation_z,
+            data.orientation_w,
+            data.velocity_x,
+            data.velocity_y,
+            data.velocity_z
+        )
+        print(f"Satellite pose data: {info.hex()}")
+        ssid_type = 0b1101
 
         # Create an ax.25 UI frame
         ax25_frame = AX25UIFrame(info, ssid_type)
