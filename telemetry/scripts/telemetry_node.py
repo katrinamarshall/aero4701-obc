@@ -132,7 +132,7 @@ class Telemetry:
     def wod_data_callback(self, data):
         """Packs and sends WOD data"""
         # Pack "DEBRA" satellite id
-        id_field = struct.pack('ccccc', data.satellite_id)
+        id_field = struct.pack('s', data.satellite_id)
 
         # Pack the time field in little endian
         time_field = struct.pack('<I', data.packet_time_size)
