@@ -104,7 +104,7 @@ class Telemetry:
             datasets_to_pack = data.datasets[:32]
             datasets = b''.join(pack_wod_dataset(dataset) for dataset in datasets_to_pack)
 
-        print(f"Bytes length of datasets: {len(datasets)}")
+        print(f"Number of datasets: {len(datasets)}")
         # # Pad if missing datasets
         # if len(data.datasets) <= 32:
         #     packets_padding = len(data.datasets) % 8 

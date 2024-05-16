@@ -44,6 +44,7 @@ class Transceiver(sx126x):
                 bytes([self.offset_freq]) + 
                 message)
         self.send(data)
+        print(f"Message: {data}")
         print("Message sent!")
         return None
 
