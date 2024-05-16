@@ -145,7 +145,7 @@ class Telemetry:
 
         # Pack the first 16 datasets
         first_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in first_16_datasets)
-        expected_length = 16 * 57 // 8  
+        expected_length = 16 * 64 // 8  
         if len(first_16_datasets_packed) < expected_length:
             first_16_datasets_packed = first_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes
 
@@ -161,7 +161,7 @@ class Telemetry:
 
         # Pack the second 16 datasets
         second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
-        expected_length = 16 * 57 // 8  # 16 datasets, each 57 bits, converted to bytes
+        expected_length = 16 * 64 // 8  # 16 datasets, each 57 bits, converted to bytes
         if len(second_16_datasets_packed) < expected_length:
             second_16_datasets_packed = second_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes if needed
 
@@ -200,17 +200,6 @@ def pack_wod_dataset(dataset):
         dataset.temperature_eps,
         dataset.temperature_battery
     )
-
-# def pack_wod_data(dataset):
-#     # Combine the fields into a single 57-bit integer
-#     combined = (dataset.satellite_mode << 56) | (dataset.battery_voltage << 48) | (dataset.battery_current << 40) | (dataset.regulated_bus_current_3v3 << 32) | (dataset.regulated_bus_current_5v << 24) | (dataset.temperature_comm << 16) | (dataset.temperature_eps << 8) | dataset.temperature_battery
-    
-#     # Convert the 57-bit integer into a bytearray
-#     packed_data = bytearray()
-#     for i in range(7, -1, -1):  # 7 bytes for 56 bits, but we only need 7 bytes for 57 bits
-#         packed_data.append((combined >> (i * 8)) & 0xFF)
-    
-#     return packed_data
 
 
 if __name__ == '__main__':
