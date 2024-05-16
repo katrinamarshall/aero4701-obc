@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(eps)
+project(adcs)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -49,7 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  current_voltage.msg
+  imu_data_packet.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -159,7 +159,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/eps_node.py
+  scripts/imu_node.py
+  scripts/imu_listener.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
