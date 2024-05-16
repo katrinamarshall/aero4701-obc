@@ -114,7 +114,6 @@ class Telemetry:
 
         # Combine id_field, time_field, and the first 16 datasets
         first_frame_info = first_wod + id_field + time_field + first_16_datasets_packed
-        print(f"Packed WOD Data (first frame): {first_frame_info.hex()} (Length: {len(first_frame_info)} bytes)")
 
         # Create and send the first ax.25 UI frame
         ssid_type = 0b1110  # WOD data type
@@ -130,7 +129,6 @@ class Telemetry:
 
         # Combine only the second 16 datasets
         second_frame_info = second_wod + second_16_datasets_packed
-        print(f"Packed WOD Data (second frame): {second_frame_info.hex()} (Length: {len(second_frame_info)} bytes)")
 
         # Create and send the second ax.25 UI frame
         second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
@@ -151,19 +149,6 @@ class Telemetry:
 
 
 # Helper functions ----------------------------------------------------------------
-# def pack_wod_dataset(dataset):
-#     """Pack a single WOD data set into binary format."""
-#     return struct.pack('B'*8, 
-#         dataset.satellite_mode,
-#         dataset.battery_voltage,
-#         dataset.battery_current,
-#         dataset.regulated_bus_current_3v3,
-#         dataset.regulated_bus_current_5v,
-#         dataset.temperature_comm,
-#         dataset.temperature_eps,
-#         dataset.temperature_battery
-#     )
-
 def convert_voltage(voltage):
     return max(0, min(255, math.floor((20 * voltage) - 60)))
 
