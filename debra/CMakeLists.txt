@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   rospy
   std_msgs
-  telemetry
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,6 +52,8 @@ add_message_files(
   command_msg.msg
   payload_data.msg
   satellite_pose.msg
+  WOD_data.msg
+  WOD.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -107,7 +108,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES debra
- CATKIN_DEPENDS message_generation rospy std_msgs telemetry
+ CATKIN_DEPENDS message_generation rospy std_msgs
 #  DEPENDS system_lib
 )
 

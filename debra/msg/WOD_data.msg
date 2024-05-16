@@ -1,0 +1,8 @@
+bool satellite_mode
+float32 battery_voltage
+float32 battery_current
+float32 regulated_bus_current_3v3
+float32 regulated_bus_current_5v
+float32 temperature_comm
+float32 temperature_eps
+float32 temperature_battery

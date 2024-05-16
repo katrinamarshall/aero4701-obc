@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  debra
 )
 
 # Ensure Python setup happens after messages
@@ -24,7 +25,7 @@ generate_messages(
 
 # Add catkin package information
 catkin_package(
-  CATKIN_DEPENDS rospy std_msgs message_runtime
+  CATKIN_DEPENDS rospy std_msgs message_runtime debra
 )
 
 # Include directories
@@ -36,5 +37,6 @@ include_directories(
 # Mark executable scripts (Python etc.) for installation
 catkin_install_python(PROGRAMS
   scripts/telemetry_node.py
+  scripts/fake_wod_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
