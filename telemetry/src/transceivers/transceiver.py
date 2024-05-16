@@ -21,12 +21,10 @@ class Transceiver(sx126x):
         # Terminal settings
         self.old_settings = termios.tcgetattr(sys.stdin)
 
-        # File path of received commands for visualization
-        self.json_file_path = 'received_commands.json'
     
     def send_deal(
             self, 
-            message: str
+            message: str # CHANGE THIS
         ) -> None:
         """Sends a message after encoding
 

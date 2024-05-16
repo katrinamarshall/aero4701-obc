@@ -35,7 +35,7 @@ def publish_wod():
     wod_msg = WOD(
         satellite_id="DEBRA",
         packet_time_size=1234567890,
-        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(30)] # Pad with 30 empty datasets
+        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(2)] 
     )
 
     while not rospy.is_shutdown():

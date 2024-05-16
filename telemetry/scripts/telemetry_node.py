@@ -92,13 +92,22 @@ class Telemetry:
 
     def wod_data_callback(self, data):
         """Packs and sends WOD data"""
-        # Pack the time field (32 bits)
+        # Pack the time field in little endian
         time_field = struct.pack('<I', data.packet_time_size)
 
-        # Pack each data set (57 bits)
-        datasets = b''.join(pack_wod_dataset(dataset) for dataset in data.datasets)
+        # Pack each data set
+        if len(data.datasets) <= 32:
+            datasets = b''.join(pack_wod_dataset(dataset) for dataset in data.datasets)
+        
+        # For when there is more than 32 datasets, just take the first 32
+        else:
+            datasets_to_pack = data.datasets[:32]
+            datasets = b''.join(pack_wod_dataset(dataset) for dataset in datasets_to_pack)
 
-        # Ensure the length of datasets is correct (32 data sets of 57 bits each = 1824 bits)
+        print(f"Bytes length of datasets: {len(datasets)}")
+        # # Pad if missing datasets
+        # if len(data.datasets) <= 32:
+        #     packets_padding = len(data.datasets) % 8 
         expected_length = 32 * 57 // 8
         if len(datasets) < expected_length:
             datasets = datasets.ljust(expected_length, b'\x00') # Pads with zeroes
@@ -141,6 +150,17 @@ def pack_wod_dataset(dataset):
         dataset.temperature_eps,
         dataset.temperature_battery
     )
+
+# def pack_wod_data(dataset):
+#     # Combine the fields into a single 57-bit integer
+#     combined = (dataset.satellite_mode << 56) | (dataset.battery_voltage << 48) | (dataset.battery_current << 40) | (dataset.regulated_bus_current_3v3 << 32) | (dataset.regulated_bus_current_5v << 24) | (dataset.temperature_comm << 16) | (dataset.temperature_eps << 8) | dataset.temperature_battery
+    
+#     # Convert the 57-bit integer into a bytearray
+#     packed_data = bytearray()
+#     for i in range(7, -1, -1):  # 7 bytes for 56 bits, but we only need 7 bytes for 57 bits
+#         packed_data.append((combined >> (i * 8)) & 0xFF)
+    
+#     return packed_data
 
 
 if __name__ == '__main__':
