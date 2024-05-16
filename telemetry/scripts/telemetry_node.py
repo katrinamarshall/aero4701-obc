@@ -32,14 +32,17 @@ class Telemetry:
         # Subscriber for WOD data
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
+
     def downlink_data_callback(self, data):
         """Sends a miscellaneous message to be sent by the transceiver"""
         info = data.data  
-        ssid_type = 0b1110
+        ssid_type = 0b1011 # Misc ssid
 
-        ax25_frame = AX25UIFrame(info, ssid_type)
+        # Create an ax.25 UI frame
+        ax25_frame = AX25UIFrame(info.encode('ascii'), ssid_type)
         frame = ax25_frame.create_frame()
 
+        # Send data
         self.transceiver.send_deal(frame)
 
     def payload_data_callback(self, data):
@@ -55,8 +58,7 @@ class Telemetry:
             data.time_of_detection,
             data.object_count
         )
-        print(f"Science data: {info.hex()}")
-        ssid_type = 0b1111
+        ssid_type = 0b1111 # Science ssid
 
         # Create an ax.25 UI frame
         ax25_frame = AX25UIFrame(info, ssid_type)
@@ -80,8 +82,7 @@ class Telemetry:
             data.velocity_y,
             data.velocity_z
         )
-        print(f"Satellite pose data: {info.hex()}")
-        ssid_type = 0b1101
+        ssid_type = 0b1101 # Satellite_pose ssid
 
         # Create an ax.25 UI frame
         ax25_frame = AX25UIFrame(info, ssid_type)
@@ -89,7 +90,6 @@ class Telemetry:
 
         # Send data
         self.transceiver.send_deal(frame)
-
 
 
     def wod_data_callback(self, data):
