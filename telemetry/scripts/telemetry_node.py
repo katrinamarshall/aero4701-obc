@@ -108,7 +108,7 @@ class Telemetry:
         # # Pad if missing datasets
         # if len(data.datasets) <= 32:
         #     packets_padding = len(data.datasets) % 8 
-        expected_length = 32 * 57 // 8
+        expected_length = 29 * 57 // 8
         if len(datasets) < expected_length:
             datasets = datasets.ljust(expected_length, b'\x00') # Pads with zeroes
 
