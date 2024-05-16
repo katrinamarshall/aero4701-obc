@@ -1,4 +1,4 @@
-uint8 satellite_mode
+bool satellite_mode
 uint8 battery_voltage
 uint8 battery_current
 uint8 regulated_bus_current_3v3

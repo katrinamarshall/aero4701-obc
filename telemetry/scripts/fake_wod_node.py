@@ -6,11 +6,11 @@ from debra.msg import WOD, WOD_data
 def publish_wod():
     pub = rospy.Publisher('/wod_data', WOD, queue_size=10)
     rospy.init_node('fake_wod_node', anonymous=True)
-    rate = rospy.Rate(1) # 1 Hz
+    rate = rospy.Rate(0.2) # 1 Hz
 
     # Define the datasets
     dataset1 = WOD_data(
-        satellite_mode=1,
+        satellite_mode=True,
         battery_voltage=128,
         battery_current=64,
         regulated_bus_current_3v3=32,
@@ -21,7 +21,7 @@ def publish_wod():
     )
     
     dataset2 = WOD_data(
-        satellite_mode=2,
+        satellite_mode=False,
         battery_voltage=129,
         battery_current=65,
         regulated_bus_current_3v3=33,

@@ -131,7 +131,7 @@ class Telemetry:
 # Helper functions ----------------------------------------------------------------
 def pack_wod_dataset(dataset):
     """Pack a single WOD data set into binary format."""
-    return struct.pack('8B', 
+    return struct.pack('B'*7, 
         dataset.satellite_mode,
         dataset.battery_voltage,
         dataset.battery_current,
