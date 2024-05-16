@@ -197,7 +197,7 @@ def pack_wod_dataset(dataset):
         dataset.regulated_bus_current_3v3,
         dataset.regulated_bus_current_5v,
         dataset.temperature_comm,
-        dataset.temperature_eps,x
+        dataset.temperature_eps,
         dataset.temperature_battery
     )
 
