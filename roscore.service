@@ -1,0 +1,20 @@
+# THIS IS A GENERATED FILE, NOT RECOMMENDED TO EDIT.
+
+[Unit]
+Description="bringup roscore in libsystemdmdsystem"
+After=network.target
+
+
+[Service]
+Type=simple
+User=debra3
+# Ensure environment variables are correctly sourced
+ExecStartPre=/bin/bash -c 'source /opt/ros/noetic/setup.bash'
+ExecStartPre=/bin/bash -c 'source /home/debra3/catkin_ws/devel/setup.bash'
+ExecStart=/bin/bash -c 'source /home/debra3/catkin_ws/devel/setup.bash && /opt/ros/noetic/bin/roscore'
+Restart=on-failure
+Environment="HOME=/home/debra3"
+Environment="ROS_HOME=/home/debra3/.ros"
+
+[Install]
+WantedBy=multi-user.target
