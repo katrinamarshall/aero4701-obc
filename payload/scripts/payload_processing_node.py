@@ -7,6 +7,7 @@ import time
 from std_msgs.msg import String
 from payload.msg import lidar_raw_data
 from payload.msg import sat_info
+from payload.msg import debris_packet
 
 import rospy
 
@@ -19,7 +20,7 @@ import datetime as dt
 
 from conversion import *
 from constants import *
-import rotation 
+import rotation as rot
 
 # initialise node outside of class
 
@@ -45,8 +46,21 @@ class PayloadProcessing():
     """ gets test data and does all the processing"""
     def __init__(self) -> None:
 
+        # TODO
+        """
+        - edit fields so not storing unnecessary information
+        - clean code so not so scary
+        - go through so works with all 4 lidars in sim
+        - look at kat's stuff - make separate topics for each lidar?
+        - make different modes - different messages for each mode
+        - send code for kivy
+        - rewrite relative velocity algorithm for testing case - should be different to how find absolute velocity
+        - go through testing criteria?
+
+        """
+
         # Publishers TODO WRITE THIS - make custom message for debris packet
-        self.pub_payload_data = rospy.Publisher('/debris_packet', payload_data_downlink, queue_size=10)
+        self.pub_payload_data = rospy.Publisher('/debris_packet', debris_packet, queue_size=10)
         # publish to different topic for debugging - showing polar coords
         # self.pub_payload_debugging_f = rospy.Publisher('/debugging_f', polar_data, queue_size=10) #TODO need to define
 
@@ -64,8 +78,7 @@ class PayloadProcessing():
 
      
         
-        # logging satellite state fields
-        # maybe i should clear this???  what about times TODO
+        # logging satellite state fields - should only contain most recent state
         self._sat_pos = []
         self._sat_vel = []
         self._sat_att = []
@@ -83,8 +96,9 @@ class PayloadProcessing():
         self._debris_count = 0
         self._lidar_labels_prev_detections = []
 
+        # updated so just store current detections
         self._debris_eci_pos = []
-        self._debris_sizes = []
+        self._debris_sizes = [] 
         self._debris_velocities = []
         self._detection_times = []
         self._debris_rel_velocities = []
@@ -95,10 +109,10 @@ class PayloadProcessing():
     
     def callback_sat_info(self, data):
 
-        self.sat_pos = np.array(data.position)
-        self.sat_vel = np.array(data.velocity)
-        self.sat_att = np.array(data.attitude)
-        self.sat_time = data.timestamp
+        self._sat_pos = np.array(data.position)
+        self._sat_vel = np.array(data.velocity)
+        self._sat_att = np.array(data.attitude)
+        self._sat_time = data.timestamp
         # print("Position received", self.sat_pos)
 
 
@@ -120,16 +134,20 @@ class PayloadProcessing():
         #     print("Service call failed: %s"%e)
 
         self._raw_lidar.append(np.array(raw_data.distances).reshape(8,8))
+
         self._lidar_labels.append(raw_data.label)
+
+        # TODO 1 callback for 1 topic but with 4 arrays
 
 
         self.process_debris(self.sat_pos, self.sat_vel, self.sat_att, self.sat_time)
+        self._lidar_labels.remove
         return
 
 
 # this should just be publisher?!
     def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, debris_vel, sat_vel):
-        self.pub.publish(timestamp, debris_count, x_eci, debris_size, debris_vel, debris_vel - sat_vel)
+        self.pub_payload_data.publish(x_eci, debris_vel, debris_vel - sat_vel, debris_size, timestamp, debris_count)
 
         # self._debris_eci_pos.append(x_eci)
         # self._debris_sizes.append(debris_size)
@@ -537,10 +555,11 @@ class PayloadProcessing():
             
             # find how many new lidar readings are to be processed
             num_new_readings = len(self._lidar_labels) - self._all_readings_count
+            print("Num new readings", num_new_readings)
             self._all_readings_count = len(self._lidar_labels)
             # print(self._lidar_labels_prev_detections)
 
-            # for each new lidar packet
+            # for each new lidar packet - TODO instead of doing like this do like separate arrays of raw lidar data - much simpler
             for n in range(num_new_readings):
                 
                 data = np.array(self._raw_lidar[-num_new_readings+n])
@@ -602,7 +621,7 @@ class PayloadProcessing():
                             
                         # store which lidar most recent detection from
                         self._prev_detections.append(lidar_label)
-                        self._log_for_transmit(timestamp, debris_pos_eci, debris_sizes[s], vel,sat_vel)
+                        # self._log_for_transmit(timestamp, debris_pos_eci, debris_sizes[s], vel,sat_vel)
 
                        
                         # Log detected debris
@@ -610,17 +629,17 @@ class PayloadProcessing():
                         print("------------------------------ TRANSMIT DATA --------------------------------------------------")
                         print(f"From LiDAR {lidar_label}: {self.sat_time}: ")
                         print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
-                        if sum(self._debris_velocities[-1] - VEL_UNKNOWN) != 0:
-                            print(f"Travelling at absolute velocity in ECI frame {self._debris_velocities[-1]} m/s")
-                            print(f"Relative to DEBRA speed {np.linalg.norm(self._debris_rel_velocities[-1])} m/s, ")
-                            print(f" {self._debris_rel_velocities[-1]} m/s")
-                            print(f"v satellite {sat_vel}")
+                        # if sum(self._debris_velocities[-1] - VEL_UNKNOWN) != 0:
+                        #     print(f"Travelling at absolute velocity in ECI frame {self._debris_velocities[-1]} m/s")
+                        #     print(f"Relative to DEBRA speed {np.linalg.norm(self._debris_rel_velocities[-1])} m/s, ")
+                        #     print(f" {self._debris_rel_velocities[-1]} m/s")
+                        #     print(f"v satellite {sat_vel}")
                     
-                        s += 1
 
                         print("-----------------------------------------------------------------------------------------------")
                         print("\n")
-                        self.payload_data_downlink(self.sat_time, self.debris_count, debris_pos_eci, debris_sizes[s], self._debris_velocities[-1], self._debris_rel_velocities[-1])
+                        self.payload_data_downlink(self.sat_time, self._debris_count, debris_pos_eci, debris_sizes[s], vel, vel - sat_vel)
+                        s += 1
 
         return
     
@@ -666,4 +685,3 @@ if __name__ == "__main__":
     myProcessing = PayloadProcessing()
     # rospy.Timer(rospy.Duration(1.0/2.0), myLidar.)
     rospy.spin()
-
