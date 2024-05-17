@@ -76,6 +76,7 @@ while not rospy.is_shutdown():
     pi_temp = getPiTemp()
     current_time = strftime("%H:%M")
     message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
+    # message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     rospy.loginfo(message)  # Log msg to ROS
     pub.publish(message)  # Publish msg
     file.write(f"{message}\n")
