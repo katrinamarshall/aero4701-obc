@@ -205,6 +205,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-catkin_install_python(PROGRAMS scripts/lidar_node.py scripts/lidar_listener.py
+catkin_install_python(PROGRAMS scripts/lidar_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
