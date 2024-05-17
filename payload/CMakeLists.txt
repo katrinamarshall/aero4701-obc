@@ -51,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   lidar_raw_data.msg
+  lidar_raw_data_single.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -205,6 +206,8 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-catkin_install_python(PROGRAMS scripts/lidar_node.py
+catkin_install_python(PROGRAMS 
+  scripts/lidar_node.py 
+  scripts/lidar_node_single.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
