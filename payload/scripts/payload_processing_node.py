@@ -37,6 +37,7 @@ PLOT = False
 CHECK_RESIDUALS = False
 TEST_VEL=True
 DEBUGGING_MODE = True
+NUM_LIDARS_ACTIVE = 1
 
 
 # debra has a server for satellite state 
@@ -85,7 +86,10 @@ class PayloadProcessing():
         self._sat_time = 0
 
         # Logging fields
-        self._raw_lidar = []
+        self._raw_lidar = [] # for lidar 1
+        # self._raw_lidar_2 = [] # for lidar 2
+        # self._raw_lidar_3 = [] # for lidar 3
+        # self._raw_lidar_4 = [] # for lidar 4
         self._lidar_labels = []
 
         # Callback variables
@@ -133,15 +137,19 @@ class PayloadProcessing():
         # except rospy.ServiceException as e:
         #     print("Service call failed: %s"%e)
 
-        self._raw_lidar.append(np.array(raw_data.distances).reshape(8,8))
+        self._raw_lidar.append(np.array(raw_data.distances_1).reshape(8,8))
+        # self._raw_lidar.append(np.array(raw_data.distances_2).reshape(8,8))
+        # self._raw_lidar.append(np.array(raw_data.distances_3).reshape(8,8))
+        # self._raw_lidar.append(np.array(raw_data.distances_4).reshape(8,8))
 
-        self._lidar_labels.append(raw_data.label)
+
+        # self._lidar_labels.append(raw_data.label)
 
         # TODO 1 callback for 1 topic but with 4 arrays
 
 
         self.process_debris(self.sat_pos, self.sat_vel, self.sat_att, self.sat_time)
-        self._lidar_labels.remove
+        # self._lidar_labels.remove
         return
 
 
@@ -550,19 +558,23 @@ class PayloadProcessing():
 
     
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
+        # assume all are synchronised
+        # make version for 4 and version for 1
         if self._lidar_message_received == True:
             self._lidar_message_received = False
             
             # find how many new lidar readings are to be processed
-            num_new_readings = len(self._lidar_labels) - self._all_readings_count
-            print("Num new readings", num_new_readings)
-            self._all_readings_count = len(self._lidar_labels)
+            # num_new_readings = len(self._lidar_labels) - self._all_readings_count
+            # print("Num new readings", num_new_readings)
+            # self._all_readings_count = len(self._lidar_labels)
+            num_new_readings = NUM_LIDARS_ACTIVE
             # print(self._lidar_labels_prev_detections)
 
             # for each new lidar packet - TODO instead of doing like this do like separate arrays of raw lidar data - much simpler
             for n in range(num_new_readings):
-                
-                data = np.array(self._raw_lidar[-num_new_readings+n])
+
+                # data = np.array(self._raw_lidar[-num_new_readings+n])
+                data = np.array(self._raw_lidar[n])
 
                 # run blob detection algorithm on new data
                 blob_diameters, blob_positions, blob_avg_values = self.find_blobs(data, SENSOR_RANGE)
@@ -571,7 +583,8 @@ class PayloadProcessing():
                 if len(blob_diameters) > 0:
 
                     # Found new debris
-                    self._lidar_labels_prev_detections.append(self._lidar_labels[-num_new_readings+n])
+                    # self._lidar_labels_prev_detections.append(self._lidar_labels[-num_new_readings+n])
+                    self._lidar_labels_prev_detections.append(n+1)
 
                     # if so, find its coordinates
                     debris_pos_polar, debris_sizes = self.image2polar(blob_positions, blob_avg_values,blob_diameters, FOV, PIXELS_1D)
@@ -595,7 +608,8 @@ class PayloadProcessing():
                     # For each debris object set of coordinates
                     for x_polar in debris_pos_polar:
                         # identify which lidar this came from
-                        lidar_label = self._lidar_labels_prev_detections[n]
+                        # lidar_label = self._lidar_labels_prev_detections[n]
+                        lidar_label = n + 1
                         # convert to xyz coordinates
                         debris_pos_cart = self.polar_to_cartesian(x_polar)
                 
