@@ -51,8 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   lidar_raw_data.msg
-  sat_info.msg
-  debris_packet.msg
 )
 
 ## Generate services in the 'srv' folder
