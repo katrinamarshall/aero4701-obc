@@ -42,16 +42,16 @@ class Telemetry:
         self.thread.daemon = True
         self.thread.start()
 
-        def process_queue(self):
-            """Sends messages to be transmitted by the transceiver from a queue"""
-            while True:
-                frame = self.message_queue.get()
-                if frame is None:
-                    break
+    def process_queue(self):
+        """Sends messages to be transmitted by the transceiver from a queue"""
+        while True:
+            frame = self.message_queue.get()
+            if frame is None:
+                break
 
-                # Only send messages one at a time
-                self.transceiver.send_deal(frame)
-                self.message_queue.task_done()
+            # Only send messages one at a time
+            self.transceiver.send_deal(frame)
+            self.message_queue.task_done()
 
 
     def downlink_data_callback(self, data):
