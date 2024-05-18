@@ -24,7 +24,7 @@ class Telemetry:
 
         self.message_queue = queue.Queue()
 
-        rospy.Timer(rospy.Duration(1), self.timer_callback)
+        rospy.Timer(rospy.Duration(2), self.timer_callback)
 
     def timer_callback(self, event):
         print("Timer has been called")
