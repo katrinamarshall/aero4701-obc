@@ -5,7 +5,7 @@ import rospy
 import numpy as np
 
 from std_msgs.msg import String
-from payload.msg import lidar_raw_data
+from payload.msg import lidar_raw_data_single
 #from lidar_listener import listener_func
 
 class FakeLidar:
@@ -15,7 +15,7 @@ class FakeLidar:
         
        
 
-        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=10)
+        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data_single, queue_size=10)
         self.ready = True
         # print("Done!")
 
@@ -35,7 +35,7 @@ class FakeLidar:
             # 2d array of distance
             distance = data.flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
             #print(f"Distance: {distance} \n")
-            self.pub.publish(self.label, distance)
+            self.pub.publish( distance)
             # 2d array of reflectance
             # reflectance = numpy.flipud(numpy.array(data.reflectance).reshape((8, 8)))
             # 2d array of good ranging data
@@ -52,13 +52,13 @@ class FakeLidar:
 if __name__ == '__main__':
     rospy.init_node("fake_lidar")
     myFakeLidar1 = FakeLidar(1)
-    myFakeLidar2 = FakeLidar(2)
-    myFakeLidar3 = FakeLidar(3)
-    myFakeLidar4 = FakeLidar(4)
+    # myFakeLidar2 = FakeLidar(2)
+    # myFakeLidar3 = FakeLidar(3)
+    # myFakeLidar4 = FakeLidar(4)
 
     rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar1.get_lidar_data)
-    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar2.get_lidar_data)
-    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar3.get_lidar_data)
-    rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar4.get_lidar_data)
+    # rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar2.get_lidar_data)
+    # rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar3.get_lidar_data)
+    # rospy.Timer(rospy.Duration(1.0/2.0), myFakeLidar4.get_lidar_data)
 
     rospy.spin()

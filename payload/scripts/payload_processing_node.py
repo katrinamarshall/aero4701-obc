@@ -6,6 +6,7 @@ import time
 
 from std_msgs.msg import String
 from payload.msg import lidar_raw_data
+from payload.msg import lidar_raw_data_single
 from payload.msg import sat_info
 from payload.msg import debris_packet
 
@@ -68,7 +69,7 @@ class PayloadProcessing():
 
         # Subscribers
         # make raw lidar data have label within message as well
-        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # raw lidar data
+        rospy.Subscriber('/raw_lidar_data', lidar_raw_data_single, self.callback_raw_lidar) # raw lidar data
 
         # make fake sat info publisher
         rospy.Subscriber('/sat_info', sat_info, self.callback_sat_info) # satellite pose data (pos, vel, att, time)
@@ -108,7 +109,11 @@ class PayloadProcessing():
         self._debris_rel_velocities = []
 
         self._prev_detections = [] #
-     
+
+        self._sat_pos = VEL_UNKNOWN
+        self._sat_vel = VEL_UNKNOWN
+        self._sat_att = VEL_UNKNOWN
+        self._sat_time = 0
         return
     
     def callback_sat_info(self, data):
@@ -148,7 +153,7 @@ class PayloadProcessing():
         # TODO 1 callback for 1 topic but with 4 arrays
 
 
-        self.process_debris(self.sat_pos, self.sat_vel, self.sat_att, self.sat_time)
+        self.process_debris(self._sat_pos, self._sat_vel, self._sat_att, self._sat_time)
         # self._lidar_labels.remove
         return
 
@@ -567,6 +572,7 @@ class PayloadProcessing():
             # num_new_readings = len(self._lidar_labels) - self._all_readings_count
             # print("Num new readings", num_new_readings)
             # self._all_readings_count = len(self._lidar_labels)
+            # FOR IF WANT 4 DIFFERENT LIDARS PUBLISHING SEPARATELY
             num_new_readings = NUM_LIDARS_ACTIVE
             # print(self._lidar_labels_prev_detections)
 
@@ -582,7 +588,7 @@ class PayloadProcessing():
                 # check if any debris has been found - if so print updating debris count - add as var TODO
                 if len(blob_diameters) > 0:
 
-                    # Found new debris
+                    # Found new debris - add whichever lidar this has come from
                     # self._lidar_labels_prev_detections.append(self._lidar_labels[-num_new_readings+n])
                     self._lidar_labels_prev_detections.append(n+1)
 
@@ -625,7 +631,7 @@ class PayloadProcessing():
                     # TODO write exception handling for if there are multiple debris objects in one frame 
                     # at new timestep, check previous timestep to find the velocity of debris object
                     #TODO make very basic for just one object in frame, if there in next time step
-                        timestamp = self.sat_time
+                        timestamp = sat_time
 
                         if len(blob_avg_values) > 1:
                             print("Cannot find speed, more than one object in frame")
@@ -633,7 +639,7 @@ class PayloadProcessing():
                         else:
                             vel = self.find_abs_vel(lidar_label, debris_pos_eci, debris_sizes[s], timestamp)
                             
-                        # store which lidar most recent detection from
+                        # store which lidar most recent detection from - why am i storing this 
                         self._prev_detections.append(lidar_label)
                         # self._log_for_transmit(timestamp, debris_pos_eci, debris_sizes[s], vel,sat_vel)
 
@@ -641,7 +647,7 @@ class PayloadProcessing():
                         # Log detected debris
                         print("-----------------------------------------------------------------------------------------------")
                         print("------------------------------ TRANSMIT DATA --------------------------------------------------")
-                        print(f"From LiDAR {lidar_label}: {self.sat_time}: ")
+                        print(f"From LiDAR {lidar_label}: {sat_time}: ")
                         print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
                         # if sum(self._debris_velocities[-1] - VEL_UNKNOWN) != 0:
                         #     print(f"Travelling at absolute velocity in ECI frame {self._debris_velocities[-1]} m/s")
@@ -652,11 +658,12 @@ class PayloadProcessing():
 
                         print("-----------------------------------------------------------------------------------------------")
                         print("\n")
-                        self.payload_data_downlink(self.sat_time, self._debris_count, debris_pos_eci, debris_sizes[s], vel, vel - sat_vel)
+                        self.payload_data_downlink(sat_time, self._debris_count, debris_pos_eci, debris_sizes[s], vel, vel - sat_vel)
                         s += 1
 
         return
     
+    # need to update this
     def find_abs_vel(self, lidar_label,debris_pos_eci, size, timestamp):
         vel = VEL_UNKNOWN 
         # If object was detected in previous timestep
