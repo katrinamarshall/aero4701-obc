@@ -116,13 +116,7 @@ class Telemetry:
         self.message_queue.put(second_frame)
 
     def run(self):
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
-            command = self.transceiver.receive_data()
-            if command:
-                rospy.loginfo(f"Received and publishing: component={command.component}, component_id={command.component_id}, command={command.command}")
-                self.uplink_publisher.publish(command)
-            rate.sleep()
+        rospy.spin()
 
 # Helper functions ----------------------------------------------------------------
 def convert_voltage(voltage):
