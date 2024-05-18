@@ -31,6 +31,9 @@ class Telemetry:
         # Initialize a queue for the messages
         self.message_queue = queue.Queue()
 
+        # Initialize a lock for sending messages
+        self.send_lock = threading.Lock()
+
         # Start a thread to process the queue
         self.processing_thread = threading.Thread(target=self.process_queue)
         self.processing_thread.daemon = True
@@ -56,14 +59,15 @@ class Telemetry:
         while not rospy.is_shutdown():
             if not self.message_queue.empty():
                 message_type, data = self.message_queue.get()
-                if message_type == 'downlink':
-                    self.process_downlink_data(data)
-                elif message_type == 'payload':
-                    self.process_payload_data(data)
-                elif message_type == 'satellite_pose':
-                    self.process_satellite_pose_data(data)
-                elif message_type == 'wod':
-                    self.process_wod_data(data)
+                with self.send_lock:
+                    if message_type == 'downlink':
+                        self.process_downlink_data(data)
+                    elif message_type == 'payload':
+                        self.process_payload_data(data)
+                    elif message_type == 'satellite_pose':
+                        self.process_satellite_pose_data(data)
+                    elif message_type == 'wod':
+                        self.process_wod_data(data)
 
     def process_downlink_data(self, data):
         info = data.data
@@ -160,7 +164,7 @@ def convert_voltage(voltage):
     return max(0, min(255, math.floor((20 * voltage) - 60)))
 
 def convert_current(current):
-    return max(0, min(255, math.floor(127 * current) + 127))
+    return max(0, min(255, math.floor(127 * current) + 127)))
 
 def convert_bus_current(current):
     return max(0, min(255, math.floor(40 * current)))
