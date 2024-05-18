@@ -7,7 +7,6 @@ from AX25UI import AX25UIFrame
 from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
 import struct
 import math
-import threading
 import queue
 
 class Telemetry:
@@ -24,17 +23,16 @@ class Telemetry:
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
         self.message_queue = queue.Queue()
-        self.send_lock = threading.Lock()
-        threading.Thread(target=self.send_messages).start()
+        self.message_sent = True
 
-    def send_messages(self):
-        while not rospy.is_shutdown():
+        rospy.Timer(rospy.Duration(0.1), self.timer_callback)
+
+    def timer_callback(self, event):
+        if self.message_sent and not self.message_queue.empty():
             frame = self.message_queue.get()
-            self.transceiver.message_sent_event.wait()
-            with self.send_lock:
-                self.transceiver.message_sent_event.clear()
-                self.transceiver.send_deal(frame)
-            self.message_queue.task_done()
+            self.message_sent = False
+            self.transceiver.send_deal(frame)
+            self.message_sent = True  # Set this to true here since we can't modify send()
 
     def downlink_data_callback(self, data):
         info = data.data  
