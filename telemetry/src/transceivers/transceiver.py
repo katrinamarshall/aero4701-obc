@@ -1,6 +1,7 @@
 import json
 import sys
 import termios
+import threading
 from ._sx126x import sx126x
 from telemetry.msg import command_msg
 from AX25UI import AX25UIFrameDecoder
@@ -17,23 +18,12 @@ class Transceiver(sx126x):
             relay=False
         ) -> None:
         super().__init__(serial_num=serial_num, freq=freq, addr=addr, power=power, rssi=rssi, air_speed=air_speed, relay=relay)
-        
-        # Terminal settings
         self.old_settings = termios.tcgetattr(sys.stdin)
+        self.message_sent_event = threading.Event()
+        self.message_sent_event.set()
 
-    
-    def send_deal(
-            self, 
-            message: str # CHANGE THIS
-        ) -> None:
-        """Sends a message after encoding
-
-        Args:
-            message (str): _description_
-
-        Returns:
-            _type_: _description_
-        """
+    def send_deal(self, message: bytes) -> None:
+        """Sends a message after encoding"""
         DEFAULT_ADDRESS = 0
         offset_frequency = self.freq - (850 if self.freq > 850 else 410)
         data = (bytes([DEFAULT_ADDRESS >> 8]) + 
@@ -44,8 +34,8 @@ class Transceiver(sx126x):
                 bytes([self.offset_freq]) + 
                 message)
         self.send(data)
+        self.message_sent_event.set()
         print(f"Data: {data}")
-        return 1
 
     def receive_data(self):
         data = self.receive()
