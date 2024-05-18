@@ -23,19 +23,14 @@ class Telemetry:
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
         self.message_queue = queue.Queue()
-        self.message_sent = True
 
         rospy.Timer(rospy.Duration(0.1), self.timer_callback)
 
     def timer_callback(self, event):
-        if self.message_sent and not self.message_queue.empty():
+        if not self.message_queue.empty():
             frame = self.message_queue.get()
-            self.message_sent = False
             self.transceiver.send_deal(frame)
-            rospy.Timer(rospy.Duration(1), self.reset_message_sent, oneshot=True)
 
-    def reset_message_sent(self, event):
-        self.message_sent = True
 
     def downlink_data_callback(self, data):
         info = data.data  
