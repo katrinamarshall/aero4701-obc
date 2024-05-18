@@ -7,6 +7,8 @@ from AX25UI import AX25UIFrame
 from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
 import struct
 import math
+import threading
+import queue
 
 class Telemetry:
     def __init__(self):
@@ -16,7 +18,6 @@ class Telemetry:
         
         # Initialize the transceiver object
         self.transceiver = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
-        self.transceiver1 = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
         
         # Publisher for uplink commands
         self.uplink_publisher = rospy.Publisher('/uplink_commands', command_msg, queue_size=10)
@@ -27,11 +28,30 @@ class Telemetry:
         # Subscriber for payload data
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
 
-        # Subscriber for statellite pose data
+        # Subscriber for satellite pose data
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
 
         # Subscriber for WOD data
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
+
+        # Message queue
+        self.message_queue = queue.Queue()
+
+        # Start thread - ensures messages are sent one at a time
+        self.thread = threading.Thread(target=self.process_queue)
+        self.thread.daemon = True
+        self.thread.start()
+
+        def process_queue(self):
+            """Sends messages to be transmitted by the transceiver from a queue"""
+            while True:
+                frame = self.message_queue.get()
+                if frame is None:
+                    break
+
+                # Only send messages one at a time
+                self.transceiver.send_deal(frame)
+                self.message_queue.task_done()
 
 
     def downlink_data_callback(self, data):
@@ -43,8 +63,8 @@ class Telemetry:
         ax25_frame = AX25UIFrame(info.encode('ascii'), ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver.send_deal(frame)
+        # Send message to the queue
+        self.message_queue.put(frame)
 
     def payload_data_callback(self, data):
         """Packs and sends payload (science) data"""
@@ -65,8 +85,8 @@ class Telemetry:
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver1.send_deal(frame)
+        # Send message to the queue
+        self.message_queue.put(frame)
 
 
     def satellite_pose_data_callback(self, data):
@@ -89,8 +109,8 @@ class Telemetry:
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver.send_deal(frame)
+        # Send message to the queue
+        self.message_queue.put(frame)
 
 
     def wod_data_callback(self, data):
@@ -120,7 +140,9 @@ class Telemetry:
         ssid_type = 0b1110  # WOD data type
         first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
         first_frame = first_ax25_frame.create_frame()
-        self.transceiver.send_deal(first_frame)
+
+        # Send message to the queue
+        self.message_queue.put(first_frame)
 
         # Pack the second 16 datasets
         second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
@@ -134,7 +156,9 @@ class Telemetry:
         # Create and send the second ax.25 UI frame
         second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
         second_frame = second_ax25_frame.create_frame()
-        self.transceiver.send_deal(second_frame)
+
+        # Send message to the queue
+        self.message_queue.put(second_frame)
 
 
     def run(self):
