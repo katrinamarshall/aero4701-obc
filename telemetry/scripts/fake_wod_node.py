@@ -49,7 +49,7 @@ def publish_fake_data():
     pub_pose = rospy.Publisher('/satellite_pose_data', satellite_pose, queue_size=10)
     
     rospy.init_node('fake_data_node', anonymous=True)
-    rate = rospy.Rate(0.2)  # 0.2 Hz
+    rate = rospy.Rate(2)  # 0.2 Hz
 
     while not rospy.is_shutdown():
         # Create and publish WOD message with random datasets
@@ -60,19 +60,19 @@ def publish_fake_data():
         )
         pub_wod.publish(wod_msg)
         rospy.loginfo("Publishing WOD data")
-        rospy.sleep(1)
+        # rospy.sleep(1)
 
-        # Create and publish random payload data
-        payload_msg = generate_random_payload_data()
-        pub_payload.publish(payload_msg)
-        rospy.loginfo("Publishing Payload data")
-        rospy.sleep(1)
+        # # Create and publish random payload data
+        # payload_msg = generate_random_payload_data()
+        # pub_payload.publish(payload_msg)
+        # rospy.loginfo("Publishing Payload data")
+        # rospy.sleep(1)
 
-        # Create and publish random satellite pose data
-        pose_msg = generate_random_satellite_pose()
-        pub_pose.publish(pose_msg)
-        rospy.loginfo("Publishing Satellite Pose data")
-        rospy.sleep(1)
+        # # Create and publish random satellite pose data
+        # pose_msg = generate_random_satellite_pose()
+        # pub_pose.publish(pose_msg)
+        # rospy.loginfo("Publishing Satellite Pose data")
+        # rospy.sleep(1)
 
         rate.sleep()
 
