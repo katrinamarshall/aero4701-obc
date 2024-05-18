@@ -16,6 +16,7 @@ class Telemetry:
         
         # Initialize the transceiver object
         self.transceiver = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
+        self.transceiver1 = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
         
         # Publisher for uplink commands
         self.uplink_publisher = rospy.Publisher('/uplink_commands', command_msg, queue_size=10)
@@ -65,7 +66,7 @@ class Telemetry:
         frame = ax25_frame.create_frame()
 
         # Send data
-        self.transceiver.send_deal(frame)
+        self.transceiver1.send_deal(frame)
 
 
     def satellite_pose_data_callback(self, data):
