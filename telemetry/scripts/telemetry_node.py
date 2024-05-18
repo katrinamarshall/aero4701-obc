@@ -164,7 +164,7 @@ def convert_voltage(voltage):
     return max(0, min(255, math.floor((20 * voltage) - 60)))
 
 def convert_current(current):
-    return max(0, min(255, math.floor(127 * current) + 127)))
+    return max(0, min(255, math.floor(127 * current) + 127))
 
 def convert_bus_current(current):
     return max(0, min(255, math.floor(40 * current)))
