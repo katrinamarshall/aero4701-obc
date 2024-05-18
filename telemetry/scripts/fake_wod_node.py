@@ -1,44 +1,34 @@
 #!/usr/bin/env python
 import rospy
+import random
 from std_msgs.msg import String
 from debra.msg import WOD, WOD_data
+
+def generate_random_wod_data():
+    return WOD_data(
+        satellite_mode=bool(random.getrandbits(1)),
+        battery_voltage=random.uniform(6.0, 8.0),  # Random voltage between 6.0 and 8.0 volts
+        battery_current=random.uniform(0.0, 1.0),  # Random current between 0.0 and 1.0 amps
+        regulated_bus_current_3v3=random.uniform(0.0, 0.5),  # Random bus current between 0.0 and 0.5 amps
+        regulated_bus_current_5v=random.uniform(0.0, 0.5),  # Random bus current between 0.0 and 0.5 amps
+        temperature_comm=random.uniform(15.0, 30.0),  # Random temperature between 15.0 and 30.0 Celsius
+        temperature_eps=random.uniform(15.0, 30.0),  # Random temperature between 15.0 and 30.0 Celsius
+        temperature_battery=random.uniform(15.0, 30.0)  # Random temperature between 15.0 and 30.0 Celsius
+    )
 
 def publish_wod():
     pub = rospy.Publisher('/wod_data', WOD, queue_size=10)
     rospy.init_node('fake_wod_node', anonymous=True)
     rate = rospy.Rate(0.2)  # 0.2 Hz
 
-    # Define the datasets with float values
-    dataset1 = WOD_data(
-        satellite_mode=True,
-        battery_voltage=6.5,  # Example voltage in volts
-        battery_current=0.5,  # Example current in amps
-        regulated_bus_current_3v3=0.1,  # Example bus current in amps
-        regulated_bus_current_5v=0.2,  # Example bus current in amps
-        temperature_comm=25.0,  # Example temperature in Celsius
-        temperature_eps=20.0,  # Example temperature in Celsius
-        temperature_battery=15.0  # Example temperature in Celsius
-    )
-    
-    dataset2 = WOD_data(
-        satellite_mode=False,
-        battery_voltage=7.0,  # Example voltage in volts
-        battery_current=0.6,  # Example current in amps
-        regulated_bus_current_3v3=0.2,  # Example bus current in amps
-        regulated_bus_current_5v=0.3,  # Example bus current in amps
-        temperature_comm=26.0,  # Example temperature in Celsius
-        temperature_eps=21.0,  # Example temperature in Celsius
-        temperature_battery=16.0  # Example temperature in Celsius
-    )
-
-    # Create the WOD message
-    wod_msg = WOD(
-        satellite_id="DEBRA",
-        packet_time_size=1234567890,
-        datasets=[dataset1, dataset2] + [WOD_data() for _ in range(30)] 
-    )
-
     while not rospy.is_shutdown():
+        # Create the WOD message with random datasets
+        wod_msg = WOD(
+            satellite_id="DEBRA",
+            packet_time_size=rospy.Time.now().to_sec(),
+            datasets=[generate_random_wod_data() for _ in range(32)]
+        )
+
         pub.publish(wod_msg)
         rospy.loginfo("Publishing WOD data")
         rate.sleep()
