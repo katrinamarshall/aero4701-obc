@@ -24,12 +24,14 @@ class Telemetry:
 
         self.message_queue = queue.Queue()
 
-        rospy.Timer(rospy.Duration(0.1), self.timer_callback)
+        rospy.Timer(rospy.Duration(1), self.timer_callback)
 
     def timer_callback(self, event):
         print("Timer has been called")
         if not self.message_queue.empty():
+            print("Processing")
             frame = self.message_queue.get()
+            print(f"Frame: {frame}")
             self.transceiver.send_deal(frame)
 
 
