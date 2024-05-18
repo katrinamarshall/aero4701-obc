@@ -25,7 +25,7 @@ def publish_wod():
         # Create the WOD message with random datasets
         wod_msg = WOD(
             satellite_id="DEBRA",
-            packet_time_size=int(rospy.Time.now().to_nsec()),  # Use nanoseconds for unique unsigned int
+            packet_time_size=int(rospy.Time.now().to_sec()),  # Use seconds for unsigned int
             datasets=[generate_random_wod_data() for _ in range(32)]
         )
 
