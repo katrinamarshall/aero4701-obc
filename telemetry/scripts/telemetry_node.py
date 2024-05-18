@@ -45,7 +45,8 @@ class Telemetry:
         while not rospy.is_shutdown():
             frame = self.message_queue.get()
             with self.send_lock:
-                self.transceiver.send_deal(frame)
+                if(self.transceiver.send_deal(frame)):
+                    continue
             self.message_queue.task_done()
 
     def downlink_data_callback(self, data):

@@ -45,7 +45,7 @@ class Transceiver(sx126x):
                 message)
         self.send(data)
         print(f"Data: {data}")
-        return None
+        return 1
 
     def receive_data(self):
         data = self.receive()
