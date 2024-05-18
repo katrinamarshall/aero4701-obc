@@ -60,19 +60,19 @@ def publish_fake_data():
         )
         pub_wod.publish(wod_msg)
         rospy.loginfo("Publishing WOD data")
-        rospy.sleep(1)
+        rospy.sleep(3)
 
         # Create and publish random payload data
         payload_msg = generate_random_payload_data()
         pub_payload.publish(payload_msg)
         rospy.loginfo("Publishing Payload data")
-        rospy.sleep(1)
+        rospy.sleep(3)
 
         # Create and publish random satellite pose data
         pose_msg = generate_random_satellite_pose()
         pub_pose.publish(pose_msg)
         rospy.loginfo("Publishing Satellite Pose data")
-        rospy.sleep(1)
+        rospy.sleep(3)
 
         rate.sleep()
 
