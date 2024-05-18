@@ -32,7 +32,10 @@ class Telemetry:
             frame = self.message_queue.get()
             self.message_sent = False
             self.transceiver.send_deal(frame)
-            self.message_sent = True  # Set this to true here since we can't modify send()
+            rospy.Timer(rospy.Duration(1), self.reset_message_sent, oneshot=True)
+
+    def reset_message_sent(self, event):
+        self.message_sent = True
 
     def downlink_data_callback(self, data):
         info = data.data  
