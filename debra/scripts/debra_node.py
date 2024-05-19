@@ -50,6 +50,9 @@ class Debra:
         # Satellite pose
         self.sat_pose = satellite_pose()
 
+        # Payload data
+        self.payload = payload_data()
+
         # Timer
         rospy.Timer(rospy.Duration(10), self.publish_wod)
 
@@ -71,8 +74,9 @@ class Debra:
         self.publish_state()
 
     def callback_debris_packet(self, data):
-        # Process debris packet and publish to downlink
-        self.pub_downlink.publish(f"Debris Packet: {data}")
+        # Update payload data
+        for field in vars(data):
+            setattr(self.sat_pose, field, getattr(data, field))
         rospy.loginfo("Published debris packet to downlink.")
 
     def callback_raw_lidar(self, data):
@@ -89,9 +93,19 @@ class Debra:
         #     self.pub_move_sat.publish("Orientation Command")
         #     rospy.loginfo("Published move_sat command.")
 
-        # Update satellite pose data
-        for field in vars(data):
-            setattr(self.sat_pose, field, getattr(data, field))
+
+
+        # # Update satellite pose data
+        # for field in vars(data):
+        #     setattr(self.sat_pose, field, getattr(data, field))
+
+        attributes = [
+            'position_x', 'position_y', 'position_z',
+            'orientation_x', 'orientation_y', 'orientation_z', 'orientation_w',
+            'velocity_x', 'velocity_y', 'velocity_z'
+        ]
+        for attr in attributes:
+            setattr(self.sat_pose, attr, getattr(data, attr))
 
     def callback_temperature(self, data):
         try:
