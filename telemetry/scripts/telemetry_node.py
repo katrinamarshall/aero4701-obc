@@ -8,6 +8,7 @@ from debra.msg import payload_data, satellite_pose, WOD_data, WOD
 import struct
 import math
 import queue
+import threading
 
 class Telemetry:
     def __init__(self):
@@ -23,30 +24,30 @@ class Telemetry:
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
         self.message_queue = queue.Queue()
+        self.sending_in_progress = False
+        self.lock = threading.Lock()
 
         rospy.Timer(rospy.Duration(1.5), self.timer_callback)
 
     def timer_callback(self, event):
-        print("Timer has been called")
-        if not self.message_queue.empty():
-            print("Processing message")
+        if not self.sending_in_progress and not self.message_queue.empty():
             frame = self.message_queue.get()
-            print(f"Sending frame: {frame}")
-            self.transceiver.send_deal(frame)
-        else:
-            print("Message queue is empty")
+            self.sending_in_progress = True
+            threading.Thread(target=self.send_message, args=(frame,)).start()
+
+    def send_message(self, frame):
+        self.transceiver.send_deal(frame)
+        with self.lock:
+            self.sending_in_progress = False
 
     def downlink_data_callback(self, data):
-        print("Downlink data received")
         info = data.data  
         ssid_type = 0b1011 # Misc ssid
         ax25_frame = AX25UIFrame(info.encode('ascii'), ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def payload_data_callback(self, data):
-        print("Payload data received")
         info = struct.pack('<fff fff f i i',
             data.debris_position_x,
             data.debris_position_y,
@@ -61,11 +62,9 @@ class Telemetry:
         ssid_type = 0b1111 # Science ssid
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def satellite_pose_data_callback(self, data):
-        print("Satellite pose data received")
         info = struct.pack('<fff ffff fff',
             data.position_x,
             data.position_y,
@@ -81,11 +80,9 @@ class Telemetry:
         ssid_type = 0b1101 # Satellite_pose ssid
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def wod_data_callback(self, data):
-        print("WOD data received")
         id_field = struct.pack('5s', data.satellite_id.encode('ascii'))
         time_field = struct.pack('<I', data.packet_time_size)
         first_16_datasets = data.datasets[:16]
@@ -101,7 +98,6 @@ class Telemetry:
         ssid_type = 0b1110  # WOD data type
         first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
         first_frame = first_ax25_frame.create_frame()
-        print(f"Enqueueing frame: {first_frame}")
         self.message_queue.put(first_frame)
 
         second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
@@ -112,7 +108,6 @@ class Telemetry:
         second_frame_info = second_wod + second_16_datasets_packed
         second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
         second_frame = second_ax25_frame.create_frame()
-        print(f"Enqueueing frame: {second_frame}")
         self.message_queue.put(second_frame)
 
     def run(self):
