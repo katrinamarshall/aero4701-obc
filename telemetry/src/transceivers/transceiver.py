@@ -1,10 +1,10 @@
 import sys
 import termios
-from ._sx126x import sx126x
+from ._sx126x import SX126x
 from telemetry.msg import command_msg
 from AX25UI import AX25UIFrameDecoder
 
-class Transceiver(sx126x):
+class Transceiver(SX126x):
     def __init__(
             self, 
             serial_num="/dev/ttyS0", 
@@ -15,7 +15,7 @@ class Transceiver(sx126x):
             air_speed=2400, 
             relay=False
         ) -> None:
-        # Initialize the parent class (sx126x)
+        # Initialize the parent class (SX126x)
         super().__init__(serial_num=serial_num, freq=freq, addr=addr, power=power, rssi=rssi, air_speed=air_speed, relay=relay)
         
         # Save terminal settings to restore later
