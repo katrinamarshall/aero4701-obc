@@ -53,8 +53,6 @@ class Debra:
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
         if msg.component == 'o' and msg.component_id == 0:
-            # CHANGE THIS
-            self.current_wod_data.battery_voltage = 3.5
             try:
                 state_number = int(msg.command)
                 if state_number in self.STATES:
@@ -63,6 +61,7 @@ class Debra:
             except ValueError:
                 rospy.logwarn(f"Invalid state number received: {msg.command}")
         
+        # THIS IS AN EXAMPLE OF WOD WORKING AND MUST BE REMOVED
         if msg.component == 'o' and msg.component_id == 1:
             self.current_wod_data.temperature_comm = 15.6
 
@@ -105,6 +104,12 @@ class Debra:
                     self.state = 4  # Nominal state
                     rospy.loginfo("Temperature nominal. Switched to NOMINAL state.")
             self.pub_state.publish(self.STATES[self.state])
+
+            # FOR MING TO CHANGE LATER
+            self.current_wod_data.temperature_comm = thermistor_temps[0]
+            self.current_wod_data.temperature_eps = thermistor_temps[1]
+            self.current_wod_data.temperature_battery = thermistor_temps[2]
+
         except ValueError as e:
             rospy.logwarn(f"Invalid temperature data received: {data.data} Error: {str(e)}")
 
@@ -118,6 +123,13 @@ class Debra:
                 self.state = 4  # Nominal state
                 rospy.loginfo("Battery voltage nominal. Switched to NOMINAL state.")
             self.pub_state.publish(self.STATES[self.state])
+
+            # FOR LUCAS TO CHANGE LATER
+            self.current_wod_data.battery_voltage = 3.5
+            self.current_wod_data.battery_current = 0.8
+            self.current_wod_data.regulated_bus_current_3v3 = 0.5
+            self.current_wod_data.regulated_bus_current_5v = 0.7
+
         except ValueError:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
 
@@ -130,9 +142,9 @@ class Debra:
         """Publish WOD every 10 seconds"""
         # Update satellite mode field
         if self.state == 5:
-            self.current_wod_data.satellite_mode = 1
+            self.current_wod_data.satellite_mode = bool(True)
         else:
-            self.current_wod_data.satellite_mode = 0
+            self.current_wod_data.satellite_mode = bool(False)
 
         # Insert the current WOD_data at index 0 and shift the list
         self.wod_data.datasets.insert(0, self.current_wod_data)
@@ -151,15 +163,6 @@ class Debra:
             self.pub_wod.publish(self.wod_data)
             rospy.loginfo("Published WOD data.")
 
-    def update_wod_data(self, field, value):
-        # Insert a new dataset at index 0
-        new_dataset = WOD_data()
-        setattr(new_dataset, field, value)
-        self.wod_data.datasets.insert(0, new_dataset)
-
-        # Ensure only 32 datasets are kept
-        if len(self.wod_data.datasets) > 32:
-            self.wod_data.datasets.pop()
 
     def handle_user_input(self):
         while not rospy.is_shutdown():
