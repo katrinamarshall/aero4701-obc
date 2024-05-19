@@ -56,6 +56,7 @@ class Debra:
         # Timer
         rospy.Timer(rospy.Duration(10), self.publish_wod)
 
+
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
         if msg.component == 'o' and msg.component_id == 0:
@@ -73,15 +74,28 @@ class Debra:
 
         self.publish_state()
 
+
     def callback_debris_packet(self, data):
+        # Define the attributes for payload_data
+        payload_attributes = [
+            'debris_position_x', 'debris_position_y', 'debris_position_z',
+            'debris_velocity_x', 'debris_velocity_y', 'debris_velocity_z',
+            'debris_diameter', 'time_of_detection', 'object_count'
+        ]
+
         # Update payload data
-        for field in vars(data):
-            setattr(self.sat_pose, field, getattr(data, field))
-        rospy.loginfo("Published debris packet to downlink.")
+        for attr in payload_attributes:
+            setattr(self.payload, attr, getattr(data, attr))
+
+        # Publish the updated payload data
+        self.pub_payload.publish(self.payload)
+        rospy.loginfo("Published updated payload data.")
+
 
     def callback_raw_lidar(self, data):
         # Process raw lidar data (this is just a placeholder)
         rospy.loginfo(f"Received raw lidar data: {data}")
+
 
     def callback_sat_info(self, data):
         # # Check if satellite information matches the desired state
@@ -94,11 +108,7 @@ class Debra:
         #     rospy.loginfo("Published move_sat command.")
 
 
-
         # # Update satellite pose data
-        # for field in vars(data):
-        #     setattr(self.sat_pose, field, getattr(data, field))
-
         attributes = [
             'position_x', 'position_y', 'position_z',
             'orientation_x', 'orientation_y', 'orientation_z', 'orientation_w',
@@ -106,6 +116,7 @@ class Debra:
         ]
         for attr in attributes:
             setattr(self.sat_pose, attr, getattr(data, attr))
+
 
     def callback_temperature(self, data):
         try:
@@ -134,6 +145,7 @@ class Debra:
         except ValueError as e:
             rospy.logwarn(f"Invalid temperature data received: {data.data} Error: {str(e)}")
 
+
     def callback_curr_volt(self, data):
         try:
             battery = float(data.data)
@@ -154,10 +166,12 @@ class Debra:
         except ValueError:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
 
+
     def publish_state(self):
         # Publish the current state to /operation_state
         # rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
+
 
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""
@@ -191,6 +205,7 @@ class Debra:
             # Publish satellite pose
             self.pub_sat_pose.publish(self.sat_pose)
 
+
     def handle_user_input(self):
         while not rospy.is_shutdown():
             user_input = input("Enter new state name or number: ")  # Use input() for Python 3
@@ -209,6 +224,7 @@ class Debra:
                 else:
                     rospy.logwarn("Invalid state name.")
             self.publish_state()
+
 
     def run(self):
         # Threading for user input
