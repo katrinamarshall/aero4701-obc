@@ -110,35 +110,11 @@ class Debra:
         rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
 
-    def handle_user_input(self):
-        while not rospy.is_shutdown():
-            user_input = input("Enter new state name or number: ")  # Use input() for Python 3
-            if user_input.isdigit():
-                state_number = int(user_input)
-                if state_number in self.STATES:
-                    self.state = state_number
-                    rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
-                else:
-                    rospy.logwarn("Invalid state number.")
-            else:
-                state_number = next((num for num, name in self.STATES.items() if name.lower() == user_input.lower()), None)
-                if state_number:
-                    self.state = state_number
-                    rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
-                else:
-                    rospy.logwarn("Invalid state name.")
-            self.publish_state()
-
     def run(self):
-        input_thread = threading.Thread(target=self.handle_user_input)
-        input_thread.start()
-
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
             self.publish_state()
             rate.sleep()
-
-        input_thread.join()
 
 if __name__ == '__main__':
     rospy.init_node('debra_node')
