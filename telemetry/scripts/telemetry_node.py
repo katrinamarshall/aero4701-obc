@@ -13,7 +13,6 @@ class Telemetry:
     def __init__(self):
         # Initialize the ROS node
         rospy.init_node('telemetry_node')
-        rospy.loginfo("Starting telemetry node")
         
         # Initialize the Transceiver object
         self.transceiver = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
