@@ -107,7 +107,7 @@ class Debra:
 
     def publish_state(self):
         # Publish the current state to /operation_state
-        # rospy.loginfo(f"Current State: {self.STATES[self.state]}")
+        rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
 
     def handle_user_input(self):

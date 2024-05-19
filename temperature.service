@@ -1,0 +1,13 @@
+# THIS IS A GENERATED FILE, NOT RECOMMENDED TO EDIT.
+
+[Unit]
+Description="bringup temperature"
+After=roscore.service
+Requires=roscore.service
+
+[Service]
+Type=simple
+ExecStart=sudo /usr/sbin/temperature-start
+
+[Install]
+WantedBy=multi-user.target
