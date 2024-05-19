@@ -150,3 +150,7 @@ def pack_wod_dataset(dataset):
         temperature_eps,
         temperature_battery
     )
+
+if __name__ == '__main__':
+    telemetry = Telemetry()
+    telemetry.run()
