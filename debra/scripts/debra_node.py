@@ -194,9 +194,18 @@ class Debra:
 
         # Publish the WOD data if not in SAFE state
         if self.state != 6:
-            # Fill in informaiton
+            # Setting ID
             self.wod_data.satellite_id = "DEBRA"
-            self.wod_data.packet_time_size = int(rospy.Time.now().to_sec())
+
+            # Reference epoch (01/01/2000 00:00:00 UTC)
+            reference_epoch = rospy.Time(946684800)  # 946684800 seconds since 1970-01-01 00:00:00 UTC (UNIX time) to 2000-01-01 00:00:00 UTC
+
+            # Calculate seconds since the reference epoch (01/01/2000 00:00:00 UTC)
+            current_time = rospy.Time.now()
+            elapsed_seconds = (current_time - reference_epoch).to_sec()
+
+            # Set the wod time
+            self.wod_data.packet_time_size = int(elapsed_seconds)
 
             # Publish wod
             self.pub_wod.publish(self.wod_data)
