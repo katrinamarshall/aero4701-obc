@@ -74,12 +74,12 @@ class Debra:
     def callback_temperature(self, data):
         try:
             temperatures = data.data.split(',')
-            time_stamp = temperatures[0]
-            thermistor_temps = [float(temp) for temp in temperatures[1:5]]  # Convert the first four temperature values
-            pi_cpu_temp = float(temperatures[5])  # Convert the Pi CPU temperature
+            # time_stamp = temperatures[0]
+            thermistor_temps = [float(temp) for temp in temperatures[0:3]]  # Convert the three thermistor temperature values
+            pi_cpu_temp = float(temperatures[3])  
 
-            # Check temperatures for going out of the nominal range
-            if any(t < -20 or t > 50 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 70°C as the critical temperature for Pi CPU
+            # Check if temp exceeds the nominal range
+            if any(t < -20 or t > 50 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 85°C as the critical temperature for Pi CPU
                 if self.state != 6:
                     self.state = 6  # Safe state
                     rospy.loginfo("Temperature out of range. Switched to SAFE state.")
