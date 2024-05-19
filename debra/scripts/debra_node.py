@@ -47,6 +47,9 @@ class Debra:
         self.wod_data.datasets = [WOD_data() for _ in range(32)]
         self.current_wod_data = WOD_data()
 
+        # Satellite pose
+        self.sat_pose = satellite_pose()
+
         # Timer
         rospy.Timer(rospy.Duration(10), self.publish_wod)
 
@@ -77,14 +80,18 @@ class Debra:
         rospy.loginfo(f"Received raw lidar data: {data}")
 
     def callback_sat_info(self, data):
-        # Check if satellite information matches the desired state
-        if not self.satellite_calibrated:
-            self.state = 3  # Calibration state
-            self.pub_state.publish(self.STATES[self.state])
-        else:
-            # Find required controls to orient the satellite
-            self.pub_move_sat.publish("Orientation Command")
-            rospy.loginfo("Published move_sat command.")
+        # # Check if satellite information matches the desired state
+        # if not self.satellite_calibrated:
+        #     self.state = 3  # Calibration state
+        #     self.pub_state.publish(self.STATES[self.state])
+        # else:
+        #     # Find required controls to orient the satellite
+        #     self.pub_move_sat.publish("Orientation Command")
+        #     rospy.loginfo("Published move_sat command.")
+
+        # Update satellite pose data
+        for field in vars(data):
+            setattr(self.sat_pose, field, getattr(data, field))
 
     def callback_temperature(self, data):
         try:
@@ -141,10 +148,11 @@ class Debra:
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""
         # Update satellite mode field
+        print(f"State: {self.state}")
         if self.state == 5:
-            self.current_wod_data.satellite_mode = bool(True)
+            self.current_wod_data.satellite_mode = 1
         else:
-            self.current_wod_data.satellite_mode = bool(False)
+            self.current_wod_data.satellite_mode = 0
 
         # Insert the current WOD_data at index 0 and shift the list
         self.wod_data.datasets.insert(0, self.current_wod_data)
@@ -158,11 +166,16 @@ class Debra:
 
         # Publish the WOD data if not in SAFE state
         if self.state != 6:
+            # Fill in informaiton
             self.wod_data.satellite_id = "DEBRA"
             self.wod_data.packet_time_size = int(rospy.Time.now().to_sec())
+
+            # Publish wod
             self.pub_wod.publish(self.wod_data)
             rospy.loginfo("Published WOD data.")
 
+            # Publish satellite pose
+            self.pub_sat_pose.publish(self.sat_pose)
 
     def handle_user_input(self):
         while not rospy.is_shutdown():
