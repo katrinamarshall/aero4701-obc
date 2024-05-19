@@ -3,7 +3,7 @@
 import rospy
 import threading
 from std_msgs.msg import String
-from debra.msg import command_msg, satellite_pose, payload_data
+from debra.msg import command_msg, satellite_pose, payload_data, WOD, WOD_data
 
 class Debra:
     STATES = {
@@ -25,11 +25,13 @@ class Debra:
 
         # Publishers
         self.pub_state = rospy.Publisher('/operation_state', String, queue_size=10)
-        self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
         self.pub_move_sat = rospy.Publisher('/move_sat', String, queue_size=10)
-        # Additional publishers for the example
-        self.pose_pub = rospy.Publisher('/satellite_pose', satellite_pose, queue_size=10)
-        self.payload_pub = rospy.Publisher('/payload_data', payload_data, queue_size=10)
+
+        # Publishers for downlink data
+        self.pub_sat_pose = rospy.Publisher('/satellite_pose_data', satellite_pose, queue_size=10)
+        self.pub_payload = rospy.Publisher('/payload_data', payload_data, queue_size=10)
+        self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
+        self.pub_wod = rospy.Publisher('/wod_data', WOD, queue_size=10)
 
         # Subscribers
         rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
@@ -39,8 +41,18 @@ class Debra:
         rospy.Subscriber('/current_voltage', String, self.callback_curr_volt)
         rospy.Subscriber('/temperature_data', String, self.callback_temperature)
 
+        # Data to be sent
+        # WOD
+        self.wod_data = WOD()
+        self.wod_data.datasets = [WOD_data() for _ in range(32)]
+        self.current_wod_data = WOD_data()
+
+        # Timer
+        rospy.Timer(rospy.Duration(10), self.publish_wod)
+
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
+        self.current_wod_data.satellite_mode = 1
         if msg.component == 'o' and msg.component_id == 0:
             try:
                 state_number = int(msg.command)
@@ -110,6 +122,35 @@ class Debra:
         rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
 
+    def publish_wod(self, event):
+        """Publish WOD every 10 seconds"""
+        # Insert the current WOD_data at index 0 and shift the list
+        self.wod_data.datasets.insert(0, self.current_wod_data)
+
+        # Ensure only 32 datasets are kept
+        if len(self.wod_data.datasets) > 32:
+            self.wod_data.datasets.pop()
+
+        # Reset current WOD_data for the next period
+        self.current_wod_data = WOD_data()
+
+        # Publish the WOD data if not in SAFE state
+        if self.state != 6:
+            self.wod_data.satellite_id = "satellite_id_placeholder"
+            self.wod_data.packet_time_size = rospy.Time.now().to_sec()
+            self.pub_wod.publish(self.wod_data)
+            rospy.loginfo("Published WOD data.")
+
+    def update_wod_data(self, field, value):
+        # Insert a new dataset at index 0
+        new_dataset = WOD_data()
+        setattr(new_dataset, field, value)
+        self.wod_data.datasets.insert(0, new_dataset)
+
+        # Ensure only 32 datasets are kept
+        if len(self.wod_data.datasets) > 32:
+            self.wod_data.datasets.pop()
+
     def handle_user_input(self):
         while not rospy.is_shutdown():
             user_input = input("Enter new state name or number: ")  # Use input() for Python 3
@@ -130,12 +171,14 @@ class Debra:
             self.publish_state()
 
     def run(self):
+        # Threading for user input
         input_thread = threading.Thread(target=self.handle_user_input)
         input_thread.start()
 
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
             self.publish_state()
+
             rate.sleep()
 
         input_thread.join()
