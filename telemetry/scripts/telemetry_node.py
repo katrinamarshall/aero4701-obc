@@ -27,7 +27,7 @@ class Telemetry:
         self.sending_in_progress = False
         self.lock = threading.Lock()
 
-        rospy.Timer(rospy.Duration(1.5), self.timer_callback)
+        rospy.Timer(rospy.Duration(0.1), self.timer_callback)
 
     def timer_callback(self, event):
         if not self.sending_in_progress and not self.message_queue.empty():
