@@ -9,7 +9,7 @@ import rospy
 from std_msgs.msg import String
 
 #ROS SETUP
-# Initialize the node
+# Initialise the node
 rospy.init_node('temperature_monitor_node', anonymous=True)
 pub = rospy.Publisher('temperature_data', String, queue_size=10)
 rate = rospy.Rate(0.2)  # 5 seconds
@@ -20,14 +20,12 @@ spi.open(0, 0)
 spi.max_speed_hz = 1350000  # Ensure under 1.35 MHz
 
 #Constants
-v_in = 3.3  # Input reference voltage from Pi
+v_in = 3.3  # Input voltage
 R_ref = 10000  # Fixed reference resistor (10k ohm)
 
-#File
-file = open('/home/debra3/temperatures.csv', 'w')
-#degrees celsius?
-file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Thermistor 3, Pi CPU \n') 
-
+#Deprecated writing to csv 
+# file = open('/home/debra3/temperatures.csv', 'w')
+# file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Pi CPU \n') 
 
 def readADC(channelNum):
     if channelNum > 7 or channelNum < 0:
@@ -40,19 +38,18 @@ def getTemp(adc_channel):
     raw_data = readADC(adc_channel)  # Read the ADC channel to get value
     voltage = (raw_data * v_in) / 1024  # Convert ADC raw data to voltage
     
-    if voltage < 20:
-        rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. Hardcoding temperature as 0°C.")
-        return 0  # Hardcoded temperature for unconnected or faulty channels
+    if voltage < 10:
+        rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. ")
+        return -9
     
-    R_thermistor = R_ref * ((v_in / voltage) - 1)  # Calculate thermistor resistance using voltage divider formula
+    #Voltage divider formula
+    R_thermistor = R_ref * ((v_in / voltage) - 1)  #
 
-    # Steinhart-Hart coefficients for a typical 10k NTC thermistor
-    a = 0.0010295
-    b = 0.000239255
-    c = 0.0000001558
-    # a = 0.001129148
-    # b = 0.000234125
-    # c = 0.0000000876741
+    # Steinhart-Hart coefficients for 10k NTC thermistor
+    a = 0.001125308852122
+    b = 0.000234711863267
+    c = 0.000000085663516
+
     ln_r = math.log(R_thermistor)  # Ensure R_thermistor > zero before taking log
     t1 = b * ln_r
     t2 = c * ln_r ** 3
@@ -72,13 +69,13 @@ def getPiTemp():
     return cpu_temp
 
 while not rospy.is_shutdown():
-    temps = [getTemp(i) for i in range(4)]
+    temps = [getTemp(i) for i in range(3)]
     pi_temp = getPiTemp()
-    current_time = strftime("%H:%M")
-    message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
+    # current_time = strftime("%H:%M")
+    message = f"{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     # message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     rospy.loginfo(message)  # Log msg to ROS
     pub.publish(message)  # Publish msg
-    file.write(f"{message}\n")
-    file.flush()
+    # file.write(f"{message}\n")
+    # file.flush()
     rate.sleep()
