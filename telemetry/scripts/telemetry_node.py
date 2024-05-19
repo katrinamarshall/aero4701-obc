@@ -42,7 +42,6 @@ class Telemetry:
         ssid_type = 0b1011 # Misc ssid
         ax25_frame = AX25UIFrame(info.encode('ascii'), ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def payload_data_callback(self, data):
@@ -61,7 +60,6 @@ class Telemetry:
         ssid_type = 0b1111 # Science ssid
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def satellite_pose_data_callback(self, data):
@@ -81,7 +79,6 @@ class Telemetry:
         ssid_type = 0b1101 # Satellite_pose ssid
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
-        print(f"Enqueueing frame: {frame}")
         self.message_queue.put(frame)
 
     def wod_data_callback(self, data):
@@ -101,7 +98,6 @@ class Telemetry:
         ssid_type = 0b1110  # WOD data type
         first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
         first_frame = first_ax25_frame.create_frame()
-        print(f"Enqueueing frame: {first_frame}")
         self.message_queue.put(first_frame)
 
         second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
@@ -112,7 +108,6 @@ class Telemetry:
         second_frame_info = second_wod + second_16_datasets_packed
         second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
         second_frame = second_ax25_frame.create_frame()
-        print(f"Enqueueing frame: {second_frame}")
         self.message_queue.put(second_frame)
 
     def run(self):
