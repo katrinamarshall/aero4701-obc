@@ -52,8 +52,9 @@ class Debra:
 
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
-        self.current_wod_data.satellite_mode = 1
         if msg.component == 'o' and msg.component_id == 0:
+            # CHANGE THIS
+            self.current_wod_data.battery_current = 3.5
             try:
                 state_number = int(msg.command)
                 if state_number in self.STATES:
@@ -61,6 +62,9 @@ class Debra:
                     rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
             except ValueError:
                 rospy.logwarn(f"Invalid state number received: {msg.command}")
+        
+        if msg.component == 'o' and msg.component_id == 1:
+            self.current_wod_data.battery_current = 6.5
 
         self.publish_state()
 
@@ -119,11 +123,17 @@ class Debra:
 
     def publish_state(self):
         # Publish the current state to /operation_state
-        rospy.loginfo(f"Current State: {self.STATES[self.state]}")
+        # rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
 
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""
+        # Update satellite mode field
+        if self.state == 5:
+            self.current_wod_data.satellite_mode = 1
+        else:
+            self.current_wod_data.satellite_mode = 0
+
         # Insert the current WOD_data at index 0 and shift the list
         self.wod_data.datasets.insert(0, self.current_wod_data)
 
@@ -136,7 +146,7 @@ class Debra:
 
         # Publish the WOD data if not in SAFE state
         if self.state != 6:
-            self.wod_data.satellite_id = "satellite_id_placeholder"
+            self.wod_data.satellite_id = "DEBRA"
             self.wod_data.packet_time_size = int(rospy.Time.now().to_sec())
             self.pub_wod.publish(self.wod_data)
             rospy.loginfo("Published WOD data.")
