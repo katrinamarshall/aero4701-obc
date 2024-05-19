@@ -17,6 +17,7 @@ def listener_func():
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
     rospy.init_node('listener_downlink', anonymous=True)
+    print("Ready")
 
     rospy.Subscriber('/debris_packet', debris_packet, callback)
 

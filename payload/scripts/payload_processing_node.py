@@ -5,10 +5,11 @@ Processes LiDAR data to output
 import time
 
 from std_msgs.msg import String
-from payload.msg import lidar_raw_data
+# from payload.msg import lidar_raw_data
 from payload.msg import lidar_raw_data_single
 from payload.msg import sat_info
 from payload.msg import debris_packet
+from payload.msg import found_debris_debugging
 
 import rospy
 
@@ -27,8 +28,12 @@ import rotation as rot
 
 # make separate lidar
 # TODO edit so each lidar is publishing to different topic
+# issue is not running fast enough - to debug try clean this code 
+# then make new topic for debugging wwee
+# rewrite code so pretty
+# rewrite velocity code
 
-SENSOR_RANGE = 4000 # mm
+SENSOR_RANGE = 100 # mm
 FOV = 45 # degrees
 PIXELS_1D = 8
 LIDAR_FREQ = 15 # Hz
@@ -36,9 +41,10 @@ LIDAR_PERIOD = 66667 # microseconds
 VEL_UNKNOWN = np.array([-1,-1,-1])
 PLOT = False
 CHECK_RESIDUALS = False
-TEST_VEL=True
+TEST_VEL=False
 DEBUGGING_MODE = True
 NUM_LIDARS_ACTIVE = 1
+OBJECT_TOLERANCE = 50
 
 
 # debra has a server for satellite state 
@@ -62,14 +68,19 @@ class PayloadProcessing():
         """
 
         # Publishers TODO WRITE THIS - make custom message for debris packet
-        self.pub_payload_data = rospy.Publisher('/debris_packet', debris_packet, queue_size=10)
+        self.pub_payload_data = rospy.Publisher('/debris_packet', debris_packet, queue_size=1)
+        self.pub_debugging_blobs = rospy.Publisher('/found_debris', found_debris_debugging, queue_size=100)
+
+
         # publish to different topic for debugging - showing polar coords
         # self.pub_payload_debugging_f = rospy.Publisher('/debugging_f', polar_data, queue_size=10) #TODO need to define
 
 
         # Subscribers
         # make raw lidar data have label within message as well
-        rospy.Subscriber('/raw_lidar_data', lidar_raw_data_single, self.callback_raw_lidar) # raw lidar data
+        # rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # raw lidar data
+        rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback_raw_lidar) # raw lidar data
+
 
         # make fake sat info publisher
         rospy.Subscriber('/sat_info', sat_info, self.callback_sat_info) # satellite pose data (pos, vel, att, time)
@@ -112,7 +123,7 @@ class PayloadProcessing():
 
         self._sat_pos = VEL_UNKNOWN
         self._sat_vel = VEL_UNKNOWN
-        self._sat_att = VEL_UNKNOWN
+        self._sat_att = np.array([1,0,0,0])
         self._sat_time = 0
         return
     
@@ -142,7 +153,9 @@ class PayloadProcessing():
         # except rospy.ServiceException as e:
         #     print("Service call failed: %s"%e)
 
-        self._raw_lidar.append(np.array(raw_data.distances_1).reshape(8,8))
+        # self._raw_lidar.append(np.array(raw_data.distances_1).reshape(8,8))
+        self._raw_lidar = np.array(raw_data.distances_1).reshape(8,8)
+
         # self._raw_lidar.append(np.array(raw_data.distances_2).reshape(8,8))
         # self._raw_lidar.append(np.array(raw_data.distances_3).reshape(8,8))
         # self._raw_lidar.append(np.array(raw_data.distances_4).reshape(8,8))
@@ -191,7 +204,7 @@ class PayloadProcessing():
         # Check has a value within the range of lidar sensor
         if (within_grid):
             # TODO need to fine tune tolerance based on lidar
-            tolerance = 50 # 5cm change per pixel max grad for same object
+            tolerance = OBJECT_TOLERANCE # 5cm change per pixel max grad for same object
             within_range = (data[i][j] < sensor_range) and (abs(data[i][j] - current_value) < tolerance)
             # Check has not been visited before
             not_visited = not visited[i][j]
@@ -313,7 +326,7 @@ class PayloadProcessing():
         c_squared = a**2 + b**2 - 2 * a * b * cos_theta
         return np.sqrt(c_squared)
 
-    def image2polar(self, blob_positions, blob_avg_values, blob_diameters, fov, num_pixels_1D):
+    def image2polar(self, lidar_label, blob_positions, blob_avg_values, blob_diameters, fov, num_pixels_1D):
         """
         Converts given position of object in pixel image to polar coordinates from sensor
         Prints detected object characteristics
@@ -349,6 +362,10 @@ class PayloadProcessing():
                 # print("------------------------------------------------------------------------------------------------")
                 print(f"Debris object detected max diameter {debris_size:.1f}mm ({blob_diameters[i]} pixels), at r:{dist:.3f}mm, theta:{np.degrees(theta):.2f}°, phi:{np.degrees(phi):.2f}°")
                 # print("------------------------------------------------------------------------------------------------")
+            
+            print(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i])
+            self.pub_debugging_blobs.publish(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i])
+
         return np.array(debris_pos), sizes
     
        
@@ -563,9 +580,13 @@ class PayloadProcessing():
 
     
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
+        print("Running...")
         # assume all are synchronised
         # make version for 4 and version for 1
         if self._lidar_message_received == True:
+            print("going through data")
+            # rospy.spin()
+
             self._lidar_message_received = False
             
             # find how many new lidar readings are to be processed
@@ -578,22 +599,31 @@ class PayloadProcessing():
 
             # for each new lidar packet - TODO instead of doing like this do like separate arrays of raw lidar data - much simpler
             for n in range(num_new_readings):
+                print("found new reading")
+                # rospy.spin()
+
 
                 # data = np.array(self._raw_lidar[-num_new_readings+n])
-                data = np.array(self._raw_lidar[n])
+                # data = np.array(self._raw_lidar[n])
+                data = np.array(self._raw_lidar)
+
 
                 # run blob detection algorithm on new data
                 blob_diameters, blob_positions, blob_avg_values = self.find_blobs(data, SENSOR_RANGE)
+                print("found some blobs")
+                print(self._raw_lidar)
 
                 # check if any debris has been found - if so print updating debris count - add as var TODO
                 if len(blob_diameters) > 0:
+                    lidar_label = n + 1
+
 
                     # Found new debris - add whichever lidar this has come from
                     # self._lidar_labels_prev_detections.append(self._lidar_labels[-num_new_readings+n])
-                    self._lidar_labels_prev_detections.append(n+1)
+                    self._lidar_labels_prev_detections.append(lidar_label)
 
                     # if so, find its coordinates
-                    debris_pos_polar, debris_sizes = self.image2polar(blob_positions, blob_avg_values,blob_diameters, FOV, PIXELS_1D)
+                    debris_pos_polar, debris_sizes = self.image2polar(lidar_label, blob_positions, blob_avg_values,blob_diameters, FOV, PIXELS_1D)
                     # if CHECK_RESIDUALS == True:
                     #     debris_pos_polar_noisy, debris_sizes_noisy = self.image2polar(blob_positions_noisy, blob_avg_values_noisy,blob_diameters_noisy, FOV, PIXELS_1D)
 
@@ -601,8 +631,7 @@ class PayloadProcessing():
                     # if PLOT == True and plotted == False:
                     #     self.plot_lidar_data(data,blob_positions)
                     #     plotted = True
-                    # update debris count
-                    self._debris_count += len(blob_avg_values)
+
                     #TODO edit this print statement
            
                     if DEBUGGING_MODE:
@@ -610,12 +639,15 @@ class PayloadProcessing():
                         print(f"VEL: {sat_vel}, ATT: {attitude}")
                         
 
+
                     s = 0 # counter
                     # For each debris object set of coordinates
                     for x_polar in debris_pos_polar:
+                        # update debris count
+                        self._debris_count += 1
+
                         # identify which lidar this came from
                         # lidar_label = self._lidar_labels_prev_detections[n]
-                        lidar_label = n + 1
                         # convert to xyz coordinates
                         debris_pos_cart = self.polar_to_cartesian(x_polar)
                 

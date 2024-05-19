@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import rospy
-from payload.msg import lidar_raw_data
+from payload.msg import lidar_raw_data_single
 from std_msgs.msg import String
 import numpy as np
 
 def callback(raw_data):
     #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-    print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances).reshape(8,8)} \n")
-    print(f"LiDAR Label: {raw_data.label}\n")
+    print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances_1).reshape(8,8)} \n")
+    # print(f"LiDAR Label: {raw_data.label}\n")
 
 def listener_func():
 
@@ -19,7 +19,7 @@ def listener_func():
     # run simultaneously.
     rospy.init_node('listener', anonymous=True)
 
-    rospy.Subscriber('/raw_lidar_data', lidar_raw_data, callback)
+    rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
