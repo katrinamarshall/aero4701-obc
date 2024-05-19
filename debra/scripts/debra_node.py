@@ -3,7 +3,7 @@
 import rospy
 import threading
 from std_msgs.msg import String
-from debra.msg import command_msg, satellite_pose, payload_data
+from debra.msg import command_msg, satellite_pose, payload_data, WOD, WOD_data
 
 class Debra:
     STATES = {
@@ -25,11 +25,13 @@ class Debra:
 
         # Publishers
         self.pub_state = rospy.Publisher('/operation_state', String, queue_size=10)
-        self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
         self.pub_move_sat = rospy.Publisher('/move_sat', String, queue_size=10)
-        # Additional publishers for the example
-        self.pose_pub = rospy.Publisher('/satellite_pose', satellite_pose, queue_size=10)
-        self.payload_pub = rospy.Publisher('/payload_data', payload_data, queue_size=10)
+
+        # Publishers for downlink data
+        self.pub_sat_pose = rospy.Publisher('/satellite_pose_data', satellite_pose, queue_size=10)
+        self.pub_payload = rospy.Publisher('/payload_data', payload_data, queue_size=10)
+        self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
+        self.pub_wod = rospy.Publisher('/wod_data', WOD, queue_size=10)
 
         # Subscribers
         rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
@@ -38,6 +40,22 @@ class Debra:
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
         rospy.Subscriber('/current_voltage', String, self.callback_curr_volt)
         rospy.Subscriber('/temperature_data', String, self.callback_temperature)
+
+        # Data to be sent
+        # WOD
+        self.wod_data = WOD()
+        self.wod_data.datasets = [WOD_data() for _ in range(32)]
+        self.current_wod_data = WOD_data()
+
+        # Satellite pose
+        self.sat_pose = satellite_pose()
+
+        # Payload data
+        self.payload = payload_data()
+
+        # Timer
+        rospy.Timer(rospy.Duration(10), self.publish_wod)
+
 
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
@@ -49,27 +67,56 @@ class Debra:
                     rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
             except ValueError:
                 rospy.logwarn(f"Invalid state number received: {msg.command}")
+        
+        # THIS IS AN EXAMPLE OF WOD WORKING AND MUST BE REMOVED
+        if msg.component == 'o' and msg.component_id == 1:
+            self.current_wod_data.temperature_comm = 15.6
 
         self.publish_state()
 
+
     def callback_debris_packet(self, data):
-        # Process debris packet and publish to downlink
-        self.pub_downlink.publish(f"Debris Packet: {data}")
-        rospy.loginfo("Published debris packet to downlink.")
+        # Define the attributes for payload_data
+        payload_attributes = [
+            'debris_position_x', 'debris_position_y', 'debris_position_z',
+            'debris_velocity_x', 'debris_velocity_y', 'debris_velocity_z',
+            'debris_diameter', 'time_of_detection', 'object_count'
+        ]
+
+        # Update payload data
+        for attr in payload_attributes:
+            setattr(self.payload, attr, getattr(data, attr))
+
+        # Publish the updated payload data
+        self.pub_payload.publish(self.payload)
+        rospy.loginfo("Published updated payload data.")
+
 
     def callback_raw_lidar(self, data):
         # Process raw lidar data (this is just a placeholder)
         rospy.loginfo(f"Received raw lidar data: {data}")
 
+
     def callback_sat_info(self, data):
-        # Check if satellite information matches the desired state
-        if not self.satellite_calibrated:
-            self.state = 3  # Calibration state
-            self.pub_state.publish(self.STATES[self.state])
-        else:
-            # Find required controls to orient the satellite
-            self.pub_move_sat.publish("Orientation Command")
-            rospy.loginfo("Published move_sat command.")
+        # # Check if satellite information matches the desired state
+        # if not self.satellite_calibrated:
+        #     self.state = 3  # Calibration state
+        #     self.pub_state.publish(self.STATES[self.state])
+        # else:
+        #     # Find required controls to orient the satellite
+        #     self.pub_move_sat.publish("Orientation Command")
+        #     rospy.loginfo("Published move_sat command.")
+
+
+        # # Update satellite pose data
+        attributes = [
+            'position_x', 'position_y', 'position_z',
+            'orientation_x', 'orientation_y', 'orientation_z', 'orientation_w',
+            'velocity_x', 'velocity_y', 'velocity_z'
+        ]
+        for attr in attributes:
+            setattr(self.sat_pose, attr, getattr(data, attr))
+
 
     def callback_temperature(self, data):
         try:
@@ -89,8 +136,15 @@ class Debra:
                     self.state = 4  # Nominal state
                     rospy.loginfo("Temperature nominal. Switched to NOMINAL state.")
             self.pub_state.publish(self.STATES[self.state])
+
+            # FOR MING TO CHANGE LATER
+            self.current_wod_data.temperature_comm = thermistor_temps[0]
+            self.current_wod_data.temperature_eps = thermistor_temps[1]
+            self.current_wod_data.temperature_battery = thermistor_temps[2]
+
         except ValueError as e:
             rospy.logwarn(f"Invalid temperature data received: {data.data} Error: {str(e)}")
+
 
     def callback_curr_volt(self, data):
         try:
@@ -102,21 +156,75 @@ class Debra:
                 self.state = 4  # Nominal state
                 rospy.loginfo("Battery voltage nominal. Switched to NOMINAL state.")
             self.pub_state.publish(self.STATES[self.state])
+
+            # FOR LUCAS TO CHANGE LATER
+            self.current_wod_data.battery_voltage = 3.5
+            self.current_wod_data.battery_current = 0.8
+            self.current_wod_data.regulated_bus_current_3v3 = 0.5
+            self.current_wod_data.regulated_bus_current_5v = 0.7
+
         except ValueError:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
 
+
     def publish_state(self):
         # Publish the current state to /operation_state
-        rospy.loginfo(f"Current State: {self.STATES[self.state]}")
+        # rospy.loginfo(f"Current State: {self.STATES[self.state]}")
         self.pub_state.publish(self.STATES[self.state])
+
+
+    def publish_wod(self, event):
+        """Publish WOD every 10 seconds"""
+        # Update satellite mode field
+        print(f"State: {self.state}")
+        if self.state == 5:
+            self.current_wod_data.satellite_mode = 1
+        else:
+            self.current_wod_data.satellite_mode = 0
+
+        # Insert the current WOD_data at index 0 and shift the list
+        self.wod_data.datasets.insert(0, self.current_wod_data)
+
+        # Ensure only 32 datasets are kept
+        if len(self.wod_data.datasets) > 32:
+            self.wod_data.datasets.pop()
+
+        # Reset current WOD_data for the next period
+        self.current_wod_data = WOD_data()
+
+        # Publish the WOD data if not in SAFE state
+        if self.state != 6:
+            # Setting ID
+            self.wod_data.satellite_id = "DEBRA"
+
+            # Reference epoch (01/01/2000 00:00:00 UTC)
+            reference_epoch = rospy.Time(946684800)  # 946684800 seconds since 1970-01-01 00:00:00 UTC (UNIX time) to 2000-01-01 00:00:00 UTC
+
+            # Calculate seconds since the reference epoch (01/01/2000 00:00:00 UTC)
+            current_time = rospy.Time.now()
+            elapsed_seconds = (current_time - reference_epoch).to_sec()
+
+            # Set the wod time
+            self.wod_data.packet_time_size = int(elapsed_seconds)
+
+            # Publish wod
+            self.pub_wod.publish(self.wod_data)
+            rospy.loginfo("Published WOD data.")
+
+            # Publish satellite pose
+            self.pub_sat_pose.publish(self.sat_pose)
+
+
 
     def run(self):
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
             self.publish_state()
+
             rate.sleep()
 
 if __name__ == '__main__':
     rospy.init_node('debra_node')
+    rospy.loginfo("Launching DEBRA")
     debra = Debra()
     debra.run()

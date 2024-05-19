@@ -7,46 +7,53 @@ from AX25UI import AX25UIFrame
 from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
 import struct
 import math
+import queue
 
 class Telemetry:
     def __init__(self):
         # Initialize the ROS node
         rospy.init_node('telemetry_node')
-        rospy.loginfo("Starting telemetry node")
         
-        # Initialize the transceiver object
+        # Initialize the Transceiver object
         self.transceiver = Transceiver(serial_num="/dev/ttyS0", freq=433, addr=0, power=22, rssi=False, air_speed=2400, relay=False)
-        
         # Publisher for uplink commands
         self.uplink_publisher = rospy.Publisher('/uplink_commands', command_msg, queue_size=10)
         
-        # Subscriber for downlink commands
+        # Subscribers for downlinking different message types
         rospy.Subscriber('/downlink_data', String, self.downlink_data_callback)
-        
-        # Subscriber for payload data
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
-
-        # Subscriber for statellite pose data
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
-
-        # Subscriber for WOD data
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
+        # Message queue for processing outgoing messages
+        self.message_queue = queue.Queue()
+
+        # Timer for periodic processing
+        rospy.Timer(rospy.Duration(1.2), self.timer_callback)
+
+    def timer_callback(self, event):
+        """Periodic timer callback for processing messages"""
+        if not self.message_queue.empty():
+            frame = self.message_queue.get()
+
+            # Send the frame to the transceiver to be transmitted
+            self.transceiver.send_deal(frame)
 
     def downlink_data_callback(self, data):
-        """Sends a miscellaneous message to be sent by the transceiver"""
+        """Callback for downlink data"""
         info = data.data  
         ssid_type = 0b1011 # Misc ssid
 
-        # Create an ax.25 UI frame
+        # Misc data is a string so must be ascii encoded
         ax25_frame = AX25UIFrame(info.encode('ascii'), ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver.send_deal(frame)
+        # Put message frame into queue
+        self.message_queue.put(frame)
 
     def payload_data_callback(self, data):
-        """Packs and sends payload (science) data"""
+        """Callback for payload (science) data"""
+        # Pack data according to payload_data msg type
         info = struct.pack('<fff fff f i i',
             data.debris_position_x,
             data.debris_position_y,
@@ -60,16 +67,16 @@ class Telemetry:
         )
         ssid_type = 0b1111 # Science ssid
 
-        # Create an ax.25 UI frame
+        # Create ax.25 frame
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver.send_deal(frame)
-
+        # Put message frame into queue 
+        self.message_queue.put(frame)
 
     def satellite_pose_data_callback(self, data):
-        """Packs and sends payload (science) data"""
+        """Callback for satellite pose data"""
+        # Pack data according to satellite_pose msg type
         info = struct.pack('<fff ffff fff',
             data.position_x,
             data.position_y,
@@ -84,103 +91,105 @@ class Telemetry:
         )
         ssid_type = 0b1101 # Satellite_pose ssid
 
-        # Create an ax.25 UI frame
+        # Create ax.25 frame
         ax25_frame = AX25UIFrame(info, ssid_type)
         frame = ax25_frame.create_frame()
 
-        # Send data
-        self.transceiver.send_deal(frame)
-
+        # Put mesage frame into queue
+        self.message_queue.put(frame)
 
     def wod_data_callback(self, data):
-        """Packs and sends WOD data"""
-        # Pack "DEBRA" satellite id
+        """Callback for WOD data"""
+        # Pack data according to wod msg type
         id_field = struct.pack('5s', data.satellite_id.encode('ascii'))
-
-        # Pack the time field in little endian
         time_field = struct.pack('<I', data.packet_time_size)
 
-        # Split datasets into two parts
+        # WOD is big, so sends in two separate frames
         first_16_datasets = data.datasets[:16]
         second_16_datasets = data.datasets[16:32]
         first_wod = struct.pack('B', 1)
         second_wod = struct.pack('B', 2)
-
-        # Pack the first 16 datasets
         first_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in first_16_datasets)
+
+        # Pad with 0's if missing info
         expected_length = 16 * 64 // 8  
         if len(first_16_datasets_packed) < expected_length:
-            first_16_datasets_packed = first_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes
+            first_16_datasets_packed = first_16_datasets_packed.ljust(expected_length, b'\x00')
 
-        # Combine id_field, time_field, and the first 16 datasets
+        # Create ax.25 for first frame
         first_frame_info = first_wod + id_field + time_field + first_16_datasets_packed
-
-        # Create and send the first ax.25 UI frame
         ssid_type = 0b1110  # WOD data type
         first_ax25_frame = AX25UIFrame(first_frame_info, ssid_type)
         first_frame = first_ax25_frame.create_frame()
-        self.transceiver.send_deal(first_frame)
 
-        # Pack the second 16 datasets
+        # Put first frame into queue
+        self.message_queue.put(first_frame)
+
+        # Second frame
         second_16_datasets_packed = b''.join(pack_wod_dataset(dataset) for dataset in second_16_datasets)
-        expected_length = 16 * 64 // 8  # 16 datasets, each 57 bits, converted to bytes
+        expected_length = 16 * 64 // 8
         if len(second_16_datasets_packed) < expected_length:
-            second_16_datasets_packed = second_16_datasets_packed.ljust(expected_length, b'\x00')  # Pad with zeroes if needed
+            second_16_datasets_packed = second_16_datasets_packed.ljust(expected_length, b'\x00')
 
-        # Combine only the second 16 datasets
+        # Create ax.25 for second frame
         second_frame_info = second_wod + second_16_datasets_packed
-
-        # Create and send the second ax.25 UI frame
         second_ax25_frame = AX25UIFrame(second_frame_info, ssid_type)
         second_frame = second_ax25_frame.create_frame()
-        self.transceiver.send_deal(second_frame)
 
+        # Put second frame into queue
+        self.message_queue.put(second_frame)
 
     def run(self):
+        """Main loop for the telemetry ROS node"""
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
+            # Constantly listen for groundstation commands
             command = self.transceiver.receive_data()
+
+            # Publish commands to /uplink_data
             if command:
                 rospy.loginfo(f"Received and publishing: component={command.component}, component_id={command.component_id}, command={command.command}")
                 self.uplink_publisher.publish(command)
             rate.sleep()
 
-
-
 # Helper functions ----------------------------------------------------------------
 def convert_voltage(voltage):
+    # Converts voltage to a byte value
     return max(0, min(255, math.floor((20 * voltage) - 60)))
 
 def convert_current(current):
+    # Converts current to a byte value
     return max(0, min(255, math.floor(127 * current) + 127))
 
 def convert_bus_current(current):
+    # Converts bus current to a byte value
     return max(0, min(255, math.floor(40 * current)))
 
 def convert_temperature(temp):
+    # Converts temperature to a byte value
     return max(0, min(255, math.floor((4 * temp) + 60)))
 
 def pack_wod_dataset(dataset):
-    """Pack a single WOD data set into binary format."""
-    # Convert all floats to unsigned 8bit integers as per WOD format
-    # Mode
+    """Packs WOD dataset into a byte structure"""
+    # Single bit for satellite_mode
     satellite_mode = 1 if dataset.satellite_mode else 0
 
-    # Battery voltage
+    # Use helper functions from given WOD data format to pack floats into 
+    # 8 bit unsigned integers
+    # Battery
     battery_voltage = convert_voltage(dataset.battery_voltage)
-
-    # Battery current
     battery_current = convert_current(dataset.battery_current)
 
-    # Bus currents
+    # Regulated bus current
     regulated_bus_current_3v3 = convert_bus_current(dataset.regulated_bus_current_3v3)
     regulated_bus_current_5v = convert_bus_current(dataset.regulated_bus_current_5v)
 
-    # Temperatures
+    # Temperature
     temperature_comm = convert_temperature(dataset.temperature_comm)
     temperature_eps = convert_temperature(dataset.temperature_eps)
     temperature_battery = convert_temperature(dataset.temperature_battery)
 
+    # Return packed WOD data as 8bytes
     return struct.pack('B'*8,
         satellite_mode,
         battery_voltage,
@@ -192,8 +201,7 @@ def pack_wod_dataset(dataset):
         temperature_battery
     )
 
-
-
 if __name__ == '__main__':
+    # Create Telemetry object and run the node
     telemetry = Telemetry()
     telemetry.run()
