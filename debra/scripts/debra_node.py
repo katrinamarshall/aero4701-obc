@@ -137,7 +137,7 @@ class Debra:
         # Publish the WOD data if not in SAFE state
         if self.state != 6:
             self.wod_data.satellite_id = "satellite_id_placeholder"
-            self.wod_data.packet_time_size = rospy.Time.now().to_sec()
+            self.wod_data.packet_time_size = int(rospy.Time.now().to_sec())
             self.pub_wod.publish(self.wod_data)
             rospy.loginfo("Published WOD data.")
 
