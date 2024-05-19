@@ -216,6 +216,6 @@ class Debra:
 
 if __name__ == '__main__':
     rospy.init_node('debra_node')
-    rospy.info("Launching DEBRA")
+    rospy.log_info("Launching DEBRA")
     debra = Debra()
     debra.run()
