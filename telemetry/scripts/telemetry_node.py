@@ -24,21 +24,20 @@ class Telemetry:
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
 
         self.message_queue = queue.Queue()
-        self.sending_in_progress = False
-        self.lock = threading.Lock()
+        self.sending_event = threading.Event()
+        self.sending_event.set()  # Initially set to allow sending
 
         rospy.Timer(rospy.Duration(0.1), self.timer_callback)
 
     def timer_callback(self, event):
-        if not self.sending_in_progress and not self.message_queue.empty():
+        if self.sending_event.is_set() and not self.message_queue.empty():
             frame = self.message_queue.get()
-            self.sending_in_progress = True
+            self.sending_event.clear()  # Block further sending
             threading.Thread(target=self.send_message, args=(frame,)).start()
 
     def send_message(self, frame):
         self.transceiver.send_deal(frame)
-        with self.lock:
-            self.sending_in_progress = False
+        self.sending_event.set()  # Allow next message to be sent
 
     def downlink_data_callback(self, data):
         info = data.data  
@@ -151,7 +150,3 @@ def pack_wod_dataset(dataset):
         temperature_eps,
         temperature_battery
     )
-
-if __name__ == '__main__':
-    telemetry = Telemetry()
-    telemetry.run()
