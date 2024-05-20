@@ -121,5 +121,5 @@ class Lidar:
 if __name__ == '__main__':
     rospy.init_node("payload")
     myLidar = Lidar()
-    rospy.Timer(rospy.Duration(1.0/10.0), myLidar.get_lidar_data)
+    rospy.Timer(rospy.Duration(1.0/15.0), myLidar.get_lidar_data)
     rospy.spin()

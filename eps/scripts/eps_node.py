@@ -47,6 +47,6 @@ class EPS:
 if __name__ == "__main__":
     rospy.init_node("eps")
     myEPS = EPS()
-    rospy.Timer(rospy.Duration(1.0/2.0), myEPS.get_curr_volt)
+    rospy.Timer(rospy.Duration(1.0/10.0), myEPS.get_curr_volt)
     rospy.spin()
     
