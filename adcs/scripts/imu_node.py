@@ -18,15 +18,20 @@ class IMU:
     def get_imu_data(self, event=None):
         msg = imu_data_packet()
 
-        msg.acceleration = self.bno055.acceleration # Accelerometer (m/s^2)
-        msg.gyro = self.bno055.gyro # Gyroscope (rad/sec)
-        msg.magnetometer = self.bno055.magnetic # Magnetometer (microteslas)
+        print(self.bno055.acceleration)
+        print(self.bno055.gyro)
+        print(self.bno055.magnetic)
+        print(self.bno055.temperature)
+
+        # msg.acceleration = self.bno055.acceleration # Accelerometer (m/s^2)
+        # msg.gyro = self.bno055.gyro # Gyroscope (rad/sec)
+        # msg.magnetometer = self.bno055.magnetic # Magnetometer (microteslas)
 
         self.pub.publish(msg)
 
 if __name__ == "__main__":
     rospy.init_node("imu")
     myIMU = IMU()
-    rospy.Timer(rospy.Duration(1.0/2.0), myIMU.get_imu_data)
+    rospy.Timer(rospy.Duration(1.0/10.0), myIMU.get_imu_data)
     rospy.spin()
     
