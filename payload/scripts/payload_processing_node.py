@@ -562,12 +562,12 @@ class PayloadProcessing():
     
 
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
-        print("Running...")
+        # print("Running...")
         # assume all are synchronised
         # make version for 4 and version for 1
         # if self._lidar_message_received == True:
         if True:
-            print("going through data")
+            # print("going through data")
             # rospy.spin()
 
             # self._lidar_message_received = False
@@ -582,7 +582,7 @@ class PayloadProcessing():
 
             # for each new lidar packet - TODO instead of doing like this do like separate arrays of raw lidar data - much simpler
             for n in range(num_new_readings):
-                print("found new reading")
+                # print("found new reading")
                 # rospy.spin()
 
 
@@ -596,7 +596,7 @@ class PayloadProcessing():
                 timestamp = sat_time
 
                 blob_diameters, blob_positions, blob_avg_values = self.find_blobs(data, status, SENSOR_RANGE)
-                print("found some blobs")
+                # print("found some blobs")
 
                 # check if any debris has been found 
                 if len(blob_diameters) > 0:
@@ -620,14 +620,14 @@ class PayloadProcessing():
                     #     self.plot_lidar_data(data,blob_positions)
                     #     plotted = True
            
-                    if DEBUGGING_MODE:
-                        print(f"----- SAT POS: {sat_pos} ECI coords -------------")
-                        print(f"VEL: {sat_vel}, ATT: {attitude}")
+                    # if DEBUGGING_MODE:
+                    #     print(f"----- SAT POS: {sat_pos} ECI coords -------------")
+                    #     print(f"VEL: {sat_vel}, ATT: {attitude}")
 
                     s = 0 # counter
                     # For each debris object set of coordinates
 
-                    if sum(self._prev_detection_eci[n]) != -3:
+                    if sum(self._prev_detection_eci[n]) != -3 and sum(self._prev_detection_eci[n]) != 0:
                         print("Same object found")
                     else:
                         for x_polar in debris_pos_polar:
