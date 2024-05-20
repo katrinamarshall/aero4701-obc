@@ -33,7 +33,9 @@ import rotation as rot
 # rewrite code so pretty
 # rewrite velocity code
 
+# ------------------------------ CONSTANTS ----------------------------------
 SENSOR_RANGE = 100 # mm
+SENSOR_MIN = 20 #mm
 FOV = 45 # degrees
 PIXELS_1D = 8
 LIDAR_FREQ = 15 # Hz
@@ -45,14 +47,230 @@ TEST_VEL=False
 DEBUGGING_MODE = True
 NUM_LIDARS_ACTIVE = 1
 OBJECT_TOLERANCE = 50
+# ----------------------------------------------------------------------------
 
 
 # debra has a server for satellite state 
 # payload has a client 
+
+class ProcessingMaths():
+    def __init__(self):
+        return
+
+
+    def cosine_rule(self, a, b, theta_degrees):
+        """
+        finds c, given opposite angle to side in degrees
+        """
+        theta_radians = np.radians(theta_degrees)
+        cos_theta = np.cos(theta_radians)
+        c_squared = a**2 + b**2 - 2 * a * b * cos_theta
+        return np.sqrt(c_squared)
+
+       
+    def polar_to_cartesian(self, polar):
+        """Converts a vector in the polar coordinate system to the cartesian coordinate system.
+        
+        The unit of the calculated cartesian vector is the same as the unit of the range.
+
+        Args:
+            polar (np.ndarray): A vector containing elevation (rad), 
+            azimuth (rad), and range.
+
+        Returns:
+            np.ndarray: A vector in the cartesian coordinate system.
+        """
+        elev, azim, rng = polar
+
+        x = rng * np.cos(azim) * np.cos(elev)
+        y = rng * np.sin(azim) * np.cos(elev)
+        z = rng * np.sin(elev)
+        
+        cart = np.array([x, y, z])
+        return cart
+
+    
+    def rot3_y(self, theta: float, degrees: bool = False):
+        """Returns a 3x3 rotation matrix about the y-axis.
+
+        Args:
+            theta (float): The angle of rotation.
+            degrees (bool, optional): Whether the angle is in
+            degrees or radians. Defaults to False.
+
+        Returns:
+            np.ndarray: The Y-rotation matrix.
+        """
+        theta = np.radians(theta) if degrees else theta
+        
+        return np.array([
+            [np.cos(theta), 0, np.sin(theta)],
+            [0, 1, 0],
+            [-np.sin(theta), 0, np.cos(theta)]
+        ])
+
+    def direction_cosine_matrix(self,
+        new: tuple,
+        original: tuple = (
+            np.array([1, 0, 0]),
+            np.array([0, 1, 0]),
+            np.array([0, 0, 1])
+        )
+    ):
+        """Calculates the direction cosine matrix from original to new coordinate basis.
+
+        Args:
+            new (tuple): The (i, j, k) unit vectors of the new basis as numpy arrays.
+            original (tuple, optional): The (i, j, k) unit vector of the old basis. 
+                Defaults to ([1, 0, 0], [0, 1, 0], [0, 0, 1]) as numpy arrays.
+
+        Returns:
+            np.ndarray: The direction cosine matrix from original to new.
+        """
+        M11 = np.dot(new[0], original[0])
+        M12 = np.dot(new[0], original[1])
+        M13 = np.dot(new[0], original[2])
+        
+        M21 = np.dot(new[1], original[0])
+        M22 = np.dot(new[1], original[1])
+        M23 = np.dot(new[1], original[2])
+        
+        M31 = np.dot(new[2], original[0])
+        M32 = np.dot(new[2], original[1])
+        M33 = np.dot(new[2], original[2])
+        
+        return np.array([
+            [M11, M12, M13],
+            [M21, M22, M23],
+            [M31, M32, M33]
+        ])
+     
+
+    def quat_product(self, q: np.ndarray, p: np.ndarray) :
+        """Multiplies two quaternions using the Hamilton product.
+
+        Args:
+            q (np.ndarray):
+            p (np.ndarray):
+
+        Returns:
+            np.ndarray: The product of q and p.
+        """
+        q_scalar, q_vec  = q[0], q[1:]
+        p_scalar, p_vec = p[0], p[1:]
+        
+        vec = q_scalar * p_vec + p_scalar * q_vec + np.cross(q_vec, p_vec)
+        scalar = q_scalar * p_scalar - np.dot(q_vec, p_vec)
+        
+        return np.array([scalar, *vec])
+
+        
+    def LVLH_to_ECI(self,x_lvlh: np.ndarray,r_sat: np.ndarray,v_sat: np.ndarray,*,rotation_only: bool = False)  :
+        """Converts a vector in Local Vertical Local Horizontal
+        coordinates to ECI coordinates.
+
+        Args:
+            x_lvlh (np.ndarray): Vector in LVLH coordinates.
+            r_sat (np.ndarray): Position vector of satellite in ECI coordinates.
+            v_sat (np.ndarray): Velocity vector of satellite in ECI coordinates.
+            rotation_only (bool, optional): If True, only the rotation to the
+
+        Returns:
+            np.ndarray: Vector in ECI coordinates.
+        """
+        
+        if not rotation_only:
+            x_rel = x_lvlh + r_sat
+        else:
+            x_rel = x_lvlh
+        
+        z_hat = - r_sat / np.linalg.norm(r_sat)     # Radial unit vector
+        h = np.cross(r_sat, v_sat)                  # Specific angular momentum
+        y_hat = - h / np.linalg.norm(h)             # negative angular momentum unit vector
+        x_hat = np.cross(y_hat, z_hat)
+        
+        # DCM from LVLH to ECI
+        eci_dcm = self.direction_cosine_matrix(
+            new=(np.array([1,0,0]), np.array([0,1,0]), np.array([0,0,1])),
+            original=(x_hat, y_hat, z_hat)
+        )
+            
+        return eci_dcm @ x_rel    
+
+    
+    def quat_rotate(self, x: np.ndarray, q: np.ndarray):
+        """Rotates a vector by a quaternion.
+        
+        Quaternion assumed to be in the form [w, x, y, z]
+        where w scalar and (x, y, z) vector.
+
+        Args:
+            x (np.ndarray): The vector to rotate.
+            q (np.ndarray): The quaternion to rotate by.
+
+        Returns:
+            np.ndarray: The rotated vector.
+        """
+        q_conj = np.array([q[0], -q[1], -q[2], -q[3]])      # Calculate conjugate of q
+        x_quat = np.array([0, *x])                          # Convert vector to quaternion
+        
+        x_prime = self.quat_product(self.quat_product(q, x_quat), q_conj)
+        
+        return x_prime[1:]
+    
+    def bodyfixed_to_LVLH(self,
+        x_bf: np.ndarray,
+        attitude: np.ndarray
+    ):
+        """Converts a vector in the bodyfixed frame into
+        the LVLH frame
+
+        Args:
+            x_bf (np.ndarray): A vector in the body fixed frame
+            attitude (np.ndarray): The attitude quaternion
+
+        Returns:
+            np.ndarray: A vector in the LVLH frame
+        """
+        att_conj = np.array([
+            attitude[0],
+            *(-attitude[1:])
+        ])
+        
+        return self.quat_rotate(x_bf, att_conj)
+
+    def bodyfixed_to_ECI(self,
+        x_bf: np.ndarray,
+        r_sat: np.ndarray,
+        v_sat: np.ndarray,
+        attitude: np.ndarray,
+        *,
+        rotation_only: bool = False
+    ) :
+        """Converts a vector in the body fixed frame to the ECI frame
+
+        Args:
+            x_bf (np.ndarray): A vector in the body fixed frame
+            r_sat (np.ndarray): Position vector of satellite in ECI coordinates.
+            v_sat (np.ndarray): Velocity vector of satellite in ECI coordinates.
+            attitude (np.ndarray): The attitude quaternion
+            rotation_only (bool, optional): If True, only the rotation to the
+            ECI frame is applied. Defaults to False.
+
+        Returns:
+            np.ndarray: A vector in the ECI frame
+        """
+        x_lvlh = self.bodyfixed_to_LVLH(x_bf, attitude)
+        return self.LVLH_to_ECI(x_lvlh, r_sat, v_sat, rotation_only=rotation_only)
+
+        
+
+
+    
             
 class PayloadProcessing():
-    """ gets test data and does all the processing"""
-    def __init__(self) -> None:
+    """ gets lidar data and does all the processing"""
+    def __init__(self):
 
         # TODO
         """
@@ -67,50 +285,45 @@ class PayloadProcessing():
 
         """
 
-        # Publishers TODO WRITE THIS - make custom message for debris packet
+        # -------------------- Publishers --------------------------------------------
+        # processed debris data for downlink
         self.pub_payload_data = rospy.Publisher('/debris_packet', debris_packet, queue_size=1)
-        self.pub_debugging_blobs = rospy.Publisher('/found_debris', found_debris_debugging, queue_size=100)
+        # polar coordinates of found debris objects
+        self.pub_blobs_detected = rospy.Publisher('/found_debris', found_debris_debugging, queue_size=100)
 
+        # -------------------- Subscribers --------------------------------------------
 
-        # publish to different topic for debugging - showing polar coords
-        # self.pub_payload_debugging_f = rospy.Publisher('/debugging_f', polar_data, queue_size=10) #TODO need to define
-
-
-        # Subscribers
-        # make raw lidar data have label within message as well
-        # rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # raw lidar data
-        rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback_raw_lidar) # raw lidar data
-
+        # rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # for all lidars
+        rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback_raw_lidar) # for just one lidar
 
         # make fake sat info publisher
         rospy.Subscriber('/sat_info', sat_info, self.callback_sat_info) # satellite pose data (pos, vel, att, time)
 
-        
-
-        # would subscribe to a reset messages which would clear all arrays  (need to sub to debra) ??
+        # TODO would subscribe to a reset messages which would clear all arrays  (need to sub to debra) ??
 
      
+        self.Process = ProcessingMaths()
         
-        # logging satellite state fields - should only contain most recent state
-        self._sat_pos = []
-        self._sat_vel = []
-        self._sat_att = []
-        self._sat_time = 0
+ 
 
         # Logging fields
-        self._raw_lidar = [] # for lidar 1
+        self._raw_lidar = np.zeros((4,8,8)) # lidar 1 is raw_lidar[0]
+        # self._raw_lidar_1 = [] # for lidar 1
         # self._raw_lidar_2 = [] # for lidar 2
         # self._raw_lidar_3 = [] # for lidar 3
         # self._raw_lidar_4 = [] # for lidar 4
         self._lidar_labels = []
 
         # Callback variables
-        self._lidar_message_received = False
-        self._all_readings_count = 0
+        # self._lidar_message_received = False
 
         # Storage fields for processed debris
         self._debris_count = 0
-        self._lidar_labels_prev_detections = []
+
+        self._prev_detection_times = np.zeros((4,1))
+        self._prev_detection_eci = np.zeros((4,3))
+        self._prev_detection_relative_pos = np.zeros((4,3))
+
 
         # updated so just store current detections
         self._debris_eci_pos = []
@@ -119,12 +332,12 @@ class PayloadProcessing():
         self._detection_times = []
         self._debris_rel_velocities = []
 
-        self._prev_detections = [] #
-
+        # logging satellite state fields - should only contain most recent state
         self._sat_pos = VEL_UNKNOWN
         self._sat_vel = VEL_UNKNOWN
         self._sat_att = np.array([1,0,0,0])
         self._sat_time = 0
+        print("Processing initialised!")
         return
     
     def callback_sat_info(self, data):
@@ -132,7 +345,7 @@ class PayloadProcessing():
         self._sat_pos = np.array(data.position)
         self._sat_vel = np.array(data.velocity)
         self._sat_att = np.array(data.attitude)
-        self._sat_time = data.timestamp
+        self._sat_time = float(data.timestamp)
         # print("Position received", self.sat_pos)
 
 
@@ -140,50 +353,33 @@ class PayloadProcessing():
 
 
     def callback_raw_lidar(self, raw_data):
-        # on tick should be in here - need to be able to access satellite state and time data
-        # store what ever is in self. sat pose as a local var so it cannot be changed
+        # self._lidar_message_received = True 
 
-        self._lidar_message_received = True # this should just have everything in it 
-
-        # need a service which requests sat state data at this point
-        # need to define service 
         # try:
         #     satellite_state_data = rospy.ServiceProxy('satellite_pose', SatellitePose)
         
         # except rospy.ServiceException as e:
         #     print("Service call failed: %s"%e)
 
-        # self._raw_lidar.append(np.array(raw_data.distances_1).reshape(8,8))
-        self._raw_lidar = np.array(raw_data.distances_1).reshape(8,8)
+        # print(np.array(raw_data.distances_1).reshape(8,8))
+     
 
-        # self._raw_lidar.append(np.array(raw_data.distances_2).reshape(8,8))
-        # self._raw_lidar.append(np.array(raw_data.distances_3).reshape(8,8))
-        # self._raw_lidar.append(np.array(raw_data.distances_4).reshape(8,8))
+        self._raw_lidar[0] = np.array(raw_data.distances_1).reshape(8,8)
+        # self._raw_lidar = (np.array(raw_data.distances_2).reshape(8,8))
+        # self._raw_lidar = (np.array(raw_data.distances_3).reshape(8,8))
+        # self._raw_lidar = (np.array(raw_data.distances_4).reshape(8,8))
 
 
         # self._lidar_labels.append(raw_data.label)
 
         # TODO 1 callback for 1 topic but with 4 arrays
-
-
         self.process_debris(self._sat_pos, self._sat_vel, self._sat_att, self._sat_time)
         # self._lidar_labels.remove
         return
 
-
-# this should just be publisher?!
     def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, debris_vel, sat_vel):
         self.pub_payload_data.publish(x_eci, debris_vel, debris_vel - sat_vel, debris_size, timestamp, debris_count)
-
-        # self._debris_eci_pos.append(x_eci)
-        # self._debris_sizes.append(debris_size)
-        # self._detection_times.append(timestamp)
-        # self._debris_velocities.append(debris_vel)
-        # self._debris_rel_velocities.append(debris_vel - sat_vel)
         return
-
-
-
 
         
     def is_valid_position(self, data, visited, i, j, sensor_range, current_value):
@@ -205,7 +401,7 @@ class PayloadProcessing():
         if (within_grid):
             # TODO need to fine tune tolerance based on lidar
             tolerance = OBJECT_TOLERANCE # 5cm change per pixel max grad for same object
-            within_range = (data[i][j] < sensor_range) and (abs(data[i][j] - current_value) < tolerance)
+            within_range = (data[i][j] < sensor_range) and (abs(data[i][j] - current_value) < tolerance) and (data[i][j] > SENSOR_MIN)
             # Check has not been visited before
             not_visited = not visited[i][j]
             result = (not_visited and within_grid and within_range)
@@ -317,15 +513,7 @@ class PayloadProcessing():
         # Return the maximum distances (diameters), centroid positions, and average values of all blobs found
         return np.array(blob_diameters), np.array(blob_positions), np.array(blob_avg_values)
 
-    def cosine_rule(self, a, b, theta_degrees):
-        """
-        finds c, given opposite angle to side in degrees
-        """
-        theta_radians = np.radians(theta_degrees)
-        cos_theta = np.cos(theta_radians)
-        c_squared = a**2 + b**2 - 2 * a * b * cos_theta
-        return np.sqrt(c_squared)
-
+    
     def image2polar(self, lidar_label, blob_positions, blob_avg_values, blob_diameters, fov, num_pixels_1D):
         """
         Converts given position of object in pixel image to polar coordinates from sensor
@@ -350,7 +538,7 @@ class PayloadProcessing():
             r = dist/1000 # m
 
             # resolution is 1 pixel at this range using cos rule
-            resolution =self.cosine_rule(dist,dist,fov)/num_pixels_1D
+            resolution =self.Process.cosine_rule(dist,dist,fov)/num_pixels_1D
 
             theta = np.radians((fov/num_pixels_1D) * x - fov/2)
             phi = np.radians((fov/num_pixels_1D) * y - fov/2)
@@ -364,230 +552,21 @@ class PayloadProcessing():
                 # print("------------------------------------------------------------------------------------------------")
             
             print(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i])
-            self.pub_debugging_blobs.publish(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i])
+            self.pub_blobs_detected.publish(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i])
 
         return np.array(debris_pos), sizes
     
-       
-    def polar_to_cartesian(self, polar):
-        """Converts a vector in the polar coordinate system to the cartesian coordinate system.
-        
-        The unit of the calculated cartesian vector is the same as the unit of the range.
 
-        Args:
-            polar (np.ndarray): A vector containing elevation (rad), 
-            azimuth (rad), and range.
-
-        Returns:
-            np.ndarray: A vector in the cartesian coordinate system.
-        """
-        elev, azim, rng = polar
-
-        x = rng * np.cos(azim) * np.cos(elev)
-        y = rng * np.sin(azim) * np.cos(elev)
-        z = rng * np.sin(elev)
-        
-        cart = np.array([x, y, z])
-        return cart
-
-    
-    def rot3_y(self, theta: float, degrees: bool = False):
-        """Returns a 3x3 rotation matrix about the y-axis.
-
-        Args:
-            theta (float): The angle of rotation.
-            degrees (bool, optional): Whether the angle is in
-            degrees or radians. Defaults to False.
-
-        Returns:
-            np.ndarray: The Y-rotation matrix.
-        """
-        theta = np.radians(theta) if degrees else theta
-        
-        return np.array([
-            [np.cos(theta), 0, np.sin(theta)],
-            [0, 1, 0],
-            [-np.sin(theta), 0, np.cos(theta)]
-        ])
-
-    def direction_cosine_matrix(self,
-        new: tuple,
-        original: tuple = (
-            np.array([1, 0, 0]),
-            np.array([0, 1, 0]),
-            np.array([0, 0, 1])
-        )
-    ):
-        """Calculates the direction cosine matrix from original to new coordinate basis.
-
-        Args:
-            new (tuple): The (i, j, k) unit vectors of the new basis as numpy arrays.
-            original (tuple, optional): The (i, j, k) unit vector of the old basis. 
-                Defaults to ([1, 0, 0], [0, 1, 0], [0, 0, 1]) as numpy arrays.
-
-        Returns:
-            np.ndarray: The direction cosine matrix from original to new.
-        """
-        M11 = np.dot(new[0], original[0])
-        M12 = np.dot(new[0], original[1])
-        M13 = np.dot(new[0], original[2])
-        
-        M21 = np.dot(new[1], original[0])
-        M22 = np.dot(new[1], original[1])
-        M23 = np.dot(new[1], original[2])
-        
-        M31 = np.dot(new[2], original[0])
-        M32 = np.dot(new[2], original[1])
-        M33 = np.dot(new[2], original[2])
-        
-        return np.array([
-            [M11, M12, M13],
-            [M21, M22, M23],
-            [M31, M32, M33]
-        ])
-        
-
-    def quat_product(self, q: np.ndarray, p: np.ndarray) :
-        """Multiplies two quaternions using the Hamilton product.
-
-        Args:
-            q (np.ndarray):
-            p (np.ndarray):
-
-        Returns:
-            np.ndarray: The product of q and p.
-        """
-        q_scalar, q_vec  = q[0], q[1:]
-        p_scalar, p_vec = p[0], p[1:]
-        
-        vec = q_scalar * p_vec + p_scalar * q_vec + np.cross(q_vec, p_vec)
-        scalar = q_scalar * p_scalar - np.dot(q_vec, p_vec)
-        
-        return np.array([scalar, *vec])
-
-        
-    def LVLH_to_ECI(self,
-    x_lvlh: np.ndarray,
-    r_sat: np.ndarray,
-    v_sat: np.ndarray,
-    *,
-    rotation_only: bool = False
-    )  :
-        """Converts a vector in Local Vertical Local Horizontal
-        coordinates to ECI coordinates.
-
-        Args:
-            x_lvlh (np.ndarray): Vector in LVLH coordinates.
-            r_sat (np.ndarray): Position vector of satellite in ECI coordinates.
-            v_sat (np.ndarray): Velocity vector of satellite in ECI coordinates.
-            rotation_only (bool, optional): If True, only the rotation to the
-
-        Returns:
-            np.ndarray: Vector in ECI coordinates.
-        """
-        
-        if not rotation_only:
-            x_rel = x_lvlh + r_sat
-        else:
-            x_rel = x_lvlh
-        
-        z_hat = - r_sat / np.linalg.norm(r_sat)     # Radial unit vector
-        h = np.cross(r_sat, v_sat)                  # Specific angular momentum
-        y_hat = - h / np.linalg.norm(h)             # negative angular momentum unit vector
-        x_hat = np.cross(y_hat, z_hat)
-        
-        # DCM from LVLH to ECI
-        eci_dcm = self.direction_cosine_matrix(
-            new=(np.array([1,0,0]), np.array([0,1,0]), np.array([0,0,1])),
-            original=(x_hat, y_hat, z_hat)
-        )
-            
-        return eci_dcm @ x_rel    
-
-    
-    def quat_rotate(self, x: np.ndarray, q: np.ndarray):
-        """Rotates a vector by a quaternion.
-        
-        Quaternion assumed to be in the form [w, x, y, z]
-        where w scalar and (x, y, z) vector.
-
-        Args:
-            x (np.ndarray): The vector to rotate.
-            q (np.ndarray): The quaternion to rotate by.
-
-        Returns:
-            np.ndarray: The rotated vector.
-        """
-        q_conj = np.array([q[0], -q[1], -q[2], -q[3]])      # Calculate conjugate of q
-        x_quat = np.array([0, *x])                          # Convert vector to quaternion
-        
-        x_prime = self.quat_product(self.quat_product(q, x_quat), q_conj)
-        
-        return x_prime[1:]
-    
-    def bodyfixed_to_LVLH(self,
-        x_bf: np.ndarray,
-        attitude: np.ndarray
-    ):
-        """Converts a vector in the bodyfixed frame into
-        the LVLH frame
-
-        Args:
-            x_bf (np.ndarray): A vector in the body fixed frame
-            attitude (np.ndarray): The attitude quaternion
-
-        Returns:
-            np.ndarray: A vector in the LVLH frame
-        """
-        att_conj = np.array([
-            attitude[0],
-            *(-attitude[1:])
-        ])
-        
-        return self.quat_rotate(x_bf, att_conj)
-
-    
-
-    def bodyfixed_to_ECI(self,
-        x_bf: np.ndarray,
-        r_sat: np.ndarray,
-        v_sat: np.ndarray,
-        attitude: np.ndarray,
-        *,
-        rotation_only: bool = False
-    ) :
-        """Converts a vector in the body fixed frame to the ECI frame
-
-        Args:
-            x_bf (np.ndarray): A vector in the body fixed frame
-            r_sat (np.ndarray): Position vector of satellite in ECI coordinates.
-            v_sat (np.ndarray): Velocity vector of satellite in ECI coordinates.
-            attitude (np.ndarray): The attitude quaternion
-            rotation_only (bool, optional): If True, only the rotation to the
-            ECI frame is applied. Defaults to False.
-
-        Returns:
-            np.ndarray: A vector in the ECI frame
-        """
-        x_lvlh = self.bodyfixed_to_LVLH(x_bf, attitude)
-        return self.LVLH_to_ECI(x_lvlh, r_sat, v_sat, rotation_only=rotation_only)
-
-        
-
-
-
-
-
-    
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
         print("Running...")
         # assume all are synchronised
         # make version for 4 and version for 1
-        if self._lidar_message_received == True:
+        # if self._lidar_message_received == True:
+        if True:
             print("going through data")
             # rospy.spin()
 
-            self._lidar_message_received = False
+            # self._lidar_message_received = False
             
             # find how many new lidar readings are to be processed
             # num_new_readings = len(self._lidar_labels) - self._all_readings_count
@@ -605,22 +584,25 @@ class PayloadProcessing():
 
                 # data = np.array(self._raw_lidar[-num_new_readings+n])
                 # data = np.array(self._raw_lidar[n])
-                data = np.array(self._raw_lidar)
+                data = np.array(self._raw_lidar[n])
 
 
                 # run blob detection algorithm on new data
+                timestamp = sat_time
+
                 blob_diameters, blob_positions, blob_avg_values = self.find_blobs(data, SENSOR_RANGE)
                 print("found some blobs")
-                print(self._raw_lidar)
+                print(self._raw_lidar[n])
 
                 # check if any debris has been found - if so print updating debris count - add as var TODO
                 if len(blob_diameters) > 0:
+
                     lidar_label = n + 1
 
 
                     # Found new debris - add whichever lidar this has come from
                     # self._lidar_labels_prev_detections.append(self._lidar_labels[-num_new_readings+n])
-                    self._lidar_labels_prev_detections.append(lidar_label)
+                    # self._lidar_labels_prev_detections.append(lidar_label)
 
                     # if so, find its coordinates
                     debris_pos_polar, debris_sizes = self.image2polar(lidar_label, blob_positions, blob_avg_values,blob_diameters, FOV, PIXELS_1D)
@@ -631,17 +613,15 @@ class PayloadProcessing():
                     # if PLOT == True and plotted == False:
                     #     self.plot_lidar_data(data,blob_positions)
                     #     plotted = True
-
-                    #TODO edit this print statement
            
                     if DEBUGGING_MODE:
                         print(f"----- SAT POS: {sat_pos} ECI coords -------------")
                         print(f"VEL: {sat_vel}, ATT: {attitude}")
-                        
-
 
                     s = 0 # counter
                     # For each debris object set of coordinates
+
+
                     for x_polar in debris_pos_polar:
                         # update debris count
                         self._debris_count += 1
@@ -649,54 +629,104 @@ class PayloadProcessing():
                         # identify which lidar this came from
                         # lidar_label = self._lidar_labels_prev_detections[n]
                         # convert to xyz coordinates
-                        debris_pos_cart = self.polar_to_cartesian(x_polar)
+                        debris_pos_cart = self.Process.polar_to_cartesian(x_polar)
                 
                         # convert these to body fixed based on lidar positioning
                         # in body-fixed frame y points straight down
-                        debris_pos_body_fixed = self.rot3_y((lidar_label-1)*np.pi/2)@debris_pos_cart
+                        debris_pos_body_fixed = self.Process.rot3_y((lidar_label-1)*np.pi/2)@debris_pos_cart
 
                         # convert body fixed coordinates to ECI
-                        debris_pos_eci_rel = self.bodyfixed_to_ECI(debris_pos_body_fixed,sat_pos,sat_vel,attitude,rotation_only=True)
+                        debris_pos_eci_rel = self.Process.bodyfixed_to_ECI(debris_pos_body_fixed,sat_pos,sat_vel,attitude,rotation_only=True)
                         debris_pos_eci = debris_pos_eci_rel + sat_pos
-       
 
-                    # TODO write exception handling for if there are multiple debris objects in one frame 
+                       
+
                     # at new timestep, check previous timestep to find the velocity of debris object
-                    #TODO make very basic for just one object in frame, if there in next time step
-                        timestamp = sat_time
 
-                        if len(blob_avg_values) > 1:
+                        if len(debris_pos_polar) > 1:
                             print("Cannot find speed, more than one object in frame")
-                            vel = VEL_UNKNOWN
+                            abs_vel = VEL_UNKNOWN
+                            rel_vel = VEL_UNKNOWN
                         else:
-                            vel = self.find_abs_vel(lidar_label, debris_pos_eci, debris_sizes[s], timestamp)
-                            
-                        # store which lidar most recent detection from - why am i storing this 
-                        self._prev_detections.append(lidar_label)
-                        # self._log_for_transmit(timestamp, debris_pos_eci, debris_sizes[s], vel,sat_vel)
+                            # add size info here
+                            abs_vel, rel_vel = self.find_vels_hw(lidar_label, debris_pos_eci, debris_pos_cart, timestamp)
+                        
+                        # if only one object in frame store to check if its moving in next round
+                        if len(debris_pos_polar) == 1:
+                            print("storing eci pos for next time!")
+                            self._prev_detection_eci[n] = debris_pos_eci
+                            self._prev_detection_times[n] = timestamp
+                            self._prev_detection_relative_pos[n] = debris_pos_cart
+                        # else reset because we don't care about past debris anymore
+                        else:
+                            print("resetting :( ")
+                            self._prev_detection_eci[n] = np.array([0,0,0])
+                            self._prev_detection_times[n] = -1
+                            self._prev_detection_relative_pos[n] = np.array([0,0,0])
 
+                            
+                
                        
                         # Log detected debris
                         print("-----------------------------------------------------------------------------------------------")
                         print("------------------------------ TRANSMIT DATA --------------------------------------------------")
-                        print(f"From LiDAR {lidar_label}: {sat_time}: ")
+                        print(f"From LiDAR {lidar_label}: {timestamp}: ")
                         print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
-                        # if sum(self._debris_velocities[-1] - VEL_UNKNOWN) != 0:
-                        #     print(f"Travelling at absolute velocity in ECI frame {self._debris_velocities[-1]} m/s")
-                        #     print(f"Relative to DEBRA speed {np.linalg.norm(self._debris_rel_velocities[-1])} m/s, ")
-                        #     print(f" {self._debris_rel_velocities[-1]} m/s")
-                        #     print(f"v satellite {sat_vel}")
+                        if sum(abs_vel - VEL_UNKNOWN) != 0:
+                            print(f"Travelling at absolute velocity in ECI frame {abs_vel} m/s")
+                            print(f"Relative to DEBRA speed {np.linalg.norm(rel_vel)} m/s, ")
+                            print(f" {rel_vel} m/s")
+                            print(f"v satellite {sat_vel}")
                     
 
                         print("-----------------------------------------------------------------------------------------------")
                         print("\n")
-                        self.payload_data_downlink(sat_time, self._debris_count, debris_pos_eci, debris_sizes[s], vel, vel - sat_vel)
+                        self.payload_data_downlink(timestamp, self._debris_count, debris_pos_eci, debris_sizes[s], abs_vel, rel_vel)
                         s += 1
+
 
         return
     
-    # need to update this
-    def find_abs_vel(self, lidar_label,debris_pos_eci, size, timestamp):
+
+    def find_vels_hw(self, lidar_label, debris_pos_eci, debris_pos_cart, timestamp):
+        vel_abs = VEL_UNKNOWN
+        vel_rel = VEL_UNKNOWN
+
+        # If object detected at previous timestep
+        # if timestamp - self._prev_detection_times[lidar_label-1] > LIDAR_PERIOD:
+        if self._prev_detection_times[lidar_label - 1] >= 0:
+
+        # check if debris size is same - check if same object as before
+        # if abs(size - self._debris_sizes[overall_index]) > 100:
+        #     print("Debris object detected a different size, not the same object in frame - cannot find speed")
+            # else:
+            time_diff_micro = (timestamp - self._prev_detection_times[lidar_label - 1]) 
+            
+            if time_diff_micro < 0:
+                time_diff_micro += 1000000
+            
+            # print(time_diff)
+            if time_diff_micro == 0:
+                print("Speed cannot be determined, larger timestep required")
+            else:
+                time_diff_s = time_diff_micro/1e6
+                print("TIME DIFF SEC", time_diff_s)
+
+                pos_diff_abs = (debris_pos_eci - self._prev_detection_eci[lidar_label - 1])
+                pos_diff_rel = (debris_pos_cart - self._prev_detection_relative_pos[lidar_label - 1])
+
+                vel_abs = pos_diff_abs/time_diff_s # m/s
+                vel_rel = pos_diff_rel/time_diff_s # m/s
+
+                    # speed = np.linalg.norm(vel)
+        else:
+            print(f"Most recent detection from LiDAR {lidar_label} more than one sensor period ago, cannot find speed") 
+        return vel_abs, vel_rel
+
+
+
+
+    def find_abs_vel_sim(self, lidar_label,debris_pos_eci, size, timestamp):
         vel = VEL_UNKNOWN 
         # If object was detected in previous timestep
         if lidar_label in self._prev_detections:                            

@@ -3,6 +3,7 @@
 import time
 import rospy
 import numpy as np
+import random
 
 from std_msgs.msg import String
 from payload.msg import lidar_raw_data_single
@@ -15,21 +16,27 @@ class FakeLidar:
         
        
 
-        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data_single, queue_size=10)
+        self.pub = rospy.Publisher('/raw_lidar_data_single', lidar_raw_data_single, queue_size=10)
         self.ready = True
         # print("Done!")
 
 
     def get_lidar_data(self, event=None):
         if True:
-            data  = np.array([[40, 30, 50, 4000, 100, 140, 4000, 4000], 
-                                    [10, 10, 1000, 4000, 4000, 4000, 4000, 4000],
-                                    [10, 4000, 1000, 1000, 1000, 4000, 4000, 4000],
-                                    [1000, 1040, 1000, 4000, 4000, 4000, 4000, 4000],
-                                    [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
-                                    [4000, 4000, 4000, 4000, 4000, 1500, 1540, 1580], 
-                                    [4000, 2000, 4000, 4000, 4000, 4000, 4000, 4000], 
-                                    [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]])  
+            # data  = np.array([[40, 30, 50, 4000, 100, 140, 4000, 4000], 
+            #                         [10, 10, 1000, 4000, 4000, 4000, 4000, 4000],
+            #                         [10, 4000, 1000, 1000, 1000, 4000, 4000, 4000],
+            #                         [1000, 1040, 1000, 4000, 4000, 4000, 4000, 4000],
+            #                         [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000],
+            #                         [4000, 4000, 4000, 4000, 4000, 1500, 1540, 1580], 
+            #                         [4000, 2000, 4000, 4000, 4000, 4000, 4000, 4000], 
+            #                         [4000, 4000, 4000, 4000, 4000, 4000, 4000, 4000]])
+            
+            data = np.full((8,8), 4000)
+            row = random.randint(0,6)
+            col = random.randint(0,6)
+            data[row:row+2, col:col+2] = 50
+     
             # 2d array of motion data (always 4x4?)
             #motion = numpy.flipud(numpy.array(data.motion_indicator.motion[0:16]).reshape((4, 4)))
             # 2d array of distance
