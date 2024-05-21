@@ -24,6 +24,7 @@ RANGING_FREQ = 15
 class Lidar:
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
         GPIO.setup(LPN_1, GPIO.OUT)
         GPIO.setup(LPN_2, GPIO.OUT)
         GPIO.setup(LPN_3, GPIO.OUT)

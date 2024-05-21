@@ -2,6 +2,7 @@
 
     <node pkg="adcs" type="imu_node.py" name="imu_node"/>
     <node pkg="eps" type="eps_node.py" name="eps_node"/>
-    <node pkg="payload" type="lidar_node_3.py" name="payload_node"/>
+    <!-- <node pkg="payload" type="lidar_node_3.py" name="payload_node"/> -->
+    <node pkg="temperature_monitor" type="temp_monitor.py" name="temp_monitor"/>
 
 </launch>

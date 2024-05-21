@@ -3,6 +3,8 @@
 import time
 import rospy
 
+from std_msgs.msg import String
+
 from ina219 import INA219
 from ina219 import DeviceRangeError
 from eps.msg import current_voltage
@@ -11,7 +13,13 @@ SHUNT_OHMS = 0.1
 
 class EPS:
     def __init__(self):
+        eps_active = False
+
         self.pub = rospy.Publisher('/current_voltage', current_voltage, queue_size=10)
+        
+        rospy.Subscriber('/operation_state', String, self.callback_state)
+
+        self.reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
 
         # Initialise ina219s
         self.curr_volt_sensor_40 = INA219(SHUNT_OHMS, address=0x40)
@@ -44,9 +52,19 @@ class EPS:
 
         self.pub.publish(msg)
 
+    def callback_state(self, state):
+        if state.data == "Deorbit":
+            self.eps_active = False
+        else:
+            self.eps_active = True
+
+        if self.eps_active:
+            self.reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
+        else:
+            self.reader.shutdown() 
+
 if __name__ == "__main__":
     rospy.init_node("eps")
     myEPS = EPS()
-    rospy.Timer(rospy.Duration(1.0/10.0), myEPS.get_curr_volt)
     rospy.spin()
     

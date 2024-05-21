@@ -24,9 +24,9 @@ v_in = 3.3  # Input reference voltage from Pi
 R_ref = 10000  # Fixed reference resistor (10k ohm)
 
 #File
-file = open('/home/debra3/temperatures.csv', 'w')
+#file = open('/home/debra3/temperatures.csv', 'w')
 #degrees celsius?
-file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Thermistor 3, Pi CPU \n') 
+#file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Thermistor 3, Pi CPU \n') 
 
 
 def readADC(channelNum):
@@ -41,7 +41,7 @@ def getTemp(adc_channel):
     voltage = (raw_data * v_in) / 1024  # Convert ADC raw data to voltage
     
     if voltage < 20:
-        rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. Hardcoding temperature as 0°C.")
+        # rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. Hardcoding temperature as 0°C.")
         return 0  # Hardcoded temperature for unconnected or faulty channels
     
     R_thermistor = R_ref * ((v_in / voltage) - 1)  # Calculate thermistor resistance using voltage divider formula
@@ -79,6 +79,6 @@ while not rospy.is_shutdown():
     # message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     rospy.loginfo(message)  # Log msg to ROS
     pub.publish(message)  # Publish msg
-    file.write(f"{message}\n")
-    file.flush()
+    # file.write(f"{message}\n")
+    # file.flush()
     rate.sleep()

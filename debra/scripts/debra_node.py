@@ -118,6 +118,7 @@ class Debra:
                 if state_number in self.STATES:
                     self.state = state_number
                     rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
+                    self.publish_state()
                 else:
                     rospy.logwarn("Invalid state number.")
             else:
@@ -127,7 +128,7 @@ class Debra:
                     rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
                 else:
                     rospy.logwarn("Invalid state name.")
-            self.publish_state()
+            
 
     def run(self):
         input_thread = threading.Thread(target=self.handle_user_input)
@@ -135,7 +136,7 @@ class Debra:
 
         rate = rospy.Rate(1)
         while not rospy.is_shutdown():
-            self.publish_state()
+            #self.publish_state()
             rate.sleep()
 
         input_thread.join()
