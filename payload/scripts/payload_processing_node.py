@@ -367,11 +367,15 @@ class PayloadProcessing():
      
 
         self._raw_lidar[0] = np.array(raw_data.distances_1).reshape(8,8)
-        # self._raw_lidar = (np.array(raw_data.distances_2).reshape(8,8))
-        # self._raw_lidar = (np.array(raw_data.distances_3).reshape(8,8))
-        # self._raw_lidar = (np.array(raw_data.distances_4).reshape(8,8))
+        # self._raw_lidar[1] = (np.array(raw_data.distances_2).reshape(8,8))
+        # self._raw_lidar[2] = (np.array(raw_data.distances_3).reshape(8,8))
+        # self._raw_lidar[3] = (np.array(raw_data.distances_4).reshape(8,8))
 
         self._lidar_status[0] = np.array(raw_data.status_1).reshape(8,8)
+        # self._lidar_status[1] = np.array(raw_data.status_2).reshape(8,8)
+        # self._lidar_status[2] = np.array(raw_data.status_3).reshape(8,8)
+        # self._lidar_status[3] = np.array(raw_data.status_4).reshape(8,8)
+
 
 
         # self._lidar_labels.append(raw_data.label)
