@@ -8,8 +8,8 @@ from std_msgs.msg import String
 # from payload.msg import lidar_raw_data
 from payload.msg import lidar_raw_data_single
 from payload.msg import sat_info
-from payload.msg import debris_packet
-from payload.msg import found_debris_debugging
+from payload.msg import payload_data
+from payload.msg import found_debris
 
 import rospy
 
@@ -287,9 +287,9 @@ class PayloadProcessing():
 
         # -------------------- Publishers --------------------------------------------
         # processed debris data for downlink
-        self.pub_payload_data = rospy.Publisher('/debris_packet', debris_packet, queue_size=1)
+        self.pub_payload_data = rospy.Publisher('/payload_data', payload_data, queue_size=1)
         # polar coordinates of found debris objects
-        self.pub_blobs_detected = rospy.Publisher('/found_debris', found_debris_debugging, queue_size=100)
+        self.pub_blobs_detected = rospy.Publisher('/found_debris', found_debris, queue_size=100)
 
         # -------------------- Subscribers --------------------------------------------
 
@@ -381,8 +381,8 @@ class PayloadProcessing():
         # self._lidar_labels.remove
         return
 
-    def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, debris_vel, sat_vel):
-        self.pub_payload_data.publish(x_eci, debris_vel, debris_vel - sat_vel, debris_size, timestamp, debris_count)
+    def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, abs_vel, rel_vel):
+        self.pub_payload_data.publish(x_eci[0], x_eci[1], x_eci[2], rel_vel[0], rel_vel[1], rel_vel[2], debris_size, timestamp, debris_count)
         return
 
         

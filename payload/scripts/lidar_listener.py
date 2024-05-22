@@ -2,7 +2,7 @@
 
 import rospy
 from payload.msg import lidar_raw_data_single
-from payload.msg import found_debris_debugging
+from payload.msg import found_debris
 from std_msgs.msg import String
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ class TestingError:
         # self._start_plotting = True
         
         rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback)
-        rospy.Subscriber('/found_debris', found_debris_debugging, self.callback_found)
+        rospy.Subscriber('/found_debris', found_debris, self.callback_found)
         return
 
 

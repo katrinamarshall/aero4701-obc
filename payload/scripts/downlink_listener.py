@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from payload.msg import debris_packet
+from payload.msg import payload_data
 from std_msgs.msg import String
 import numpy as np
 
@@ -19,7 +19,7 @@ def listener_func():
     rospy.init_node('listener_downlink', anonymous=True)
     print("Ready")
 
-    rospy.Subscriber('/debris_packet', debris_packet, callback)
+    rospy.Subscriber('/payload_data', payload_data, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

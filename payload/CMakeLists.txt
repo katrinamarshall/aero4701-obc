@@ -52,9 +52,9 @@ add_message_files(
   FILES
   lidar_raw_data.msg
   lidar_raw_data_single.msg
-  debris_packet.msg
+  payload_data.msg
   sat_info.msg
-  found_debris_debugging.msg
+  found_debris.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -67,7 +67,7 @@ add_message_files(
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
-#   Action1.action
+#   Action1.actiondebris_packet
 #   Action2.action
 # )
 
