@@ -34,7 +34,7 @@ import rotation as rot
 # rewrite velocity code
 
 # ------------------------------ CONSTANTS ----------------------------------
-SENSOR_RANGE = 200 # mm
+SENSOR_RANGE = 500 # mm
 SENSOR_MIN = 20 #mm
 FOV = 45 # degrees
 PIXELS_1D = 8
@@ -46,7 +46,7 @@ CHECK_RESIDUALS = False
 TEST_VEL=False
 DEBUGGING_MODE = True
 NUM_LIDARS_ACTIVE = 1
-OBJECT_TOLERANCE = 50
+OBJECT_TOLERANCE = 60
 # ----------------------------------------------------------------------------
 
 
@@ -371,7 +371,7 @@ class PayloadProcessing():
         # self._raw_lidar = (np.array(raw_data.distances_3).reshape(8,8))
         # self._raw_lidar = (np.array(raw_data.distances_4).reshape(8,8))
 
-        self._lidar_status[0] = np.array(raw_data.status).reshape(8,8)
+        self._lidar_status[0] = np.array(raw_data.status_1).reshape(8,8)
 
 
         # self._lidar_labels.append(raw_data.label)
@@ -627,71 +627,72 @@ class PayloadProcessing():
                     s = 0 # counter
                     # For each debris object set of coordinates
 
-                    if sum(self._prev_detection_eci[n]) != -3 and sum(self._prev_detection_eci[n]) != 0:
-                        print("Same object found")
-                    else:
-                        for x_polar in debris_pos_polar:
-                        
-                            # update debris count
-                            self._debris_count += 1
-
-                            # identify which lidar this came from
-                            # lidar_label = self._lidar_labels_prev_detections[n]
-                            # convert to xyz coordinates
-                            debris_pos_cart = self.Process.polar_to_cartesian(x_polar)
+                    # if sum(self._prev_detection_eci[n]) != -3 and sum(self._prev_detection_eci[n]) != 0:
+                    #     print("Same object found")
+                    # else:
+                    for x_polar in debris_pos_polar:
                     
-                            # convert these to body fixed based on lidar positioning
-                            # in body-fixed frame y points straight down
-                            debris_pos_body_fixed = self.Process.rot3_y((lidar_label-1)*np.pi/2)@debris_pos_cart
+                        # update debris count
 
-                            # convert body fixed coordinates to ECI
-                            debris_pos_eci_rel = self.Process.bodyfixed_to_ECI(debris_pos_body_fixed,sat_pos,sat_vel,attitude,rotation_only=True)
-                            debris_pos_eci = debris_pos_eci_rel + sat_pos
+                        # identify which lidar this came from
+                        # lidar_label = self._lidar_labels_prev_detections[n]
+                        # convert to xyz coordinates
+                        debris_pos_cart = self.Process.polar_to_cartesian(x_polar)
+                
+                        # convert these to body fixed based on lidar positioning
+                        # in body-fixed frame y points straight down
+                        debris_pos_body_fixed = self.Process.rot3_y((lidar_label-1)*np.pi/2)@debris_pos_cart
 
+                        # convert body fixed coordinates to ECI
+                        debris_pos_eci_rel = self.Process.bodyfixed_to_ECI(debris_pos_body_fixed,sat_pos,sat_vel,attitude,rotation_only=True)
+                        debris_pos_eci = debris_pos_eci_rel + sat_pos
+
+                    
+
+                    # at new timestep, check previous timestep to find the velocity of debris object
+
+                        if len(debris_pos_polar) > 1:
+                            print(f"Cannot find speed, {len(debris_pos_polar)} objects in frame")
+                            self._debris_count += len(debris_pos_polar)
+
+                            abs_vel = VEL_UNKNOWN
+                            rel_vel = VEL_UNKNOWN
+                        else:
+                            # add size info here
+                            abs_vel, rel_vel = self.find_vels_hw(lidar_label, debris_pos_eci, debris_pos_cart, timestamp)
                         
+                        # if only one object in frame store to check if its moving in next round
+                        if len(debris_pos_polar) == 1:
+                            print("storing eci pos for next time!")
+                            self._prev_detection_eci[n] = debris_pos_eci
+                            self._prev_detection_times[n] = timestamp
+                            self._prev_detection_relative_pos[n] = debris_pos_cart
+                        # else reset because we don't care about past debris anymore
+                        else:
+                            print("resetting :( ")
+                            self._prev_detection_eci[n] = VEL_UNKNOWN
+                            self._prev_detection_times[n] = -1
+                            self._prev_detection_relative_pos[n] = VEL_UNKNOWN
 
-                        # at new timestep, check previous timestep to find the velocity of debris object
-
-                            if len(debris_pos_polar) > 1:
-                                print("Cannot find speed, more than one object in frame")
-                                abs_vel = VEL_UNKNOWN
-                                rel_vel = VEL_UNKNOWN
-                            else:
-                                # add size info here
-                                abs_vel, rel_vel = self.find_vels_hw(lidar_label, debris_pos_eci, debris_pos_cart, timestamp)
                             
-                            # if only one object in frame store to check if its moving in next round
-                            if len(debris_pos_polar) == 1:
-                                print("storing eci pos for next time!")
-                                self._prev_detection_eci[n] = debris_pos_eci
-                                self._prev_detection_times[n] = timestamp
-                                self._prev_detection_relative_pos[n] = debris_pos_cart
-                            # else reset because we don't care about past debris anymore
-                            else:
-                                print("resetting :( ")
-                                self._prev_detection_eci[n] = VEL_UNKNOWN
-                                self._prev_detection_times[n] = -1
-                                self._prev_detection_relative_pos[n] = VEL_UNKNOWN
-
-                                
+                
                     
-                        
-                            # Log detected debris
-                            print("-----------------------------------------------------------------------------------------------")
-                            print("------------------------------ TRANSMIT DATA --------------------------------------------------")
-                            print(f"From LiDAR {lidar_label}: {timestamp}: ")
-                            print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
-                            if sum(abs_vel - VEL_UNKNOWN) != 0:
-                                print(f"Travelling at absolute velocity in ECI frame {abs_vel} m/s")
-                                print(f"Relative to DEBRA speed {np.linalg.norm(rel_vel)} m/s, ")
-                                print(f" {rel_vel} m/s")
-                                print(f"v satellite {sat_vel}")
-                        
+                        # Log detected debris
+                        # print("-----------------------------------------------------------------------------------------------")
+                        # print("------------------------------ TRANSMIT DATA --------------------------------------------------")
+                        # print(f"From LiDAR {lidar_label}: {timestamp}: ")
+                        # print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
+                        # if sum(abs_vel - VEL_UNKNOWN) != 0:
+                        #     print(f"Travelling at absolute velocity in ECI frame {abs_vel} m/s")
+                        #     print(f"Relative to DEBRA speed {np.linalg.norm(rel_vel)} m/s, ")
+                        #     print(f" {rel_vel} m/s")
+                        #     print(f"v satellite {sat_vel}")
+                    
 
-                            print("-----------------------------------------------------------------------------------------------")
-                            print("\n")
-                            self.payload_data_downlink(timestamp, self._debris_count, debris_pos_eci, debris_sizes[s], abs_vel, rel_vel)
-                            s += 1
+                        # print("-----------------------------------------------------------------------------------------------")
+                        # print("\n")
+                        self.payload_data_downlink(timestamp, self._debris_count, debris_pos_eci, debris_sizes[s], abs_vel, rel_vel)
+                        s += 1
 
 
         return
@@ -728,9 +729,11 @@ class PayloadProcessing():
                 vel_abs = pos_diff_abs/time_diff_s # m/s
                 vel_rel = pos_diff_rel/time_diff_s # m/s
 
+
                     # speed = np.linalg.norm(vel)
         else:
             print(f"Most recent detection from LiDAR {lidar_label} more than one sensor period ago, cannot find speed") 
+            self._debris_count += 1
         return vel_abs, vel_rel
 
 
