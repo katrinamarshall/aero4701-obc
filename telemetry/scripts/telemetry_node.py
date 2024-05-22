@@ -112,15 +112,16 @@ class Telemetry:
                 lidar_data = struct.pack('64H', *distance_array)
                 # lidar_data = struct.pack(f'{len(distance_array)}H', *distance_array)
 
+                empty = struct.pack('B', 0)
                 # Create frame
-                frame_info = lidar_num + lidar_data + lidar_num
+                frame_info = lidar_num + lidar_data + empty
                 # print(f"Frame size: {struct.calcsize(frame_info)}")
                 print(f"Frame size: {len(frame_info)} bytes")
                 ssid_type = 0b1100  # Raw lidar data type
                 frame = AX25UIFrame(frame_info, ssid_type)
 
                 # Put message into frame
-                print(f"Putting the raw_lidar frame into the queue: {lidar_data}")
+                print(f"Putting the raw_lidar frame into the queue: {frame_info}")
                 self.message_queue.put(frame.create_frame())
 
 
