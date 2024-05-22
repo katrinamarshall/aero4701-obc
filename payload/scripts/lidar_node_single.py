@@ -60,9 +60,12 @@ class Lidar:
             data1 = self.vl53_1.get_data()
             msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
             msg.status_1 = numpy.array(data1.target_status).flatten()
-            print("sigma", numpy.array(data1.range_sigma_mm).reshape((8,8)))     
-            print("reflectance",numpy.array(data1.reflectance).reshape((8,8)))
+            # print("sigma", numpy.array(data1.range_sigma_mm).reshape((8,8)))     
+            # print("reflectance",numpy.array(data1.reflectance).reshape((8,8)))
             print("status", numpy.array(data1.target_status).reshape((8,8)))
+            print("raw data", numpy.array(data1.distance_mm).reshape((8,8)))
+
+
             # print(data1.)     
             self.pub.publish(msg)
 

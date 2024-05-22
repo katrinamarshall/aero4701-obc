@@ -12,6 +12,7 @@ class TestingError:
         self._raw_data = np.zeros((8,8))
         self._blob_positions = np.array([0,0])
         self._sizes = []
+        self._found_objects = 0
         # self._start_plotting = True
         
         rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback)
@@ -32,21 +33,38 @@ class TestingError:
         #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
         # print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances_1).reshape(8,8)} \n")
         # print(f"LiDAR Label: {raw_data.label}\n")
-        self._blob_positions = np.array(int(found_debris.blob_position[0]), int(found_debris.blob_position[1]))
-        
-        print("Size debris: ", found_debris.size, found_debris.num_pixels)
+
+        self._found_objects +=1
+
+        self._blob_positions = np.array([found_debris.blob_position[0], found_debris.blob_position[1]])
+        self._sizes.append(found_debris.size)
         print("blob position", self._blob_positions)
 
+        
+        print("Size debris: ", found_debris.size, found_debris.num_pixels)
 
-        plt.figure()
-        plt.imshow(self._raw_data, cmap='viridis', interpolation= 'nearest')
-        plt.colorbar(label='Value')
-        plt.scatter(self._blob_positions[1], self._blob_positions[0], marker='x', color = 'r')
-        plt.xlabel('Column')
-        plt.ylabel('Row')
-        plt.title('2D Plot of test_data')
-        plt.savefig("lidar.png")
+        if self._found_objects == 20:
+
+
+            plt.figure()
+            plt.imshow(self._raw_data, cmap='viridis', interpolation= 'nearest')
+            plt.colorbar(label='Distance (mm)')
+            plt.scatter(self._blob_positions[1], self._blob_positions[0], marker='x', color = 'r')
+            plt.xlabel('Column')
+            plt.ylabel('Row')
+            plt.title('2D Plot of test_data')
+            plt.savefig("lidar.png")
+
+
+            plt.figure()
+            plt.plot(range(len(self._sizes)), self._sizes)
+            plt.xlabel('Detection')
+            plt.ylabel('Size (mm)')
+            plt.title('Size of Object Detected')
+            plt.savefig("size.png")
         return
+
+        
 
     # def listener_func(self):
 

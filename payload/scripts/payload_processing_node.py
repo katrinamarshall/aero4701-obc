@@ -34,7 +34,7 @@ import rotation as rot
 # rewrite velocity code
 
 # ------------------------------ CONSTANTS ----------------------------------
-SENSOR_RANGE = 500 # mm
+SENSOR_RANGE = 100 # mm
 SENSOR_MIN = 20 #mm
 FOV = 45 # degrees
 PIXELS_1D = 8
@@ -495,7 +495,7 @@ class PayloadProcessing():
         for i in range(rows):
             for j in range(cols):
                 # If the position has a value above or equal to the threshold and has not been visited
-                if (data[i][j]) < sensor_range and not visited[i][j] and status[i][j] != 255:
+                if (data[i][j]) < sensor_range and data[i][j] > SENSOR_MIN and not visited[i][j] and status[i][j] != 255:
                     #HELP MESSAGE DO THIS ASAP NOISE YAY
                     # Explore the blob starting from this position
                     max_diameter_x, max_diameter_y, avg_value, size = self.explore_blob(data, visited, i, j, sensor_range, i, j)
@@ -507,8 +507,10 @@ class PayloadProcessing():
                     if max_diameter_y > 2:
                         # Calculate the centroid position assuming regular object
                         row = np.floor(i + max_diameter_y/2)
+                        row = min(row,7)
                     if max_diameter_x > 2:
                         col = np.floor(j + max_diameter_x/2)
+                        col = min(col,7)
 
                     # Add the maximum distance, centroid position, and average value to their respective lists
                     blob_diameters.append(max_diameter)
@@ -553,9 +555,9 @@ class PayloadProcessing():
             sizes[i] = debris_size
             if DEBUGGING_MODE:
                 # print("------------------------------------------------------------------------------------------------")
-                print(f"Debris object detected max diameter {debris_size:.1f}mm ({blob_diameters[i]} pixels), at r:{dist:.3f}mm, theta:{np.degrees(theta):.2f}°, phi:{np.degrees(phi):.2f}°")
+                print(f"Debris object detected max diameter {debris_size:.1f}mm ({blob_diameters[i]} pixels), at r:{dist:.3f}mm, theta:{np.degrees(theta):.2f}°, phi:{np.degrees(phi):.2f}°/n")
                 # print("------------------------------------------------------------------------------------------------")
-            print(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i], blob_positions[i])
+            # print(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i], blob_positions[i])
             self.pub_blobs_detected.publish(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i], [int(blob_positions[i][0]), int(blob_positions[i][1] )])
 
         return np.array(debris_pos), sizes
@@ -600,7 +602,7 @@ class PayloadProcessing():
 
                 # check if any debris has been found 
                 if len(blob_diameters) > 0:
-                    print(self._raw_lidar[n])
+                    # print(self._raw_lidar[n])
 
 
                     lidar_label = n + 1
@@ -663,13 +665,13 @@ class PayloadProcessing():
                         
                         # if only one object in frame store to check if its moving in next round
                         if len(debris_pos_polar) == 1:
-                            print("storing eci pos for next time!")
+                            # print("storing eci pos for next time!")
                             self._prev_detection_eci[n] = debris_pos_eci
                             self._prev_detection_times[n] = timestamp
                             self._prev_detection_relative_pos[n] = debris_pos_cart
                         # else reset because we don't care about past debris anymore
                         else:
-                            print("resetting :( ")
+                            # print("resetting because this is object no longer needed")
                             self._prev_detection_eci[n] = VEL_UNKNOWN
                             self._prev_detection_times[n] = -1
                             self._prev_detection_relative_pos[n] = VEL_UNKNOWN
@@ -711,17 +713,15 @@ class PayloadProcessing():
         #     print("Debris object detected a different size, not the same object in frame - cannot find speed")
             # else:
             time_diff_micro = (timestamp - self._prev_detection_times[lidar_label - 1]) 
-            print(time_diff_micro)
             
             if time_diff_micro < 0:
                 time_diff_micro += 1000000
             
-            # print(time_diff)
             if time_diff_micro == 0:
                 print("Speed cannot be determined, larger timestep required")
             else:
                 time_diff_s = time_diff_micro/1e6
-                print("TIME DIFF SEC", time_diff_s)
+                # print("TIME DIFF SEC", time_diff_s)
 
                 pos_diff_abs = (debris_pos_eci - self._prev_detection_eci[lidar_label - 1])
                 pos_diff_rel = (debris_pos_cart - self._prev_detection_relative_pos[lidar_label - 1])
