@@ -7,6 +7,7 @@ from time import strftime
 
 import rospy
 from std_msgs.msg import String
+import RPi.GPIO as GPIO
 
 #ROS SETUP
 # Initialise the node
@@ -14,35 +15,41 @@ rospy.init_node('temperature_monitor_node', anonymous=True)
 pub = rospy.Publisher('temperature_data', String, queue_size=10)
 rate = rospy.Rate(0.2)  # 5 seconds
 
+
+# GPIO setup for chip select
+GPIO.setmode(GPIO.BCM)
+CS_PIN = 5
+GPIO.setup(CS_PIN, GPIO.OUT)
+GPIO.output(CS_PIN, GPIO.HIGH)
+
 # Open SPI bus
 spi = spidev.SpiDev()
 spi.open(0, 0)
 spi.max_speed_hz = 1350000  # Ensure under 1.35 MHz
 
-#Constants
+# Constants
 v_in = 3.3  # Input voltage
 R_ref = 10000  # Fixed reference resistor (10k ohm)
-
-#Deprecated writing to csv 
-# file = open('/home/debra3/temperatures.csv', 'w')
-# file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Pi CPU \n') 
 
 def readADC(channelNum):
     if channelNum > 7 or channelNum < 0:
         return -1
+    GPIO.output(CS_PIN, GPIO.LOW)
     r = spi.xfer2([1, (8 + channelNum) << 4, 0])
+    GPIO.output(CS_PIN, GPIO.HIGH)
     adc_out = ((r[1] & 3) << 8) + r[2]
     return adc_out
 
 def getTemp(adc_channel):
     raw_data = readADC(adc_channel)  # Read the ADC channel to get value
+    print(raw_data)
     voltage = (raw_data * v_in) / 1024  # Convert ADC raw data to voltage
     
     if voltage < 10:
         rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. ")
         return -9
     
-    #Voltage divider formula
+    # Voltage divider formula
     R_thermistor = R_ref * ((v_in / voltage) - 1)  #
 
     # Steinhart-Hart coefficients for 10k NTC thermistor
@@ -57,9 +64,9 @@ def getTemp(adc_channel):
     temp_c = temp_k - 273.15  # Convert Kelvin to Celsius
 
     # print(f"Channel {adc_channel}: {temp_c:.1f} °C \n {raw_data}/1023 => {voltage:.3f} V => {R_thermistor:.1f} Ω => {temp_k:.1f} K =>  ")
-    print(f"Channel {adc_channel} Temp: {temp_c:.1f} °C (raw data - {raw_data})")
-
-    return temp_c
+    #print(f"Channel {adc_channel} Temp: {temp_c:.1f} °C (raw data - {raw_data})")
+    #print(raw_data)
+    return raw_data
 
 def getPiTemp():
     with open('/sys/class/thermal/thermal_zone0/temp', 'r') as f:
@@ -75,7 +82,7 @@ while not rospy.is_shutdown():
     message = f"{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     # message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     rospy.loginfo(message)  # Log msg to ROS
-    pub.publish(message)  # Publish msg
+    #pub.publish(message)  # Publish msg
     # file.write(f"{message}\n")
     # file.flush()
     rate.sleep()

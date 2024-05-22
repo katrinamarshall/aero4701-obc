@@ -1,0 +1,3 @@
+<launch>
+  <node name='roscore' pkg='ros' type='roscore' />
+</launch>

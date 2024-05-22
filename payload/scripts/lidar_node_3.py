@@ -95,8 +95,31 @@ class Lidar:
 
         print("Done!")
 
-        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=10)
+        # Initialise timer to take readings
+        lidar_active = False
+        self.vl53l5cx_reader = rospy.Timer(rospy.Duration(0.0), self.get_lidar_data)
 
+        # Publishers
+        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=10)
+        
+        # Subscribers
+        rospy.Subscriber('/operation_state', String, self.callback_state)
+
+    # Callback for state changes
+    def callback_state(self, state):
+        
+        # Check state
+        if state.data == "Debris Detection":
+            self.lidar_active = True
+        else:
+            self.lidar_active = False
+
+        # Start/Stop reading LiDARs
+        if self.lidar_active:
+            self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
+        else:
+            self.vl53l5cx_reader.shutdown() 
+    
     def get_lidar_data(self, event=None):
         msg = lidar_raw_data()
 
@@ -122,5 +145,4 @@ class Lidar:
 if __name__ == '__main__':
     rospy.init_node("payload")
     myLidar = Lidar()
-    rospy.Timer(rospy.Duration(1.0/15.0), myLidar.get_lidar_data)
     rospy.spin()

@@ -18,7 +18,7 @@ class Debra:
     }
 
     def __init__(self):
-        self.state = 2  # Initial state is DETUMBLE
+        self.state = 1  # Initial state is LAUNCH
         self.nominal_battery_state = True
         self.nominal_temperature_state = True
         self.satellite_calibrated = False
@@ -55,8 +55,21 @@ class Debra:
 
         # Timer
         rospy.Timer(rospy.Duration(10), self.publish_wod)
+        rospy.Timer(rospy.Duration(1), self.override_state)
 
+    def override_state(self, event):
+        new_state = input("Override state number: ")
+        try:
+            state_number = int(new_state)
+            if state_number in self.STATES:
+                self.state = state_number
+                rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
 
+        except ValueError:
+            rospy.logwarn(f"Invalid state number received: {new_state}")
+        
+        self.pub_state.publish(self.STATES[self.state])
+        
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
         if msg.component == 'o' and msg.component_id == 0:
@@ -72,7 +85,7 @@ class Debra:
         if msg.component == 'o' and msg.component_id == 1:
             self.current_wod_data.temperature_comm = 15.6
 
-        self.publish_state()
+        self.pub_state.publish(self.STATES[self.state])
 
 
     def callback_debris_packet(self, data):
@@ -167,12 +180,6 @@ class Debra:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
 
 
-    def publish_state(self):
-        # Publish the current state to /operation_state
-        # rospy.loginfo(f"Current State: {self.STATES[self.state]}")
-        self.pub_state.publish(self.STATES[self.state])
-
-
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""
         # Update satellite mode field
@@ -215,16 +222,8 @@ class Debra:
             self.pub_sat_pose.publish(self.sat_pose)
 
 
-
-    def run(self):
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
-            self.publish_state()
-
-            rate.sleep()
-
 if __name__ == '__main__':
     rospy.init_node('debra_node')
     rospy.loginfo("Launching DEBRA")
     debra = Debra()
-    debra.run()
+    rospy.spin()

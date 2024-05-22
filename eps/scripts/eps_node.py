@@ -13,15 +13,18 @@ SHUNT_OHMS = 0.1
 
 class EPS:
     def __init__(self):
+        
+        # Initialise timer to take readings
         eps_active = False
+        self.ina219_reader = rospy.Timer(rospy.Duration(0.0), self.get_curr_volt)
 
+        # Publishers
         self.pub = rospy.Publisher('/current_voltage', current_voltage, queue_size=10)
         
+        # Subscribers
         rospy.Subscriber('/operation_state', String, self.callback_state)
 
-        self.reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
-
-        # Initialise ina219s
+        # Initialise INA219s
         self.curr_volt_sensor_40 = INA219(SHUNT_OHMS, address=0x40)
         self.curr_volt_sensor_41 = INA219(SHUNT_OHMS, address=0x41)
         self.curr_volt_sensor_44 = INA219(SHUNT_OHMS, address=0x44)
@@ -30,6 +33,7 @@ class EPS:
         self.curr_volt_sensor_41.configure()
         self.curr_volt_sensor_44.configure()
  
+    # Take current voltage readings
     def get_curr_volt(self, event=None):
         msg = current_voltage()
 
@@ -52,16 +56,20 @@ class EPS:
 
         self.pub.publish(msg)
 
+    # Callback for state changes
     def callback_state(self, state):
-        if state.data == "Deorbit":
+        
+        # Check state
+        if state.data == "Deorbit" or state.data == "Launch":
             self.eps_active = False
         else:
             self.eps_active = True
 
+        # Start/Stop reading INA219s
         if self.eps_active:
-            self.reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
+            self.ina219_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
         else:
-            self.reader.shutdown() 
+            self.ina219_reader.shutdown() 
 
 if __name__ == "__main__":
     rospy.init_node("eps")
