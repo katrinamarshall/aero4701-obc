@@ -8,11 +8,18 @@ from time import strftime
 import rospy
 from std_msgs.msg import String
 
+import RPi.GPIO as GPIO
 #ROS SETUP
-# Initialise the node
+# Initialize the node
 rospy.init_node('temperature_monitor_node', anonymous=True)
 pub = rospy.Publisher('temperature_data', String, queue_size=10)
 rate = rospy.Rate(0.2)  # 5 seconds
+
+# GPIO setup for chip select
+GPIO.setmode(GPIO.BCM)
+CS_PIN = 5
+GPIO.setup(CS_PIN, GPIO.OUT)
+GPIO.output(CS_PIN, GPIO.HIGH)
 
 # Open SPI bus
 spi = spidev.SpiDev()
@@ -23,14 +30,12 @@ spi.max_speed_hz = 1350000  # Ensure under 1.35 MHz
 v_in = 3.3  # Input voltage
 R_ref = 10000  # Fixed reference resistor (10k ohm)
 
-#Deprecated writing to csv 
-# file = open('/home/debra3/temperatures.csv', 'w')
-# file.write('Time, Thermistor 0, Thermistor 1, Thermistor 2, Pi CPU \n') 
-
 def readADC(channelNum):
     if channelNum > 7 or channelNum < 0:
         return -1
+    GPIO.output(CS_PIN, GPIO.LOW)
     r = spi.xfer2([1, (8 + channelNum) << 4, 0])
+    GPIO.output(CS_PIN, GPIO.HIGH)
     adc_out = ((r[1] & 3) << 8) + r[2]
     return adc_out
 
