@@ -38,5 +38,6 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/telemetry_node.py
   scripts/fake_data_node.py
+  scripts/fake_raw_lidar_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

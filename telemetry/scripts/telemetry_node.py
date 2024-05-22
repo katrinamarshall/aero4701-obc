@@ -4,7 +4,7 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
-from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
+from debra.msg import payload_data, satellite_pose, WOD_data, WOD, raw_lidar_msg
 import struct
 import math
 import queue
@@ -24,6 +24,7 @@ class Telemetry:
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
+        rospy.Subscriber('/raw_lidar', raw_lidar_msg, self.raw_lidar_callback)
 
         # Message queue for processing outgoing messages
         self.message_queue = queue.Queue()
@@ -97,6 +98,29 @@ class Telemetry:
 
         # Put mesage frame into queue
         self.message_queue.put(frame)
+
+    def raw_lidar_callback(self, data):
+        """Callback for raw lidar data"""
+        # Iterate over the four distance arrays
+        for distance_num in range(1, 5):
+            # Get the distance array from lidar number
+            distance_array = getattr(data, f'distances_{distance_num}')
+
+            if len(distance_array) != 0:
+                # Create data packet
+                lidar_num = struct.pack('B', distance_num)
+                lidar_data = struct.pack('64H', *distance_array)
+                # lidar_data = struct.pack(f'{len(distance_array)}H', *distance_array)
+
+                # Create frame
+                frame_info = lidar_num + lidar_data
+                ssid_type = 0b1100  # Raw lidar data type
+                frame = AX25UIFrame(frame_info, ssid_type)
+
+                # Put message into frame
+                print(f"Putting the raw_lidar frame into the queue: {lidar_data}")
+                self.message_queue.put(frame.create_frame())
+
 
     def wod_data_callback(self, data):
         """Callback for WOD data"""
