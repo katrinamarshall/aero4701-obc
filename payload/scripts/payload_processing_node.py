@@ -34,7 +34,7 @@ import rotation as rot
 # rewrite velocity code
 
 # ------------------------------ CONSTANTS ----------------------------------
-SENSOR_RANGE = 100 # mm
+SENSOR_RANGE = 200 # mm
 SENSOR_MIN = 20 #mm
 FOV = 45 # degrees
 PIXELS_1D = 8
@@ -374,7 +374,8 @@ class PayloadProcessing():
         self._lidar_status[0] = np.array(raw_data.status_1).reshape(8,8)
         # self._lidar_status[1] = np.array(raw_data.status_2).reshape(8,8)
         # self._lidar_status[2] = np.array(raw_data.status_3).reshape(8,8)
-        # self._lidar_status[3] = np.array(raw_data.status_4).reshape(8,8)
+        # self.
+        # _lidar_status[3] = np.array(raw_data.status_4).reshape(8,8)
 
 
 
@@ -387,6 +388,7 @@ class PayloadProcessing():
 
     def payload_data_downlink(self, timestamp, debris_count, x_eci, debris_size, abs_vel, rel_vel):
         self.pub_payload_data.publish(x_eci[0], x_eci[1], x_eci[2], rel_vel[0], rel_vel[1], rel_vel[2], debris_size, timestamp, debris_count)
+        # print("sent to ground!")
         return
 
         
@@ -511,10 +513,15 @@ class PayloadProcessing():
                     if max_diameter_y > 2:
                         # Calculate the centroid position assuming regular object
                         row = np.floor(i + max_diameter_y/2)
-                        row = min(row,7)
+                        if row > 7:
+                            row = i
+                        # row = min(row,7)
+                        
                     if max_diameter_x > 2:
                         col = np.floor(j + max_diameter_x/2)
-                        col = min(col,7)
+                        if col > 7:
+                            col = j
+                        # col = min(col,7)
 
                     # Add the maximum distance, centroid position, and average value to their respective lists
                     blob_diameters.append(max_diameter)
@@ -559,7 +566,7 @@ class PayloadProcessing():
             sizes[i] = debris_size
             if DEBUGGING_MODE:
                 # print("------------------------------------------------------------------------------------------------")
-                print(f"Debris object detected max diameter {debris_size:.1f}mm ({blob_diameters[i]} pixels), at r:{dist:.3f}mm, theta:{np.degrees(theta):.2f}°, phi:{np.degrees(phi):.2f}°/n")
+                print(f"Debris object detected max diameter {debris_size:.1f}mm ({blob_diameters[i]} pixels), at r:{dist:.3f}mm, theta:{np.degrees(theta):.2f}°, phi:{np.degrees(phi):.2f}°\n")
                 # print("------------------------------------------------------------------------------------------------")
             # print(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i], blob_positions[i])
             self.pub_blobs_detected.publish(lidar_label, dist, np.degrees(theta), np.degrees(phi), debris_size, blob_diameters[i], [int(blob_positions[i][0]), int(blob_positions[i][1] )])
@@ -665,6 +672,7 @@ class PayloadProcessing():
                             rel_vel = VEL_UNKNOWN
                         else:
                             # add size info here
+                            self._debris_count += 1
                             abs_vel, rel_vel = self.find_vels_hw(lidar_label, debris_pos_eci, debris_pos_cart, timestamp)
                         
                         # if only one object in frame store to check if its moving in next round
@@ -677,26 +685,26 @@ class PayloadProcessing():
                         else:
                             # print("resetting because this is object no longer needed")
                             self._prev_detection_eci[n] = VEL_UNKNOWN
-                            self._prev_detection_times[n] = -1
+                            self._prev_detection_times[n] = 0
                             self._prev_detection_relative_pos[n] = VEL_UNKNOWN
 
                             
                 
                     
                         # Log detected debris
-                        # print("-----------------------------------------------------------------------------------------------")
-                        # print("------------------------------ TRANSMIT DATA --------------------------------------------------")
-                        # print(f"From LiDAR {lidar_label}: {timestamp}: ")
-                        # print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
-                        # if sum(abs_vel - VEL_UNKNOWN) != 0:
-                        #     print(f"Travelling at absolute velocity in ECI frame {abs_vel} m/s")
-                        #     print(f"Relative to DEBRA speed {np.linalg.norm(rel_vel)} m/s, ")
-                        #     print(f" {rel_vel} m/s")
-                        #     print(f"v satellite {sat_vel}")
+                        print("-----------------------------------------------------------------------------------------------")
+                        print("------------------------------ TRANSMIT DATA --------------------------------------------------")
+                        print(f"From LiDAR {lidar_label}: {timestamp}: ")
+                        print(f"DEBRIS FOUND with max diam {debris_sizes[s]}mm at {debris_pos_eci} ECI ")
+                        if sum(abs_vel - VEL_UNKNOWN) != 0:
+                            print(f"Travelling at absolute velocity in ECI frame {abs_vel} m/s")
+                            print(f"Relative to DEBRA speed {np.linalg.norm(rel_vel)} m/s, ")
+                            print(f" {rel_vel} m/s")
+                            print(f"v satellite {sat_vel}")
                     
 
-                        # print("-----------------------------------------------------------------------------------------------")
-                        # print("\n")
+                        print("-----------------------------------------------------------------------------------------------")
+                        print("\n")
                         self.payload_data_downlink(timestamp, self._debris_count, debris_pos_eci, debris_sizes[s], abs_vel, rel_vel)
                         s += 1
 
@@ -732,12 +740,14 @@ class PayloadProcessing():
 
                 vel_abs = pos_diff_abs/time_diff_s # m/s
                 vel_rel = pos_diff_rel/time_diff_s # m/s
+                self._debris_count -= 1
+                # self._debris_count 
+
 
 
                     # speed = np.linalg.norm(vel)
         else:
             print(f"Most recent detection from LiDAR {lidar_label} more than one sensor period ago, cannot find speed") 
-            self._debris_count += 1
         return vel_abs, vel_rel
 
 
