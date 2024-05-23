@@ -15,6 +15,6 @@
   <node pkg="debra" type="debra_node.py" name="debra_node" output="screen"/>
 
   <!-- Launch the payload node -->
-  <node pkg="payload" type="lidar_node_3.py" name="lidar_node" output="screen"/>
+  <!-- <node pkg="payload" type="lidar_node_3.py" name="lidar_node" output="screen"/> -->
 
 </launch>

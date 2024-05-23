@@ -1,0 +1,3 @@
+float32 thermistor_1
+float32 thermistor_2
+float32 pi

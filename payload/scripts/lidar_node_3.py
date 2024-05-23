@@ -113,13 +113,8 @@ class Lidar:
             self.lidar_active = True
         else:
             self.lidar_active = False
-
-        # # Start/Stop reading LiDARs
-        # if self.lidar_active:
-        #     self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
-        # else:
-        #     self.vl53l5cx_reader.shutdown() 
     
+    # Get LiDAR raw data
     def get_lidar_data(self, event=None):
         if self.lidar_active:
             msg = lidar_raw_data()
