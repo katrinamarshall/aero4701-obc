@@ -300,6 +300,7 @@ class PayloadProcessing():
         rospy.Subscriber('/sat_info', sat_info, self.callback_sat_info) # satellite pose data (pos, vel, att, time)
 
         # TODO would subscribe to a reset messages which would clear all arrays  (need to sub to debra) ??
+        rospy.Subscriber('/operation_state', String, self.callback_reset)
 
      
         self.Process = ProcessingMaths()
@@ -352,6 +353,22 @@ class PayloadProcessing():
 
 
         return
+
+
+    def callback_reset(self, state):
+        if state.data != "Debris Detection":
+            self._debris_count = 0
+            self._prev_detection_times = np.zeros((4,1))
+            self._prev_detection_eci = np.zeros((4,3))
+            self._prev_detection_relative_pos = np.zeros((4,3))
+            self._debris_eci_pos = []
+            self._debris_sizes = [] 
+            self._debris_velocities = []
+            self._detection_times = []
+            self._debris_rel_velocities = []
+
+    return
+
 
 
     def callback_raw_lidar(self, raw_data):
