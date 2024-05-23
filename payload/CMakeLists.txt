@@ -8,9 +8,9 @@ project(payload)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  std_msgs
-  message_generation
+ rospy
+ std_msgs
+ message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,8 +48,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-  FILES
-  lidar_raw_data.msg
+ FILES
+ lidar_raw_data.msg
+ lidar_raw_data_single.msg
+ payload_data.msg
+ sat_info.msg
+ found_debris.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -62,15 +66,15 @@ add_message_files(
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
-#   Action1.action
+#   Action1.actiondebris_packet
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -104,7 +108,7 @@ add_message_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES payload
-  CATKIN_DEPENDS rospy std_msgs message_runtime
+CATKIN_DEPENDS rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -116,7 +120,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+ ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -158,10 +162,10 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-  scripts/lidar_node_3.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# catkin_install_python(PROGRAMS
+#   scripts/my_python_script
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
@@ -203,3 +207,14 @@ catkin_install_python(PROGRAMS
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+catkin_install_python(PROGRAMS 
+  scripts/lidar_listener.py 
+  scripts/fake_sat_state_pub.py 
+  scripts/payload_processing_node.py
+  scripts/constants.py 
+  scripts/lidar_node.py
+  scripts/lidar_node_single.py
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+

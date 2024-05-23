@@ -5,7 +5,7 @@ Processes LiDAR data to output
 import time
 
 from std_msgs.msg import String
-# from payload.msg import lidar_raw_data
+from payload.msg import lidar_raw_data
 from payload.msg import lidar_raw_data_single
 from payload.msg import sat_info
 from payload.msg import payload_data
@@ -16,22 +16,10 @@ import rospy
 # from debra.msg import command_msg, satellite_pose, payload_data
 
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import datetime as dt
 
-
-from conversion import *
 from constants import *
-import rotation as rot
-
-# initialise node outside of class
-
-# make separate lidar
-# TODO edit so each lidar is publishing to different topic
-# issue is not running fast enough - to debug try clean this code 
-# then make new topic for debugging wwee
-# rewrite code so pretty
-# rewrite velocity code
 
 # ------------------------------ CONSTANTS ----------------------------------
 SENSOR_RANGE = 200 # mm
@@ -45,7 +33,7 @@ PLOT = False
 CHECK_RESIDUALS = False
 TEST_VEL=False
 DEBUGGING_MODE = True
-NUM_LIDARS_ACTIVE = 1
+NUM_LIDARS_ACTIVE = 4
 OBJECT_TOLERANCE = 60
 # ----------------------------------------------------------------------------
 
@@ -272,19 +260,6 @@ class PayloadProcessing():
     """ gets lidar data and does all the processing"""
     def __init__(self):
 
-        # TODO
-        """
-        - edit fields so not storing unnecessary information
-        - clean code so not so scary
-        - go through so works with all 4 lidars in sim
-        - look at kat's stuff - make separate topics for each lidar?
-        - make different modes - different messages for each mode
-        - send code for kivy
-        - rewrite relative velocity algorithm for testing case - should be different to how find absolute velocity
-        - go through testing criteria?
-
-        """
-
         # -------------------- Publishers --------------------------------------------
         # processed debris data for downlink
         self.pub_payload_data = rospy.Publisher('/payload_data', payload_data, queue_size=1)
@@ -294,12 +269,12 @@ class PayloadProcessing():
         # -------------------- Subscribers --------------------------------------------
 
         # rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # for all lidars
-        rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data_single, self.callback_raw_lidar) # for just one lidar
+        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar) # for just one lidar
 
         # make fake sat info publisher
         rospy.Subscriber('/sat_info', sat_info, self.callback_sat_info) # satellite pose data (pos, vel, att, time)
 
-        # TODO would subscribe to a reset messages which would clear all arrays  (need to sub to debra) ??
+        # subscribe to a reset messages which would clear all arrays when not in debris detection mode
         rospy.Subscriber('/operation_state', String, self.callback_reset)
 
      
@@ -350,8 +325,6 @@ class PayloadProcessing():
         self._sat_att = np.array(data.attitude)
         self._sat_time = float(data.timestamp)
         # print("Position received", self.sat_pos)
-
-
         return
 
 
@@ -366,8 +339,7 @@ class PayloadProcessing():
             self._debris_velocities = []
             self._detection_times = []
             self._debris_rel_velocities = []
-
-    return
+        return
 
 
 
@@ -384,21 +356,19 @@ class PayloadProcessing():
      
 
         self._raw_lidar[0] = np.array(raw_data.distances_1).reshape(8,8)
-        # self._raw_lidar[1] = (np.array(raw_data.distances_2).reshape(8,8))
-        # self._raw_lidar[2] = (np.array(raw_data.distances_3).reshape(8,8))
-        # self._raw_lidar[3] = (np.array(raw_data.distances_4).reshape(8,8))
+        self._raw_lidar[1] = (np.array(raw_data.distances_2).reshape(8,8))
+        self._raw_lidar[2] = (np.array(raw_data.distances_3).reshape(8,8))
+        self._raw_lidar[3] = (np.array(raw_data.distances_4).reshape(8,8))
 
         self._lidar_status[0] = np.array(raw_data.status_1).reshape(8,8)
-        # self._lidar_status[1] = np.array(raw_data.status_2).reshape(8,8)
-        # self._lidar_status[2] = np.array(raw_data.status_3).reshape(8,8)
-        # self.
-        # _lidar_status[3] = np.array(raw_data.status_4).reshape(8,8)
+        self._lidar_status[1] = np.array(raw_data.status_2).reshape(8,8)
+        self._lidar_status[2] = np.array(raw_data.status_3).reshape(8,8)
+        self._lidar_status[3] = np.array(raw_data.status_4).reshape(8,8)
 
 
 
         # self._lidar_labels.append(raw_data.label)
 
-        # TODO 1 callback for 1 topic but with 4 arrays
         self.process_debris(self._sat_pos, self._sat_vel, self._sat_att, self._sat_time)
         # self._lidar_labels.remove
         return
@@ -592,7 +562,7 @@ class PayloadProcessing():
     
 
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
-        # print("Running...")
+        print("Running...")
         # assume all are synchronised
         # make version for 4 and version for 1
         # if self._lidar_message_received == True:
@@ -610,7 +580,6 @@ class PayloadProcessing():
             num_new_readings = NUM_LIDARS_ACTIVE
             # print(self._lidar_labels_prev_detections)
 
-            # for each new lidar packet - TODO instead of doing like this do like separate arrays of raw lidar data - much simpler
             for n in range(num_new_readings):
                 # print("found new reading")
                 # rospy.spin()

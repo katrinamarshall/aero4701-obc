@@ -19,7 +19,7 @@ I2C_ADD_2 = 0x60
 I2C_ADD_3 = 0x64
 # I2C_ADD_4 = 0x68
 
-RANGING_FREQ = 15
+RANGING_FREQ = 10
 
 class Lidar:
     def __init__(self):
@@ -100,7 +100,7 @@ class Lidar:
         self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
 
         # Publishers
-        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=10)
+        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=20)
         
         # Subscribers
         rospy.Subscriber('/operation_state', String, self.callback_state)
@@ -119,23 +119,24 @@ class Lidar:
         if self.lidar_active:
             msg = lidar_raw_data()
 
-            if self.vl53_1.data_ready():
+            if self.vl53_1.data_ready() and self.vl53_2.data_ready() and self.vl53_3.data_ready():
                 data1 = self.vl53_1.get_data()
                 msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
-            
-            if self.vl53_2.data_ready():
+                msg.status_1 = numpy.array(data1.target_status).flatten()
+
                 data2 = self.vl53_2.get_data()
                 msg.distances_2 = numpy.array(data2.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+                msg.status_2 = numpy.array(data2.target_status).flatten()
 
-            if self.vl53_3.data_ready():
                 data3 = self.vl53_3.get_data()
                 msg.distances_3 = numpy.array(data3.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+                msg.status_3 = numpy.array(data3.target_status).flatten()
 
             # if self.vl53_4.data_ready():
             #     data4 = self.vl53_4.get_data()
             #     msg.distances_4 = numpy.array(data4.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
             
-            self.pub.publish(msg)
+                self.pub.publish(msg)
 
 
 if __name__ == '__main__':

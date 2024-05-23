@@ -38,10 +38,10 @@ class Debra:
 
         # Subscribers 
         rospy.Subscriber('/state_ssh_command', Int8, self.override_state)
-        rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
+        #rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
         rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
-        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar)
+        #rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data, self.callback_raw_lidar)
         rospy.Subscriber('/current_voltage', current_voltage, self.callback_curr_volt)
         rospy.Subscriber('/temperatures', temperatures, self.callback_temperature)
 
@@ -90,21 +90,21 @@ class Debra:
             rospy.logwarn(f"Invalid state number received: {new_state}")
 
 ##----------------- TO DO ------------------
-    def callback_debris_packet(self, data):
-        # Define the attributes for payload_data
-        payload_attributes = [
-            'debris_position_x', 'debris_position_y', 'debris_position_z',
-            'debris_velocity_x', 'debris_velocity_y', 'debris_velocity_z',
-            'debris_diameter', 'time_of_detection', 'object_count'
-        ]
+    # def callback_debris_packet(self, data):
+    #     # Define the attributes for payload_data
+    #     payload_attributes = [
+    #         'debris_position_x', 'debris_position_y', 'debris_position_z',
+    #         'debris_velocity_x', 'debris_velocity_y', 'debris_velocity_z',
+    #         'debris_diameter', 'time_of_detection', 'object_count'
+    #     ]
 
-        # Update payload data
-        for attr in payload_attributes:
-            setattr(self.payload, attr, getattr(data, attr))
+    #     # Update payload data
+    #     for attr in payload_attributes:
+    #         setattr(self.payload, attr, getattr(data, attr))
 
-        # Publish the updated payload data
-        self.pub_payload.publish(self.payload)
-        rospy.loginfo("Published updated payload data.")
+    #     # Publish the updated payload data
+    #     self.pub_payload.publish(self.payload)
+    #     rospy.loginfo("Published updated payload data.")
 
     def callback_sat_info(self, data):
         # # Check if satellite information matches the desired state
@@ -125,9 +125,9 @@ class Debra:
         for attr in attributes:
             setattr(self.sat_pose, attr, getattr(data, attr))
 
-    def callback_raw_lidar(self, data):
+    # def callback_raw_lidar(self, data):
         # Process raw lidar data (this is just a placeholder)
-        rospy.loginfo(f"Received raw lidar data!")
+        # rospy.loginfo(f"Received raw lidar data!")
 #--------------------------------------------
 
     def callback_temperature(self, data):
