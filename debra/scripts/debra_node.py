@@ -44,7 +44,7 @@ class Debra:
         rospy.Subscriber('/temperature_data', String, self.callback_temperature)
 
         # Telemetry data
-        self.store_data = True
+        self.store_data = False
         self.wod_file_path = os.path.join(os.path.expanduser('~'), 'catkin_ws/src/aero4701-obc/debra/Data/wod_data.json')
 
         # WOD
