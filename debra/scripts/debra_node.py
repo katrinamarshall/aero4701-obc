@@ -256,17 +256,17 @@ class Debra:
             }
 
             # Check if the file exists, if not create an empty list
-            if not os.path.isfile(self.file_path):
+            if not os.path.isfile(self.wod_file_path):
                 data_list = []
             else:
-                with open(self.file_path, 'r') as file:
+                with open(self.wod_file_path, 'r') as file:
                     data_list = json.load(file)
 
             # Append the new entry
             data_list.append(wod_entry)
 
             # Write back to the file
-            with open(self.file_path, 'w') as file:
+            with open(self.wod_file_path, 'w') as file:
                 json.dump(data_list, file, indent=4)
             rospy.loginfo("WOD data appended to file")
 
