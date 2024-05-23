@@ -13,8 +13,8 @@ class IMU:
     def __init__(self):
 
         # Initialise timer to take readings
-        imu_active = False
-        self.bno055_reader = rospy.Timer(rospy.Duration(0.0), self.get_imu_data)
+        self.imu_active = False
+        self.bno055_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_imu_data)
 
         # Publishers
         self.pub = rospy.Publisher('/imu_data', imu_data_packet, queue_size=10)
@@ -34,22 +34,17 @@ class IMU:
             self.imu_active = False
         else:
             self.imu_active = True
-
-        # Start/Stop reading IMU
-        if self.imu_active:
-            self.bno055_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_imu_data)
-        else:
-            self.bno055_reader.shutdown() 
  
     def get_imu_data(self, event=None):
-        msg = imu_data_packet()
+        if self.imu_active:
+            msg = imu_data_packet()
 
-        msg.acceleration = self.bno055.acceleration # Accelerometer (m/s^2)
-        msg.gyro = self.bno055.gyro # Gyroscope (rad/sec)
-        msg.magnetometer = self.bno055.magnetic # Magnetometer (microteslas)
-        msg.temperature = self.bno055.temperature # Temperature (degrees C)
+            msg.acceleration = self.bno055.acceleration # Accelerometer (m/s^2)
+            msg.gyro = self.bno055.gyro # Gyroscope (rad/sec)
+            msg.magnetometer = self.bno055.magnetic # Magnetometer (microteslas)
+            msg.temperature = self.bno055.temperature # Temperature (degrees C)
 
-        self.pub.publish(msg)
+            self.pub.publish(msg)
 
 if __name__ == "__main__":
     rospy.init_node("imu")

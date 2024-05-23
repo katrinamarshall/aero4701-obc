@@ -33,14 +33,11 @@ class Thermal:
         cs = digitalio.DigitalInOut(board.D5)
         self.mcp = MCP.MCP3008(spi, cs)
 
-        #self.chan1 = AnalogIn(self.mcp, MCP.P0)
-        #self.chan2 = AnalogIn(self.mcp, MCP.P2)
-
     # Callback for state changes
     def callback_state(self, state):
         
         # Check state
-        if state.data == "Deorbit": # or state.data == "Launch":
+        if state.data == "Deorbit" or state.data == "Launch":
             self.thermal_active = False
         else:
             self.thermal_active = True
@@ -50,14 +47,8 @@ class Thermal:
         if self.thermal_active:
             msg = temperatures()
 
-
-            # print(self.chan1.voltage)
-            # print(self.chan2.voltage)
-            voltage1 = (AnalogIn(self.mcp, MCP.P0).voltage)
-            voltage2 = (AnalogIn(self.mcp, MCP.P2).voltage)
-
-            #print(type(voltage1))
-            #print(voltage2.type)
+            voltage1 = AnalogIn(self.mcp, MCP.P0).voltage
+            voltage2 = AnalogIn(self.mcp, MCP.P2).voltage
 
             msg.thermistor_1 = self.voltage2temp(voltage1)
             msg.thermistor_2 = self.voltage2temp(voltage2)

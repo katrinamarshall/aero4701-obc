@@ -15,8 +15,8 @@ class EPS:
     def __init__(self):
         
         # Initialise timer to take readings
-        eps_active = False
-        self.ina219_reader = rospy.Timer(rospy.Duration(0.0), self.get_curr_volt)
+        self.eps_active = False
+        self.ina219_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
 
         # Publishers
         self.pub = rospy.Publisher('/current_voltage', current_voltage, queue_size=10)
@@ -32,29 +32,6 @@ class EPS:
         self.curr_volt_sensor_40.configure()
         self.curr_volt_sensor_41.configure()
         self.curr_volt_sensor_44.configure()
- 
-    # Take current voltage readings
-    def get_curr_volt(self, event=None):
-        msg = current_voltage()
-
-        self.curr_volt_sensor_40.wake()
-        self.curr_volt_sensor_41.wake()
-        self.curr_volt_sensor_44.wake()
-
-        msg.voltage_40 = self.curr_volt_sensor_40.voltage()
-        msg.current_40 = self.curr_volt_sensor_40.current()
-
-        msg.voltage_41 = self.curr_volt_sensor_41.voltage()
-        msg.current_41 = self.curr_volt_sensor_41.current()
-
-        msg.voltage_44 = self.curr_volt_sensor_44.voltage()
-        msg.current_44 = self.curr_volt_sensor_44.current()
-
-        self.curr_volt_sensor_40.sleep()
-        self.curr_volt_sensor_41.sleep()
-        self.curr_volt_sensor_44.sleep()
-
-        self.pub.publish(msg)
 
     # Callback for state changes
     def callback_state(self, state):
@@ -64,12 +41,30 @@ class EPS:
             self.eps_active = False
         else:
             self.eps_active = True
-
-        # Start/Stop reading INA219s
+ 
+    # Take current voltage readings
+    def get_curr_volt(self, event=None):
         if self.eps_active:
-            self.ina219_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
-        else:
-            self.ina219_reader.shutdown() 
+            msg = current_voltage()
+
+            self.curr_volt_sensor_40.wake()
+            self.curr_volt_sensor_41.wake()
+            self.curr_volt_sensor_44.wake()
+
+            msg.voltage_40 = self.curr_volt_sensor_40.voltage()
+            msg.current_40 = self.curr_volt_sensor_40.current()
+
+            msg.voltage_41 = self.curr_volt_sensor_41.voltage()
+            msg.current_41 = self.curr_volt_sensor_41.current()
+
+            msg.voltage_44 = self.curr_volt_sensor_44.voltage()
+            msg.current_44 = self.curr_volt_sensor_44.current()
+
+            self.curr_volt_sensor_40.sleep()
+            self.curr_volt_sensor_41.sleep()
+            self.curr_volt_sensor_44.sleep()
+
+            self.pub.publish(msg)
 
 if __name__ == "__main__":
     rospy.init_node("eps")
