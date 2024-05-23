@@ -8,13 +8,11 @@ from time import strftime
 import rospy
 from std_msgs.msg import String
 import RPi.GPIO as GPIO
-
 #ROS SETUP
-# Initialise the node
+# Initialize the node
 rospy.init_node('temperature_monitor_node', anonymous=True)
 pub = rospy.Publisher('temperature_data', String, queue_size=10)
 rate = rospy.Rate(0.2)  # 5 seconds
-
 
 # GPIO setup for chip select
 GPIO.setmode(GPIO.BCM)
@@ -44,19 +42,20 @@ def getTemp(adc_channel):
     raw_data = readADC(adc_channel)  # Read the ADC channel to get value
     print(raw_data)
     voltage = (raw_data * v_in) / 1024  # Convert ADC raw data to voltage
-    
-    if voltage < 10:
-        rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected. ")
-        return -9
-    
-    # Voltage divider formula
-    R_thermistor = R_ref * ((v_in / voltage) - 1)  #
 
-    # Steinhart-Hart coefficients for 10k NTC thermistor
-    a = 0.001125308852122
-    b = 0.000234711863267
-    c = 0.000000085663516
+    if voltage < 0.01:
+        rospy.logwarn(f"Channel {adc_channel}: Voltage zero detected, possibly unconnected.")
+        return 0  # Hardcoded temperature for unconnected or faulty channels
 
+    R_thermistor = R_ref * ((v_in / voltage) - 1)  # Calculate thermistor resistance using voltage divider formula
+
+    # Steinhart-Hart coefficients for a typical 10k NTC thermistor
+    a = 0.0010295
+    b = 0.000239255
+    c = 0.0000001558
+    # a = 0.001129148
+    # b = 0.000234125
+    # c = 0.0000000876741
     ln_r = math.log(R_thermistor)  # Ensure R_thermistor > zero before taking log
     t1 = b * ln_r
     t2 = c * ln_r ** 3
@@ -76,13 +75,12 @@ def getPiTemp():
     return cpu_temp
 
 while not rospy.is_shutdown():
-    temps = [getTemp(i) for i in range(3)]
+    temps = [getTemp(i) for i in range(4)]
     pi_temp = getPiTemp()
-    # current_time = strftime("%H:%M")
-    message = f"{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
-    # message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
+    current_time = strftime("%H:%M")
+    message = f"{current_time},{','.join(f'{t:.2f}' for t in temps)},{pi_temp:.2f}"
     rospy.loginfo(message)  # Log msg to ROS
-    #pub.publish(message)  # Publish msg
-    # file.write(f"{message}\n")
-    # file.flush()
+    pub.publish(message)  # Publish msg
+    #file.write(f"{message}\n")
+    #file.flush()
     rate.sleep()
