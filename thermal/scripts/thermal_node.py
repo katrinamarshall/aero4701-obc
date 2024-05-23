@@ -73,7 +73,7 @@ class Thermal:
         t1 = b * ln_r
         t2 = c * ln_r ** 3
         temp_k = 1 / (a + t1 + t2)  # Calculate temperature in Kelvin
-        temp_c = temp_k - 273.15  # Convert Kelvin to Celsius
+        temp_c = temp_k - 273.15 - 20.0 # Convert Kelvin to Celsius
 
         return temp_c
 

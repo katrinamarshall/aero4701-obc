@@ -89,23 +89,6 @@ class Debra:
         except ValueError:
             rospy.logwarn(f"Invalid state number received: {new_state}")
 
-##----------------- TO DO ------------------
-    # def callback_debris_packet(self, data):
-    #     # Define the attributes for payload_data
-    #     payload_attributes = [
-    #         'debris_position_x', 'debris_position_y', 'debris_position_z',
-    #         'debris_velocity_x', 'debris_velocity_y', 'debris_velocity_z',
-    #         'debris_diameter', 'time_of_detection', 'object_count'
-    #     ]
-
-    #     # Update payload data
-    #     for attr in payload_attributes:
-    #         setattr(self.payload, attr, getattr(data, attr))
-
-    #     # Publish the updated payload data
-    #     self.pub_payload.publish(self.payload)
-    #     rospy.loginfo("Published updated payload data.")
-
     def callback_sat_info(self, data):
         # # Check if satellite information matches the desired state
         # if not self.satellite_calibrated:
@@ -125,11 +108,6 @@ class Debra:
         for attr in attributes:
             setattr(self.sat_pose, attr, getattr(data, attr))
 
-    # def callback_raw_lidar(self, data):
-        # Process raw lidar data (this is just a placeholder)
-        # rospy.loginfo(f"Received raw lidar data!")
-#--------------------------------------------
-
     def callback_temperature(self, data):
         try:
             pi_cpu_temp = data.pi
@@ -138,7 +116,7 @@ class Debra:
             # Check if temp exceeds the nominal range
             if any(t < -20 or t > 50 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 85°C as the critical temperature for Pi CPU
                 self.nominal_temperature_state = False
-                rospy.loginfo("WARNING Temperature out of range.")
+                rospy.loginfo(f"WARNING Temperature out of range: {thermistor_temps}")
             else: 
                 self.nominal_temperature_state = True
             self.check_battery_and_temp()
@@ -146,7 +124,7 @@ class Debra:
             # FOR MING TO CHANGE LATER
             self.current_wod_data.temperature_comm = thermistor_temps[0]
             self.current_wod_data.temperature_eps = thermistor_temps[1]
-            self.current_wod_data.temperature_battery = thermistor_temps[1] # does not exisst
+            self.current_wod_data.temperature_battery = thermistor_temps[1] - 2.0 # does not exisst
 
         except ValueError as e:
             rospy.logwarn(f"Invalid temperature data received: {data.data} Error: {str(e)}")

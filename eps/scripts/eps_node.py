@@ -13,10 +13,6 @@ SHUNT_OHMS = 0.1
 
 class EPS:
     def __init__(self):
-        
-        # Initialise timer to take readings
-        self.eps_active = False
-        self.ina219_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
 
         # Publishers
         self.pub = rospy.Publisher('/current_voltage', current_voltage, queue_size=10)
@@ -32,6 +28,10 @@ class EPS:
         self.curr_volt_sensor_40.configure()
         self.curr_volt_sensor_41.configure()
         self.curr_volt_sensor_44.configure()
+
+        # Initialise timer to take readings
+        self.eps_active = False
+        self.ina219_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_curr_volt)
 
     # Callback for state changes
     def callback_state(self, state):
