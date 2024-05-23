@@ -158,7 +158,7 @@ class Debra:
         else:
             if not self.nominal_battery_state or not self.nominal_temperature_state:
                 self.state = 6
-                rospy.loginfo("Back to nominal operation. Switched to SAFE state.")
+                rospy.loginfo("Out of nominal operation. Switched to SAFE state.")
                 self.pub_state.publish(self.STATES[self.state])
 
     def publish_wod(self, event):

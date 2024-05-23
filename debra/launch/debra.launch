@@ -27,6 +27,6 @@
   <node pkg="payload" type="payload_processing_node.py" name="payload_node" output="screen"/>
 
   <!-- Launch the ssh node -->
-  <!-- <node pkg="debra" type="debra_ssh_control.py" name="debra_ssh_control" output="screen"/> -->
+  <node pkg="debra" type="debra_ssh_control.py" name="debra_ssh_control" output="screen"/>
 
 </launch>
