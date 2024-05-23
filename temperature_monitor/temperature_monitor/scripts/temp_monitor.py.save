@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+import rospy
+from std_msgs.msg import String
+import spidev
+import time
+import math
+from time import strftime
+
+# Initialize the node
+rospy.init_node('temperature_monitor_node', anonymous=True)
+
+pub = rospy.Publisher('temperature_data', String, queue_size=10)
+rate = rospy.Rate(0.2)  # 5 seconds
