@@ -96,8 +96,8 @@ class Lidar:
         print("Done!")
 
         # Initialise timer to take readings
-        lidar_active = False
-        self.vl53l5cx_reader = rospy.Timer(rospy.Duration(0.0), self.get_lidar_data)
+        self.lidar_active = False
+        self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
 
         # Publishers
         self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=10)
@@ -114,32 +114,33 @@ class Lidar:
         else:
             self.lidar_active = False
 
-        # Start/Stop reading LiDARs
-        if self.lidar_active:
-            self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
-        else:
-            self.vl53l5cx_reader.shutdown() 
+        # # Start/Stop reading LiDARs
+        # if self.lidar_active:
+        #     self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
+        # else:
+        #     self.vl53l5cx_reader.shutdown() 
     
     def get_lidar_data(self, event=None):
-        msg = lidar_raw_data()
+        if self.lidar_active:
+            msg = lidar_raw_data()
 
-        if self.vl53_1.data_ready():
-            data1 = self.vl53_1.get_data()
-            msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
-        
-        if self.vl53_2.data_ready():
-            data2 = self.vl53_2.get_data()
-            msg.distances_2 = numpy.array(data2.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+            if self.vl53_1.data_ready():
+                data1 = self.vl53_1.get_data()
+                msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+            
+            if self.vl53_2.data_ready():
+                data2 = self.vl53_2.get_data()
+                msg.distances_2 = numpy.array(data2.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
 
-        if self.vl53_3.data_ready():
-            data3 = self.vl53_3.get_data()
-            msg.distances_3 = numpy.array(data3.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+            if self.vl53_3.data_ready():
+                data3 = self.vl53_3.get_data()
+                msg.distances_3 = numpy.array(data3.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
 
-        # if self.vl53_4.data_ready():
-        #     data4 = self.vl53_4.get_data()
-        #     msg.distances_4 = numpy.array(data4.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
-        
-        self.pub.publish(msg)
+            # if self.vl53_4.data_ready():
+            #     data4 = self.vl53_4.get_data()
+            #     msg.distances_4 = numpy.array(data4.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+            
+            self.pub.publish(msg)
 
 
 if __name__ == '__main__':
