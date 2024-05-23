@@ -108,7 +108,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES debra
- CATKIN_DEPENDS message_generation rospy std_msgs
+ CATKIN_DEPENDS message_generation rospy std_msgs eps
 #  DEPENDS system_lib
 )
 

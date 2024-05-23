@@ -4,6 +4,7 @@ import rospy
 import threading
 from std_msgs.msg import String
 from debra.msg import command_msg, satellite_pose, payload_data, WOD, WOD_data
+from eps.msg import current_voltage
 
 class Debra:
     STATES = {
@@ -38,7 +39,7 @@ class Debra:
         rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
         rospy.Subscriber('/raw_lidar', String, self.callback_raw_lidar)
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
-        rospy.Subscriber('/current_voltage', String, self.callback_curr_volt)
+        rospy.Subscriber('/current_voltage', current_voltage, self.callback_curr_volt)
         rospy.Subscriber('/temperature_data', String, self.callback_temperature)
 
         # Data to be sent
@@ -161,20 +162,20 @@ class Debra:
 
     def callback_curr_volt(self, data):
         try:
-            battery = float(data.data)
-            if battery < 0.25:
-                self.state = 6  # Safe state
-                rospy.loginfo("Battery voltage low. Switched to SAFE state.")
-            elif self.state == 6 and self.nominal_temperature_state:
-                self.state = 4  # Nominal state
-                rospy.loginfo("Battery voltage nominal. Switched to NOMINAL state.")
-            self.pub_state.publish(self.STATES[self.state])
+        #     battery = float(data.data)
+        #     if battery < 0.25:
+        #         self.state = 6  # Safe state
+        #         rospy.loginfo("Battery voltage low. Switched to SAFE state.")
+        #     elif self.state == 6 and self.nominal_temperature_state:
+        #         self.state = 4  # Nominal state
+        #         rospy.loginfo("Battery voltage nominal. Switched to NOMINAL state.")
+        #     self.pub_state.publish(self.STATES[self.state])
 
             # FOR LUCAS TO CHANGE LATER
-            self.current_wod_data.battery_voltage = 3.5
-            self.current_wod_data.battery_current = 0.8
-            self.current_wod_data.regulated_bus_current_3v3 = 0.5
-            self.current_wod_data.regulated_bus_current_5v = 0.7
+            self.current_wod_data.battery_voltage = data.voltage_40
+            self.current_wod_data.battery_current = data.current_40
+            self.current_wod_data.regulated_bus_current_3v3 = data.current_44
+            self.current_wod_data.regulated_bus_current_5v = data.current_41
 
         except ValueError:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
