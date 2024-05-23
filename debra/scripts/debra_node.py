@@ -2,9 +2,11 @@
 
 import rospy
 import threading
-from std_msgs.msg import String
+from std_msgs.msg import String, Int8
 from debra.msg import command_msg, satellite_pose, payload_data, WOD, WOD_data
 from eps.msg import current_voltage
+from payload.msg import lidar_raw_data
+from thermal.msg import temperatures
 
 class Debra:
     STATES = {
@@ -24,7 +26,7 @@ class Debra:
         self.nominal_temperature_state = True
         self.satellite_calibrated = False
 
-        # Publishers
+        # Publishers for state machine
         self.pub_state = rospy.Publisher('/operation_state', String, queue_size=10)
         self.pub_move_sat = rospy.Publisher('/move_sat', String, queue_size=10)
 
@@ -34,13 +36,14 @@ class Debra:
         self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
         self.pub_wod = rospy.Publisher('/wod_data', WOD, queue_size=10)
 
-        # Subscribers
-        rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
+        # Subscribers 
+        rospy.Subscriber('/state_ssh_command', Int8, self.override_state)
         rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
-        rospy.Subscriber('/raw_lidar', String, self.callback_raw_lidar)
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
+        rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
+        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.callback_raw_lidar)
         rospy.Subscriber('/current_voltage', current_voltage, self.callback_curr_volt)
-        rospy.Subscriber('/temperature_data', String, self.callback_temperature)
+        rospy.Subscriber('/temperatures', temperatures, self.callback_temperature)
 
         # Data to be sent
         # WOD
@@ -56,20 +59,6 @@ class Debra:
 
         # Timer
         rospy.Timer(rospy.Duration(10), self.publish_wod)
-        rospy.Timer(rospy.Duration(1), self.override_state)
-
-    def override_state(self, event):
-        new_state = input("Override state number: ")
-        try:
-            state_number = int(new_state)
-            if state_number in self.STATES:
-                self.state = state_number
-                rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
-
-        except ValueError:
-            rospy.logwarn(f"Invalid state number received: {new_state}")
-        
-        self.pub_state.publish(self.STATES[self.state])
         
     def uplink_callback(self, msg):
         # Check if the message matches the criteria to change state
@@ -88,7 +77,19 @@ class Debra:
 
         self.pub_state.publish(self.STATES[self.state])
 
+    def override_state(self, data):
+        rospy.loginfo("Overriding state...")
+        new_state = data.data
+        try:
+            state_number = int(new_state)
+            if state_number in self.STATES:
+                self.state = state_number
+                rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
+                self.pub_state.publish(self.STATES[self.state])
+        except ValueError:
+            rospy.logwarn(f"Invalid state number received: {new_state}")
 
+##----------------- TO DO ------------------
     def callback_debris_packet(self, data):
         # Define the attributes for payload_data
         payload_attributes = [
@@ -105,12 +106,6 @@ class Debra:
         self.pub_payload.publish(self.payload)
         rospy.loginfo("Published updated payload data.")
 
-
-    def callback_raw_lidar(self, data):
-        # Process raw lidar data (this is just a placeholder)
-        rospy.loginfo(f"Received raw lidar data: {data}")
-
-
     def callback_sat_info(self, data):
         # # Check if satellite information matches the desired state
         # if not self.satellite_calibrated:
@@ -121,7 +116,6 @@ class Debra:
         #     self.pub_move_sat.publish("Orientation Command")
         #     rospy.loginfo("Published move_sat command.")
 
-
         # # Update satellite pose data
         attributes = [
             'position_x', 'position_y', 'position_z',
@@ -131,30 +125,28 @@ class Debra:
         for attr in attributes:
             setattr(self.sat_pose, attr, getattr(data, attr))
 
+    def callback_raw_lidar(self, data):
+        # Process raw lidar data (this is just a placeholder)
+        rospy.loginfo(f"Received raw lidar data!")
+#--------------------------------------------
 
     def callback_temperature(self, data):
         try:
-            temperatures = data.data.split(',')
-            # time_stamp = temperatures[0]
-            thermistor_temps = [float(temp) for temp in temperatures[0:3]]  # Convert the three thermistor temperature values
-            pi_cpu_temp = float(temperatures[3])  
-
+            pi_cpu_temp = data.pi
+            thermistor_temps = [data.thermistor_1, data.thermistor_2]
+            
             # Check if temp exceeds the nominal range
             if any(t < -20 or t > 50 for t in thermistor_temps) or pi_cpu_temp > 85:  # Assuming 85°C as the critical temperature for Pi CPU
-                if self.state != 6:
-                    self.state = 6  # Safe state
-                    rospy.loginfo("Temperature out of range. Switched to SAFE state.")
-            elif self.state == 6 and self.nominal_battery_state:
-                # Check if all temperatures are back to nominal range
-                if all(-20 <= t <= 50 for t in thermistor_temps) and pi_cpu_temp <= 85:
-                    self.state = 4  # Nominal state
-                    rospy.loginfo("Temperature nominal. Switched to NOMINAL state.")
-            self.pub_state.publish(self.STATES[self.state])
+                self.nominal_temperature_state = False
+                rospy.loginfo("WARNING Temperature out of range.")
+            else: 
+                self.nominal_temperature_state = True
+            self.check_battery_and_temp()
 
             # FOR MING TO CHANGE LATER
             self.current_wod_data.temperature_comm = thermistor_temps[0]
             self.current_wod_data.temperature_eps = thermistor_temps[1]
-            self.current_wod_data.temperature_battery = thermistor_temps[2]
+            self.current_wod_data.temperature_battery = thermistor_temps[1] # does not exisst
 
         except ValueError as e:
             rospy.logwarn(f"Invalid temperature data received: {data.data} Error: {str(e)}")
@@ -162,14 +154,13 @@ class Debra:
 
     def callback_curr_volt(self, data):
         try:
-        #     battery = float(data.data)
-        #     if battery < 0.25:
-        #         self.state = 6  # Safe state
-        #         rospy.loginfo("Battery voltage low. Switched to SAFE state.")
-        #     elif self.state == 6 and self.nominal_temperature_state:
-        #         self.state = 4  # Nominal state
-        #         rospy.loginfo("Battery voltage nominal. Switched to NOMINAL state.")
-        #     self.pub_state.publish(self.STATES[self.state])
+            ############# TO CHANGE TO ACTUAL BATTERY VOLTAGE ############
+            if data.voltage_40 < 0.25:
+                self.nominal_battery_state = False
+                rospy.loginfo("WARNING Battery voltage low.")
+            elif self.state == 6:
+                self.nominal_battery_state = True
+            self.check_battery_and_temp()
 
             # FOR LUCAS TO CHANGE LATER
             self.current_wod_data.battery_voltage = data.voltage_40
@@ -180,6 +171,17 @@ class Debra:
         except ValueError:
             rospy.logwarn(f"Invalid battery voltage data received: {data.data}")
 
+    def check_battery_and_temp(self):
+        if self.state == 6:
+            if self.nominal_battery_state and self.nominal_temperature_state:
+                self.state = 4
+                rospy.loginfo("Back to nominal operation. Switched to NOMINAL state.")
+                self.pub_state.publish(self.STATES[self.state])
+        else:
+            if not self.nominal_battery_state or not self.nominal_temperature_state:
+                self.state = 6
+                rospy.loginfo("Back to nominal operation. Switched to SAFE state.")
+                self.pub_state.publish(self.STATES[self.state])
 
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""

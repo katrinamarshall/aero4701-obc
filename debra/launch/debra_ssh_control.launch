@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- Launch the thermistor node -->
+  <node pkg="temperature_monitor" type="temp_monitor.py" name="temp_monitor_node" output="screen"/>
+
+  <!-- Launch the EPS node -->
+  <!-- <node pkg="eps" type="eps_node.py" name="eps_node" output="screen"/>   -->
+
+  <!-- Launch the ADCS node -->
+  <!-- <node pkg="adcs" type="imu_node.py" name="imu_node" output="screen"/>   -->
+
+  <!-- Launch the debra node -->
+  <node pkg="debra" type="debra_node.py" name="debra_node" output="screen"/>
+
+  <!-- Launch the payload node -->
+  <!-- <node pkg="payload" type="lidar_node_3.py" name="lidar_node" output="screen"/> -->
+
+</launch>

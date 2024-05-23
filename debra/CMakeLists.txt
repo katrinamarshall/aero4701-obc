@@ -108,7 +108,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES debra
- CATKIN_DEPENDS message_generation rospy std_msgs eps
+ CATKIN_DEPENDS message_generation rospy std_msgs eps thermal payload
 #  DEPENDS system_lib
 )
 
@@ -164,6 +164,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/debra_node.py
+  scripts/debra_ssh_control.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

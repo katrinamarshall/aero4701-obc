@@ -18,20 +18,20 @@ R_REF = 10000  # Fixed reference resistor (10k ohm)
 
 class Thermal:
     def __init__(self):
-        
-        # Initialise timer to take readings
-        self.thermal_active = True
-        self.mcp3008_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_temps)
 
+        spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
+        cs = digitalio.DigitalInOut(board.D5)
+        self.mcp = MCP.MCP3008(spi, cs)
+        
         # Publishers
         self.pub = rospy.Publisher('/temperatures', temperatures, queue_size=10)
         
         # Subscribers
         rospy.Subscriber('/operation_state', String, self.callback_state)
 
-        spi = busio.SPI(clock=board.SCK, MISO=board.MISO, MOSI=board.MOSI)
-        cs = digitalio.DigitalInOut(board.D5)
-        self.mcp = MCP.MCP3008(spi, cs)
+        # Initialise timer to take readings
+        self.thermal_active = False
+        self.mcp3008_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_temps)
 
     # Callback for state changes
     def callback_state(self, state):
