@@ -9,10 +9,10 @@ from std_msgs.msg import String
 from payload.msg import lidar_raw_data
 import vl53l5cx_ctypes as vl53l5cx
 
-LPN_1 = 35
-LPN_2 = 37
-LPN_3 = 38
-# LPN_4 = 40
+LPN_1 = 6
+LPN_2 = 12
+LPN_3 = 13
+# LPN_4 = 16
 
 I2C_ADD_1 = 0x56
 I2C_ADD_2 = 0x60
@@ -23,7 +23,7 @@ RANGING_FREQ = 15
 
 class Lidar:
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(LPN_1, GPIO.OUT)
         GPIO.setup(LPN_2, GPIO.OUT)
