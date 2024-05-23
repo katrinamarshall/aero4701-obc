@@ -226,8 +226,9 @@ class Debra:
             
             # Store wod data
             elif self.store_data == True:
-                rospy.loginfo("Stored WOD data")
+                rospy.loginfo("Storing WOD data")
                 self.append_wod_data_to_file()
+                rospy.loginfo("Stored WOD data")
 
             # Publish satellite pose
             self.pub_sat_pose.publish(self.sat_pose)
@@ -259,8 +260,12 @@ class Debra:
             if not os.path.isfile(self.wod_file_path):
                 data_list = []
             else:
-                with open(self.wod_file_path, 'r') as file:
-                    data_list = json.load(file)
+                try:
+                    with open(self.file_path, 'r') as file:
+                        data_list = json.load(file)
+                # If the file is empty
+                except json.JSONDecodeError:
+                    data_list = []
 
             # Append the new entry
             data_list.append(wod_entry)
