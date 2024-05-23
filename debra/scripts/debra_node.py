@@ -261,7 +261,7 @@ class Debra:
                 data_list = []
             else:
                 try:
-                    with open(self.file_path, 'r') as file:
+                    with open(self.wod_file_path, 'r') as file:
                         data_list = json.load(file)
                 # If the file is empty
                 except json.JSONDecodeError:
