@@ -24,7 +24,7 @@ class TestingError:
 
     def callback(self,raw_data):
         #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-        print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances_1).reshape(8,8)} \n")
+        # print(f"Raw LiDAR Distances:\n{np.array(raw_data.distances_1).reshape(8,8)} \n")
         # print(f"LiDAR Label: {raw_data.label}\n")
         self._raw_data = np.array(raw_data.distances_1).reshape(8,8)
         return
@@ -43,8 +43,11 @@ class TestingError:
         
         print("Size debris: ", found_debris.size, found_debris.num_pixels)
 
-        if self._found_objects == 20:
+        
 
+        if self._found_objects == 50:
+            print("PLOTTING")
+            print(self._sizes)
 
             plt.figure()
             plt.imshow(self._raw_data, cmap='viridis', interpolation= 'nearest')
@@ -56,12 +59,22 @@ class TestingError:
             plt.savefig("lidar.png")
 
 
+            
+
+
             plt.figure()
             plt.plot(range(len(self._sizes)), self._sizes)
             plt.xlabel('Detection')
             plt.ylabel('Size (mm)')
             plt.title('Size of Object Detected')
             plt.savefig("size.png")
+
+            plt.figure()
+            plt.plot(range(len(self._sizes)), np.array(self._sizes) - 50*np.ones(50))
+            plt.xlabel('Detection')
+            plt.ylabel('Size Residual (mm)')
+            plt.title('Residual Object Detection Size')
+            plt.savefig("size_residual.png")
         return
 
         
