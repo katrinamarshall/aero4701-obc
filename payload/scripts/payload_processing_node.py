@@ -672,6 +672,7 @@ class PayloadProcessing():
                             rel_vel = VEL_UNKNOWN
                         else:
                             # add size info here
+                            self._debris_count += 1
                             abs_vel, rel_vel = self.find_vels_hw(lidar_label, debris_pos_eci, debris_pos_cart, timestamp)
                         
                         # if only one object in frame store to check if its moving in next round
@@ -684,7 +685,7 @@ class PayloadProcessing():
                         else:
                             # print("resetting because this is object no longer needed")
                             self._prev_detection_eci[n] = VEL_UNKNOWN
-                            self._prev_detection_times[n] = -1
+                            self._prev_detection_times[n] = 0
                             self._prev_detection_relative_pos[n] = VEL_UNKNOWN
 
                             
@@ -739,12 +740,14 @@ class PayloadProcessing():
 
                 vel_abs = pos_diff_abs/time_diff_s # m/s
                 vel_rel = pos_diff_rel/time_diff_s # m/s
+                self._debris_count -= 1
+                # self._debris_count 
+
 
 
                     # speed = np.linalg.norm(vel)
         else:
             print(f"Most recent detection from LiDAR {lidar_label} more than one sensor period ago, cannot find speed") 
-            self._debris_count += 1
         return vel_abs, vel_rel
 
 

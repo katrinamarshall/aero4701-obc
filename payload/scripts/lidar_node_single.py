@@ -23,7 +23,7 @@ LPN_1 = 31
 
 I2C_ADD_1 = 0x56
 
-RANGING_FREQ = 10 # (Hz) For 8x8 ranging frequency must be between 1-15Hz
+RANGING_FREQ = 2 # (Hz) For 8x8 ranging frequency must be between 1-15Hz
 
 class Lidar:
     def __init__(self):
@@ -73,5 +73,5 @@ class Lidar:
 if __name__ == '__main__':
     rospy.init_node("lidar")
     myLidar = Lidar()
-    rospy.Timer(rospy.Duration(1.0/10.0), myLidar.get_lidar_data)
+    rospy.Timer(rospy.Duration(1.0/2.0), myLidar.get_lidar_data)
     rospy.spin()
