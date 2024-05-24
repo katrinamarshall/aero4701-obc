@@ -31,7 +31,7 @@ class Telemetry:
         self.message_queue = queue.Queue()
 
         # Timer for periodic processing
-        rospy.Timer(rospy.Duration(1.2), self.timer_callback)
+        rospy.Timer(rospy.Duration(1.5), self.timer_callback)
 
     def timer_callback(self, event):
         """Periodic timer callback for processing messages"""
@@ -117,12 +117,12 @@ class Telemetry:
                 # Create frame
                 frame_info = lidar_num + lidar_data + empty
                 # print(f"Frame size: {struct.calcsize(frame_info)}")
-                print(f"Frame size: {len(frame_info)} bytes")
+                #print(f"Frame size: {len(frame_info)} bytes")
                 ssid_type = 0b1100  # Raw lidar data type
                 frame = AX25UIFrame(frame_info, ssid_type)
 
                 # Put message into frame
-                print(f"Putting the raw_lidar frame into the queue: {frame_info}")
+                # print(f"Putting the raw_lidar frame into the queue: {frame_info}")
                 self.message_queue.put(frame.create_frame())
 
 
