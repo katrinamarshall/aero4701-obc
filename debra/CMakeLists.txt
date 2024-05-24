@@ -54,6 +54,7 @@ add_message_files(
   satellite_pose.msg
   WOD_data.msg
   WOD.msg
+  raw_lidar_data.msg
 )
 
 ## Generate services in the 'srv' folder
