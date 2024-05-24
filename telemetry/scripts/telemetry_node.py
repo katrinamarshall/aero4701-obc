@@ -4,7 +4,8 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
-from debra.msg import payload_data, satellite_pose, WOD_data, WOD, raw_lidar_msg
+from debra.msg import payload_data, satellite_pose, WOD_data, WOD
+from payload.msg import raw_lidar_msg
 import struct
 import math
 import queue
