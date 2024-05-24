@@ -147,33 +147,6 @@ class Telemetry:
         # Put message frame into queue
         self.message_queue.put(frame)
 
-    def run(self):
-        """Main loop for the telemetry ROS node"""
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
-            # Constantly listen for groundstation commands
-            command = self.transceiver.receive_data()
-
-            # Publish commands to /uplink_data
-            if command:
-                rospy.loginfo(f"Received and publishing: component={command.component}, component_id={command.component_id}, command={command.command}")
-                self.uplink_publisher.publish(command)
-            rate.sleep()
-
-# Helper functions ----------------------------------------------------------------
-def convert_voltage(voltage):
-    # Converts voltage to a byte value
-    return max(0, min(255, math.floor((20 * voltage) - 60)))
-
-def convert_current(current):
-    # Converts current to a byte value
-    return max(0, min(255, math.floor(127 * current) + 127))
-
-def convert_bus_current(current):
-    # Converts bus current to a byte value
-
-
-
 
     def wod_data_callback(self, data):
         """Callback for WOD data"""
