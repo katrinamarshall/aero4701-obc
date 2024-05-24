@@ -4,7 +4,8 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
-from debra.msg import payload_data, satellite_pose, WOD_data, WOD, raw_lidar_msg
+from debra.msg import payload_data, satellite_pose, WOD_data, WOD
+from payload.msg import lidar_raw_data
 import struct
 import math
 import queue
@@ -24,7 +25,7 @@ class Telemetry:
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
-        rospy.Subscriber('/raw_lidar', raw_lidar_msg, self.raw_lidar_callback)
+        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.raw_lidar_callback)
 
         # Message queue for processing outgoing messages
         self.message_queue = queue.Queue()

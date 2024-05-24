@@ -55,6 +55,7 @@
   <build_depend>eps</build_depend>
   <build_depend>thermal</build_depend>
   <build_depend>payload</build_depend>
+  <build_depend>adcs</build_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <exec_depend>message_runtime</exec_depend>
@@ -64,6 +65,7 @@
   <exec_depend>eps</exec_depend>
   <exec_depend>thermal</exec_depend>
   <exec_depend>payload</exec_depend>
+  <exec_depend>adcs</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

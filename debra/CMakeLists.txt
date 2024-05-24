@@ -109,7 +109,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES debra
- CATKIN_DEPENDS message_generation rospy std_msgs eps thermal payload
+ CATKIN_DEPENDS message_generation rospy std_msgs eps thermal payload adcs
 #  DEPENDS system_lib
 )
 

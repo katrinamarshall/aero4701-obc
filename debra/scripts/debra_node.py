@@ -7,6 +7,7 @@ from debra.msg import command_msg, satellite_pose, payload_data, WOD, WOD_data
 from eps.msg import current_voltage
 from payload.msg import lidar_raw_data
 from thermal.msg import temperatures
+from adcs.msg import imu_data_packet
 
 class Debra:
     STATES = {
@@ -44,6 +45,7 @@ class Debra:
         #rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data, self.callback_raw_lidar)
         rospy.Subscriber('/current_voltage', current_voltage, self.callback_curr_volt)
         rospy.Subscriber('/temperatures', temperatures, self.callback_temperature)
+        rospy.Subscriber('/imu_data', imu_data_packet, self.callback_imu)
 
         # Data to be sent
         # WOD
@@ -107,6 +109,12 @@ class Debra:
         ]
         for attr in attributes:
             setattr(self.sat_pose, attr, getattr(data, attr))
+
+    def callback_imu(self, data):
+        self.sat_pose.orientation_x = data.orientation[0]
+        self.sat_pose.orientation_y = data.orientation[1]
+        self.sat_pose.orientation_z = data.orientation[2]
+        self.sat_pose.orientation_w = data.orientation[3]
 
     def callback_temperature(self, data):
         try:

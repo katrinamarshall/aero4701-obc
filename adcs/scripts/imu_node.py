@@ -25,7 +25,7 @@ class IMU:
 
         # Initialise timer to take readings
         self.imu_active = True
-        self.bno055_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_imu_data)
+        self.bno055_reader = rospy.Timer(rospy.Duration(1.0), self.get_imu_data)
 
     # Callback for state changes
     def callback_state(self, state):
