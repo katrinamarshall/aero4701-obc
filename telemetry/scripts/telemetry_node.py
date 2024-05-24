@@ -5,7 +5,7 @@ from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
 from debra.msg import payload_data, satellite_pose, WOD_data, WOD
-from payload.msg import lidar_raw_data
+from payload.msg import lidar_raw_data, found_debris
 import struct
 import math
 import queue
@@ -26,6 +26,7 @@ class Telemetry:
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
         rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.raw_lidar_callback)
+        rospy.Subscriber('/found_debris', found_debris, self.found_debris_callback)
 
         # Message queue for processing outgoing messages
         self.message_queue = queue.Queue()
@@ -124,6 +125,54 @@ class Telemetry:
                 # Put message into frame
                 # print(f"Putting the raw_lidar frame into the queue: {frame_info}")
                 self.message_queue.put(frame.create_frame())
+
+    def found_debris_callback(self, data):
+        """Callback for debris messages"""
+        # Process data according to found_debris msg type
+        info = struct.pack('<B f f f f B', 
+            data.lidar_label,
+            data.range,
+            data.theta,
+            data.phi,
+            data.size,
+            data.num_pixels
+        ) + bytearray(data.blob_position)
+        
+        ssid_type = 0b1000  # Debris ssid
+
+        # Create ax.25 frame
+        ax25_frame = AX25UIFrame(info, ssid_type)
+        frame = ax25_frame.create_frame()
+
+        # Put message frame into queue
+        self.message_queue.put(frame)
+
+    def run(self):
+        """Main loop for the telemetry ROS node"""
+        rate = rospy.Rate(1)
+        while not rospy.is_shutdown():
+            # Constantly listen for groundstation commands
+            command = self.transceiver.receive_data()
+
+            # Publish commands to /uplink_data
+            if command:
+                rospy.loginfo(f"Received and publishing: component={command.component}, component_id={command.component_id}, command={command.command}")
+                self.uplink_publisher.publish(command)
+            rate.sleep()
+
+# Helper functions ----------------------------------------------------------------
+def convert_voltage(voltage):
+    # Converts voltage to a byte value
+    return max(0, min(255, math.floor((20 * voltage) - 60)))
+
+def convert_current(current):
+    # Converts current to a byte value
+    return max(0, min(255, math.floor(127 * current) + 127))
+
+def convert_bus_current(current):
+    # Converts bus current to a byte value
+
+
 
 
     def wod_data_callback(self, data):
