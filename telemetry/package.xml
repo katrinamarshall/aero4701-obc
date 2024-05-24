@@ -57,19 +57,16 @@
   <build_depend>debra</build_depend>
   <build_depend>setuptools</build_depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>payload</build_depend>
 
 
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>debra</build_export_depend>
-  <build_export_depend>payload</build_export_depend>
 
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>debra</exec_depend>
-  <exec_depend>payload</exec_depend>
   
 
 
