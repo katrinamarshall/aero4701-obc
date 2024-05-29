@@ -34,6 +34,9 @@ class Telemetry:
         # Timer for periodic processing
         rospy.Timer(rospy.Duration(1.7), self.timer_callback)
 
+        # Counter for raw lidar messages
+        self.lidar_counter = 0
+
     def timer_callback(self, event):
         """Periodic timer callback for processing messages"""
         if not self.message_queue.empty():
@@ -103,28 +106,33 @@ class Telemetry:
 
     def raw_lidar_callback(self, data):
         """Callback for raw lidar data"""
-        # Iterate over the four distance arrays
-        for distance_num in range(1, 5):
-            # Get the distance array from lidar number
-            distance_array = getattr(data, f'distances_{distance_num}')
+        # Increment the counter
+        self.lidar_counter += 1
 
-            if len(distance_array) != 0:
-                # Create data packet
-                lidar_num = struct.pack('B', distance_num)
-                lidar_data = struct.pack('64H', *distance_array)
-                # lidar_data = struct.pack(f'{len(distance_array)}H', *distance_array)
+        # Only process every 10th message
+        if self.lidar_counter % 10 == 0:
+            # Iterate over the four distance arrays
+            for distance_num in range(1, 5):
+                # Get the distance array from lidar number
+                distance_array = getattr(data, f'distances_{distance_num}')
 
-                empty = struct.pack('B', 0)
-                # Create frame
-                frame_info = lidar_num + lidar_data + empty
-                # print(f"Frame size: {struct.calcsize(frame_info)}")
-                #print(f"Frame size: {len(frame_info)} bytes")
-                ssid_type = 0b1100  # Raw lidar data type
-                frame = AX25UIFrame(frame_info, ssid_type)
+                if len(distance_array) != 0:
+                    # Create data packet
+                    lidar_num = struct.pack('B', distance_num)
+                    lidar_data = struct.pack('64H', *distance_array)
+                    # lidar_data = struct.pack(f'{len(distance_array)}H', *distance_array)
 
-                # Put message into frame
-                # print(f"Putting the raw_lidar frame into the queue: {frame_info}")
-                self.message_queue.put(frame.create_frame())
+                    empty = struct.pack('B', 0)
+                    # Create frame
+                    frame_info = lidar_num + lidar_data + empty
+                    # print(f"Frame size: {struct.calcsize(frame_info)}")
+                    #print(f"Frame size: {len(frame_info)} bytes")
+                    ssid_type = 0b1100  # Raw lidar data type
+                    frame = AX25UIFrame(frame_info, ssid_type)
+
+                    # Put message into frame
+                    # print(f"Putting the raw_lidar frame into the queue: {frame_info}")
+                    self.message_queue.put(frame.create_frame())
 
     def found_debris_callback(self, data):
         """Callback for debris messages"""

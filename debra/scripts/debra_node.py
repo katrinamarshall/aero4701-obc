@@ -33,7 +33,6 @@ class Debra:
 
         # Publishers for downlink data
         self.pub_sat_pose = rospy.Publisher('/satellite_pose_data', satellite_pose, queue_size=10)
-        self.pub_payload = rospy.Publisher('/payload_data', payload_data, queue_size=10)
         self.pub_downlink = rospy.Publisher('/downlink_data', String, queue_size=10)
         self.pub_wod = rospy.Publisher('/wod_data', WOD, queue_size=10)
 
