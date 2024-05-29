@@ -1,15 +1,15 @@
 <launch>
   <!-- Launch the telemetry node -->
-  <node pkg="telemetry" type="telemetry_node.py" name="telemetry_node" output="screen"/>
+  <!-- <node pkg="telemetry" type="telemetry_node.py" name="telemetry_node" output="screen"/> -->
 
   <!-- Launch the thermal node -->
-  <!-- <node pkg="thermal" type="thermal_node.py" name="thermal_node" output="screen"/> -->
+  <node pkg="thermal" type="thermal_node.py" name="thermal_node" output="screen"/>
 
   <!-- Launch the EPS node -->
-  <!-- <node pkg="eps" type="eps_node.py" name="eps_node" output="screen"/>   -->
+  <node pkg="eps" type="eps_node.py" name="eps_node" output="screen"/>  
 
   <!-- Launch the ADCS node -->
-  <!-- <node pkg="adcs" type="imu_node.py" name="imu_node" output="screen"/>   -->
+  <node pkg="adcs" type="imu_node.py" name="imu_node" output="screen"/>  
 
   <!-- Launch the debra node -->
   <node pkg="debra" type="debra_node.py" name="debra_node" output="screen"/>
@@ -27,6 +27,6 @@
   <node pkg="payload" type="payload_processing_node.py" name="payload_node" output="screen"/>
 
   <!-- Launch the ssh node -->
-  <!-- <node pkg="debra" type="debra_ssh_control.py" name="debra_ssh_control" output="screen"/> -->
+  <node pkg="debra" type="debra_ssh_control.py" name="debra_ssh_control" output="screen"/>
 
 </launch>

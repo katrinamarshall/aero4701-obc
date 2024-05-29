@@ -32,7 +32,7 @@ class Telemetry:
         self.message_queue = queue.Queue()
 
         # Timer for periodic processing
-        rospy.Timer(rospy.Duration(1.5), self.timer_callback)
+        rospy.Timer(rospy.Duration(1.7), self.timer_callback)
 
     def timer_callback(self, event):
         """Periodic timer callback for processing messages"""

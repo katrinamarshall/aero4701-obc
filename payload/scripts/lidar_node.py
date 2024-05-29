@@ -100,7 +100,7 @@ class Lidar:
         self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
 
         # Publishers
-        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=20)
+        self.pub = rospy.Publisher('/raw_lidar_data', lidar_raw_data, queue_size=5)
         
         # Subscribers
         rospy.Subscriber('/operation_state', String, self.callback_state)

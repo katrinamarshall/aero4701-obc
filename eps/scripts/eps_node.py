@@ -9,6 +9,8 @@ from ina219 import INA219
 from ina219 import DeviceRangeError
 from eps.msg import current_voltage
 
+from numpy import random
+
 SHUNT_OHMS = 0.1
 
 class EPS:
@@ -51,13 +53,13 @@ class EPS:
             self.curr_volt_sensor_41.wake()
             self.curr_volt_sensor_44.wake()
 
-            msg.voltage_40 = self.curr_volt_sensor_40.voltage()
+            msg.voltage_40 = 3.24 + random.rand() #self.curr_volt_sensor_40.voltage()
             msg.current_40 = self.curr_volt_sensor_40.current()
 
-            msg.voltage_41 = self.curr_volt_sensor_41.voltage()
+            msg.voltage_41 = 4.66 + random.rand() #self.curr_volt_sensor_41.voltage()
             msg.current_41 = self.curr_volt_sensor_41.current()
 
-            msg.voltage_44 = self.curr_volt_sensor_44.voltage()
+            msg.voltage_44 = 2.77 + random.rand() #self.curr_volt_sensor_44.voltage()
             msg.current_44 = self.curr_volt_sensor_44.current()
 
             self.curr_volt_sensor_40.sleep()
