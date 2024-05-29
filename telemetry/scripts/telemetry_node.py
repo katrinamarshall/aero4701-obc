@@ -37,6 +37,9 @@ class Telemetry:
         # Counter for raw lidar messages
         self.lidar_counter = 0
 
+        # When to send the raw data
+        self.store_raw = False
+
     def timer_callback(self, event):
         """Periodic timer callback for processing messages"""
         if not self.message_queue.empty():
@@ -106,11 +109,13 @@ class Telemetry:
 
     def raw_lidar_callback(self, data):
         """Callback for raw lidar data"""
-        # Increment the counter
-        self.lidar_counter += 1
+        # # Increment the counter
+        # self.lidar_counter += 1
 
-        # Only process every 10th message
-        if self.lidar_counter % 10 == 0:
+        # # Only process every 10th message
+        # if self.lidar_counter % 10 == 0:
+
+        if self.store_raw:
             # Iterate over the four distance arrays
             for distance_num in range(1, 5):
                 # Get the distance array from lidar number
@@ -154,6 +159,9 @@ class Telemetry:
 
         # Put message frame into queue
         self.message_queue.put(frame)
+        self.store_raw = True
+        rospy.sleep(0.4)
+        self.store_raw = False
 
 
     def wod_data_callback(self, data):
