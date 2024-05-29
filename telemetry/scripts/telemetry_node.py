@@ -4,7 +4,8 @@ from std_msgs.msg import String
 from telemetry.msg import command_msg
 from transceivers import Transceiver
 from AX25UI import AX25UIFrame
-from debra.msg import payload_data, satellite_pose, WOD_data, WOD 
+from debra.msg import payload_data, satellite_pose, WOD_data, WOD
+from payload.msg import lidar_raw_data, found_debris
 import struct
 import math
 import queue
@@ -24,12 +25,20 @@ class Telemetry:
         rospy.Subscriber('/payload_data', payload_data, self.payload_data_callback)
         rospy.Subscriber('/satellite_pose_data', satellite_pose, self.satellite_pose_data_callback)
         rospy.Subscriber('/wod_data', WOD, self.wod_data_callback)
+        rospy.Subscriber('/raw_lidar_data', lidar_raw_data, self.raw_lidar_callback)
+        rospy.Subscriber('/found_debris', found_debris, self.found_debris_callback)
 
         # Message queue for processing outgoing messages
         self.message_queue = queue.Queue()
 
         # Timer for periodic processing
-        rospy.Timer(rospy.Duration(1.2), self.timer_callback)
+        rospy.Timer(rospy.Duration(1.7), self.timer_callback)
+
+        # Counter for raw lidar messages
+        self.lidar_counter = 0
+
+        # When to send the raw data
+        self.store_raw = False
 
     def timer_callback(self, event):
         """Periodic timer callback for processing messages"""
@@ -97,6 +106,63 @@ class Telemetry:
 
         # Put mesage frame into queue
         self.message_queue.put(frame)
+
+    def raw_lidar_callback(self, data):
+        """Callback for raw lidar data"""
+        # # Increment the counter
+        # self.lidar_counter += 1
+
+        # # Only process every 10th message
+        # if self.lidar_counter % 10 == 0:
+
+        if self.store_raw:
+            # Iterate over the four distance arrays
+            for distance_num in range(1, 5):
+                # Get the distance array from lidar number
+                distance_array = getattr(data, f'distances_{distance_num}')
+
+                if len(distance_array) != 0:
+                    # Create data packet
+                    lidar_num = struct.pack('B', distance_num)
+                    lidar_data = struct.pack('64H', *distance_array)
+                    # lidar_data = struct.pack(f'{len(distance_array)}H', *distance_array)
+
+                    empty = struct.pack('B', 0)
+                    # Create frame
+                    frame_info = lidar_num + lidar_data + empty
+                    # print(f"Frame size: {struct.calcsize(frame_info)}")
+                    #print(f"Frame size: {len(frame_info)} bytes")
+                    ssid_type = 0b1100  # Raw lidar data type
+                    frame = AX25UIFrame(frame_info, ssid_type)
+
+                    # Put message into frame
+                    # print(f"Putting the raw_lidar frame into the queue: {frame_info}")
+                    self.message_queue.put(frame.create_frame())
+
+    def found_debris_callback(self, data):
+        """Callback for debris messages"""
+        # Process data according to found_debris msg type
+        info = struct.pack('<B f f f f B', 
+            data.lidar_label,
+            data.range,
+            data.theta,
+            data.phi,
+            data.size,
+            data.num_pixels
+        ) + bytearray(data.blob_position)
+        
+        ssid_type = 0b1000  # Debris ssid
+
+        # Create ax.25 frame
+        ax25_frame = AX25UIFrame(info, ssid_type)
+        frame = ax25_frame.create_frame()
+
+        # Put message frame into queue
+        self.message_queue.put(frame)
+        self.store_raw = True
+        rospy.sleep(0.4)
+        self.store_raw = False
+
 
     def wod_data_callback(self, data):
         """Callback for WOD data"""

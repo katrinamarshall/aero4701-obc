@@ -19,7 +19,7 @@ import vl53l5cx_ctypes as vl53l5cx
 
 # Debugging: check if the LiDAR is detected on the i2c bus using `i2cdetect -y 1` in command line
 
-LPN_1 = 31
+LPN_1 = 6
 
 I2C_ADD_1 = 0x56
 
@@ -27,7 +27,7 @@ RANGING_FREQ = 10 # (Hz) For 8x8 ranging frequency must be between 1-15Hz
 
 class Lidar:
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(LPN_1, GPIO.OUT)
 
         print("Uploading firmware, please wait...")
@@ -51,27 +51,39 @@ class Lidar:
 
         print("Done!")
 
+        # Publishers
         self.pub = rospy.Publisher('/raw_lidar_data_single', lidar_raw_data_single, queue_size=10)
 
+       # Initialise timer to take readings
+        self.lidar_active = False
+        self.vl53l5cx_reader = rospy.Timer(rospy.Duration(1.0/10.0), self.get_lidar_data)
+
+       # Subscribers
+        rospy.Subscriber('/operation_state', String, self.callback_state)
+
+
+    # Callback for state changes
+    def callback_state(self, state):
+        
+        # Check state
+        if state.data == "Debris Detection":
+            self.lidar_active = True
+        else:
+            self.lidar_active = False
+
     def get_lidar_data(self, event=None):
-        msg = lidar_raw_data_single()
+        if self.lidar_active:
+            msg = lidar_raw_data_single()
 
-        if self.vl53_1.data_ready():
-            data1 = self.vl53_1.get_data()
-            msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
-            msg.status_1 = numpy.array(data1.target_status).flatten()
-            # print("sigma", numpy.array(data1.range_sigma_mm).reshape((8,8)))     
-            # print("reflectance",numpy.array(data1.reflectance).reshape((8,8)))
-            print("status", numpy.array(data1.target_status).reshape((8,8)))
-            print("raw data", numpy.array(data1.distance_mm).reshape((8,8)))
-
-
-            # print(data1.)     
-            self.pub.publish(msg)
+            if self.vl53_1.data_ready():
+                data1 = self.vl53_1.get_data()
+                msg.distances_1 = numpy.array(data1.distance_mm).flatten() # numpy.flipud(numpy.array(data.distance_mm).reshape((8, 8)))
+                msg.status_1 = numpy.array(data1.target_status).flatten()   
+                self.pub.publish(msg)
 
 
 if __name__ == '__main__':
     rospy.init_node("lidar")
     myLidar = Lidar()
-    rospy.Timer(rospy.Duration(1.0/10.0), myLidar.get_lidar_data)
+    # rospy.Timer(rospy.Duration(1.0/10.0), myLidar.get_lidar_data)
     rospy.spin()

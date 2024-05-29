@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(debra)
+project(thermal)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,9 +8,9 @@ project(debra)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   rospy
   std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -46,15 +46,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
+# Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  command_msg.msg
-  payload_data.msg
-  satellite_pose.msg
-  WOD_data.msg
-  WOD.msg
-  raw_lidar_data.msg
+  temperatures.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -71,7 +66,7 @@ add_message_files(
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
+# Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
@@ -108,8 +103,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES debra
- CATKIN_DEPENDS message_generation rospy std_msgs eps thermal payload adcs
+#  LIBRARIES thermal
+  CATKIN_DEPENDS rospy std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -126,7 +121,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/debra.cpp
+#   src/${PROJECT_NAME}/thermal.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -137,7 +132,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/debra_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/thermal_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,11 +156,10 @@ include_directories(
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
+# Mark executable scripts (Python etc.) for installation
+# in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/debra_node.py
-  scripts/debra_ssh_control.py
+  scripts/thermal_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -202,7 +196,7 @@ catkin_install_python(PROGRAMS
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_debra.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_thermal.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

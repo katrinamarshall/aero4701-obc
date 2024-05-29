@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>telemetry</name>
+  <name>my_ros_launches</name>
   <version>0.0.0</version>
-  <description>The telemetry package</description>
+  <description>The my_ros_launches package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="debra1@todo.todo">debra1</maintainer>
+  <maintainer email="debra3@todo.todo">debra3</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/telemetry</url> -->
+  <!-- <url type="website">http://wiki.ros.org/my_ros_launches</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -48,28 +48,16 @@
   <!--   <test_depend>gtest</test_depend> -->
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
-  
-  
   <buildtool_depend>catkin</buildtool_depend>
-
+  <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>debra</build_depend>
-  <build_depend>payload</build_depend>
-  <build_depend>setuptools</build_depend>
-  <build_depend>message_generation</build_depend>
-
-
+  <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
-  <build_export_depend>debra</build_export_depend>
-
+  <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
-  <exec_depend>debra</exec_depend>
-  <exec_depend>payload</exec_depend>
-  
 
 
   <!-- The export tag contains other, unspecified, tags -->
