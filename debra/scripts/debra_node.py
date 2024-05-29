@@ -8,6 +8,8 @@ from eps.msg import current_voltage
 from payload.msg import lidar_raw_data
 from thermal.msg import temperatures
 from adcs.msg import imu_data_packet
+import os
+import json
 
 class Debra:
     STATES = {
@@ -41,12 +43,16 @@ class Debra:
         #rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
         rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
-        #rospy.Subscriber('/raw_lidar_data_single', lidar_raw_data, self.callback_raw_lidar)
-        rospy.Subscriber('/current_voltage', current_voltage, self.callback_curr_volt)
-        rospy.Subscriber('/temperatures', temperatures, self.callback_temperature)
-        rospy.Subscriber('/imu_data', imu_data_packet, self.callback_imu)
+        rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
+        rospy.Subscriber('/raw_lidar', String, self.callback_raw_lidar)
+        rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
+        rospy.Subscriber('/current_voltage', String, self.callback_curr_volt)
+        rospy.Subscriber('/temperature_data', String, self.callback_temperature)
 
-        # Data to be sent
+        # Telemetry data
+        self.store_data = False
+        self.wod_file_path = os.path.join(os.path.expanduser('~'), 'catkin_ws/src/aero4701-obc/debra/Data/wod_data.json')
+
         # WOD
         self.wod_data = WOD()
         self.wod_data.datasets = [WOD_data() for _ in range(32)]
@@ -71,6 +77,14 @@ class Debra:
                     rospy.loginfo(f"State changed to: {self.STATES[self.state]}")
             except ValueError:
                 rospy.logwarn(f"Invalid state number received: {msg.command}")
+        
+        # Ready to send data WOD to telemetry
+        elif msg.component == 'c' and msg.component_id == '1':
+            self.store_data = False
+        
+        # Connection to telemetry lost, have to store WOD data on board
+        elif msg.component == 'c' and msg.component_id == '0':
+            self.store_data = True
         
         # THIS IS AN EXAMPLE OF WOD WORKING AND MUST BE REMOVED
         if msg.component == 'o' and msg.component_id == 1:
@@ -171,7 +185,6 @@ class Debra:
     def publish_wod(self, event):
         """Publish WOD every 10 seconds"""
         # Update satellite mode field
-        print(f"State: {self.state}")
         if self.state == 5:
             self.current_wod_data.satellite_mode = 1
         else:
@@ -203,12 +216,69 @@ class Debra:
             self.wod_data.packet_time_size = int(elapsed_seconds)
 
             # Publish wod
-            self.pub_wod.publish(self.wod_data)
-            rospy.loginfo("Published WOD data.")
+            if self.store_data == False:
+                self.pub_wod.publish(self.wod_data)
+                rospy.loginfo("Published WOD data.")
+            
+            # Store wod data
+            elif self.store_data == True:
+                rospy.loginfo("Storing WOD data")
+                self.append_wod_data_to_file()
+                rospy.loginfo("Stored WOD data")
 
             # Publish satellite pose
             self.pub_sat_pose.publish(self.sat_pose)
 
+
+    def append_wod_data_to_file(self):
+        """Appends wod data to a json when groundstation is not connected"""
+        if self.wod_data:
+            # Create the data dictionary to be appended
+            wod_entry = {
+                "satellite_id": self.wod_data.satellite_id,
+                "packet_time_size": self.wod_data.packet_time_size,
+                "datasets": [
+                    {
+                        "satellite_mode": dataset.satellite_mode,
+                        "battery_voltage": dataset.battery_voltage,
+                        "battery_current": dataset.battery_current,
+                        "regulated_bus_current_3v3": dataset.regulated_bus_current_3v3,
+                        "regulated_bus_current_5v": dataset.regulated_bus_current_5v,
+                        "temperature_comm": dataset.temperature_comm,
+                        "temperature_eps": dataset.temperature_eps,
+                        "temperature_battery": dataset.temperature_battery
+                    }
+                    for dataset in self.wod_data.datasets
+                ]
+            }
+
+            # Check if the file exists, if not create an empty list
+            if not os.path.isfile(self.wod_file_path):
+                data_list = []
+            else:
+                try:
+                    with open(self.wod_file_path, 'r') as file:
+                        data_list = json.load(file)
+                # If the file is empty
+                except json.JSONDecodeError:
+                    data_list = []
+
+            # Append the new entry
+            data_list.append(wod_entry)
+
+            # Write back to the file
+            with open(self.wod_file_path, 'w') as file:
+                json.dump(data_list, file, indent=4)
+            rospy.loginfo("WOD data appended to file")
+
+
+
+    def run(self):
+        rate = rospy.Rate(1)
+        while not rospy.is_shutdown():
+            self.publish_state()
+
+            rate.sleep()
 
 if __name__ == '__main__':
     rospy.init_node('debra_node')

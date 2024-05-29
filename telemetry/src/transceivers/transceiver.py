@@ -52,6 +52,7 @@ class Transceiver(SX126x):
 
         # Process the received data if available
         if data:
+            print(f"Data: {data}")
             try:
                 # Decode the data to determine message type
                 if isinstance(data, bytes):
