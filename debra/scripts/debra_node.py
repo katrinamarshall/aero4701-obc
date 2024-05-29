@@ -44,7 +44,7 @@ class Debra:
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
         rospy.Subscriber('/uplink_commands', command_msg, self.uplink_callback)
         # rospy.Subscriber('/debris_packet', payload_data, self.callback_debris_packet)
-        rospy.Subscriber('/raw_lidar', String, self.callback_raw_lidar)
+        # rospy.Subscriber('/raw_lidar', String, self.callback_raw_lidar)
         rospy.Subscriber('/sat_info', satellite_pose, self.callback_sat_info)
         rospy.Subscriber('/current_voltage', String, self.callback_curr_volt)
         rospy.Subscriber('/temperature_data', String, self.callback_temperature)
