@@ -37,10 +37,6 @@ NUM_LIDARS_ACTIVE = 4
 OBJECT_TOLERANCE = 60
 # ----------------------------------------------------------------------------
 
-
-# debra has a server for satellite state 
-# payload has a client 
-
 class ProcessingMaths():
     def __init__(self):
         return
@@ -252,9 +248,6 @@ class ProcessingMaths():
         return self.LVLH_to_ECI(x_lvlh, r_sat, v_sat, rotation_only=rotation_only)
 
         
-
-
-    
             
 class PayloadProcessing():
     """ gets lidar data and does all the processing"""
@@ -285,10 +278,6 @@ class PayloadProcessing():
         # Logging fields
         self._raw_lidar = np.zeros((4,8,8)) # lidar 1 is raw_lidar[0]
         self._lidar_status = np.zeros((4,8,8))
-        # self._raw_lidar_1 = [] # for lidar 1
-        # self._raw_lidar_2 = [] # for lidar 2
-        # self._raw_lidar_3 = [] # for lidar 3
-        # self._raw_lidar_4 = [] # for lidar 4
         self._lidar_labels = []
 
         # Callback variables
@@ -346,12 +335,6 @@ class PayloadProcessing():
     def callback_raw_lidar(self, raw_data):
         # self._lidar_message_received = True 
 
-        # try:
-        #     satellite_state_data = rospy.ServiceProxy('satellite_pose', SatellitePose)
-        
-        # except rospy.ServiceException as e:
-        #     print("Service call failed: %s"%e)
-
         # print(np.array(raw_data.distances_1).reshape(8,8))
      
 
@@ -396,7 +379,7 @@ class PayloadProcessing():
         within_grid = (i >= 0 and i < rows) and (j >= 0 and j < cols)
         # Check has a value within the range of lidar sensor
         if (within_grid):
-            # TODO need to fine tune tolerance based on lidar
+            # fine tune tolerance based on lidar
             tolerance = OBJECT_TOLERANCE # 5cm change per pixel max grad for same object
             within_range = (data[i][j] < sensor_range) and (abs(data[i][j] - current_value) < tolerance) and (data[i][j] > SENSOR_MIN)
             # Check has not been visited before
@@ -564,21 +547,21 @@ class PayloadProcessing():
     def process_debris(self, sat_pos, sat_vel, attitude, sat_time):
         print("Running...")
         # assume all are synchronised
-        # make version for 4 and version for 1
         # if self._lidar_message_received == True:
         if True:
             # print("going through data")
-            # rospy.spin()
 
             # self._lidar_message_received = False
             
             # find how many new lidar readings are to be processed
+
+            # FOR IF WANT 4 DIFFERENT LIDARS PUBLISHING SEPARATELY
             # num_new_readings = len(self._lidar_labels) - self._all_readings_count
             # print("Num new readings", num_new_readings)
             # self._all_readings_count = len(self._lidar_labels)
-            # FOR IF WANT 4 DIFFERENT LIDARS PUBLISHING SEPARATELY
+
+
             num_new_readings = NUM_LIDARS_ACTIVE
-            # print(self._lidar_labels_prev_detections)
 
             for n in range(num_new_readings):
                 # print("found new reading")
@@ -631,10 +614,6 @@ class PayloadProcessing():
                     # else:
                     for x_polar in debris_pos_polar:
                     
-                        # update debris count
-
-                        # identify which lidar this came from
-                        # lidar_label = self._lidar_labels_prev_detections[n]
                         # convert to xyz coordinates
                         debris_pos_cart = self.Process.polar_to_cartesian(x_polar)
                 
@@ -726,17 +705,13 @@ class PayloadProcessing():
 
                 vel_abs = pos_diff_abs/time_diff_s # m/s
                 vel_rel = pos_diff_rel/time_diff_s # m/s
-                self._debris_count -= 1
-                # self._debris_count 
-
+                self._debris_count -= 1 # stabilise debris ocunt so not to overcount objects
 
 
                     # speed = np.linalg.norm(vel)
         else:
             print(f"Most recent detection from LiDAR {lidar_label} more than one sensor period ago, cannot find speed") 
         return vel_abs, vel_rel
-
-
 
 
     def find_abs_vel_sim(self, lidar_label,debris_pos_eci, size, timestamp):
@@ -774,7 +749,6 @@ class PayloadProcessing():
         return vel
     
     
-
 
 if __name__ == "__main__":
     rospy.init_node("payload_processing")
